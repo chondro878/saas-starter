@@ -1,11 +1,13 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: './',
+    rules: {},
+  },
   experimental: {
-    ppr: true,
     clientSegmentCache: true,
-    nodeMiddleware: true
-  }
+  },
 };
 
 export default nextConfig;

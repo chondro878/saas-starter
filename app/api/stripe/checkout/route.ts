@@ -95,3 +95,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/error', request.url));
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const { priceId } = await req.json();
+
+    if (!priceId || typeof priceId !== 'string') {
+      return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
+    });
+
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error('Stripe checkout error:', error);
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+  }
+}

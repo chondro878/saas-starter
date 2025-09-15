@@ -1,130 +1,363 @@
-import { Button } from '@/components/ui/button';
-import { ArrowRight, CreditCard, Database } from 'lucide-react';
-import { Terminal } from './terminal';
+/**
+ * This is the main home page of your site.
+ * 
+ * It includes:
+ * - A sticky header with a holiday countdown banner and nav
+ * - A hero section with background image, headline, email input, and CTA
+ * - A carousel preview of card designs
+ * - A rotating quote/testimonial section
+ * - A teaser for the reminder feature
+ * - A FAQ section using the Accordion component
+ */
+"use client";
+import { useCallback, useEffect, useState, useRef } from "react";
+import type { CarouselApi } from "@/components/ui/carousel";
+import { getNextHoliday } from "@/lib/occasions";
+import { useMemo } from "react";
+import Image from 'next/image';
+import Link from "next/link";
+import { ReminderForm } from "./components/form/reminder-form";
+import SplitTeaser from "./components/ui/split-teaser";
+import Newsletter from "./components/ui/newsletter";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Carousel, CarouselItem, CarouselContent } from "@/components/ui/carousel";
+import Step from "@/app/(dashboard)/components/ui/step";
 
-export default function HomePage() {
+// Quotes shown in the rotating testimonial section
+export default function Home() {
+  // Quote rotator state/hooks
+  const quotes = [
+    { text: "This legit saved my relationship", source: "Doug B." },
+    { text: "Beautifully designed cards with zero effort.", source: "anonymous" },
+    { text: "No more panic shopping - Unreal!", source: "Emily R." },
+    { text: "Such a self confidence booster - thank you!", source: "Grace T." },
+    { text: "Such a effortless way to stay connected.", source: "Tyler M." },
+    { text: "I love how easy it is to never forget a birthday.", source: "Grace L." },
+    { text: "I've been wanting somethimg like this for years!'", source: "Andrew T." },
+    { text: "This service is a game-changer for relationships.", source: "Mark T." },
+    { text: "This has helped my self confidence so much!", source: "Jon P" },
+    { text: "A no-brainer. Seroiusly, just sign up...", source: "Sophie H." },
+    { text: "The quality of the cards - OMFG!!!", source: "Don r." },
+    { text: "It. just. works. I’m hooked!", source: "Alex J." },
+    { text: "So smooth, so simple, so smart!", source: "Vanessa K." },
+    { text: "My mom cried when she got her card.", source: "Diego C." },
+    { text: "I’ve never felt more organized.", source: "Jordan F." },
+    { text: "Seriously, a pricelss service", source: "Shawn P." },
+    { text: "No more lame Halmark cards - FINALLY!", source: "Doug F." },
+    { text: "The quality is next level", source: "Sheila E." },
+    { text: "Finally, a way to automate being thoughtful.", source: "Nina W." }
+  ];
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [api, setApi] = useState<CarouselApi | null>(null);
+
+  // Calculate the next upcoming holiday and how many days until it
+  const nextHoliday = useMemo(() => {
+    const holiday = getNextHoliday();
+    if (!holiday) return null;
+    const today = new Date();
+    const timeDiff = holiday.date.getTime() - today.getTime();
+    const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return {
+      ...holiday,
+      name: holiday.label,
+      daysUntil,
+    };
+  }, []);
+
+  // Automatically cycle through quotes every 6 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prevIndex) => (prevIndex + 1) % quotes.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Image cycling logic for SplitTeaser rightContent
+  const images = [
+    { src: "/split1.jpg", alt: "Split teaser image 1" },
+    { src: "/split2.jpg", alt: "Split teaser image 2" },
+    { src: "/split3.jpg", alt: "Split teaser image 3" }
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const imageInterval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000);
+    return () => clearInterval(imageInterval);
+  }, [images.length]);
+
+  const rightContentImage = (
+    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+      <Image
+        src={images[currentImageIndex].src}
+        alt={images[currentImageIndex].alt}
+        width={600}
+        height={400}
+        className="object-cover w-full h-full"
+      />
+    </div>
+  );
+
+  // New image carousel for How It Works section
+  const howItWorksImages = [
+    "/howitworks/1phonelist.jpg",
+    "/howitworks/2phonecalendar.jpg",
+    "/howitworks/3cardrecived.jpg",
+    "/howitworks/4mailbox.jpg",
+  ];
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % howItWorksImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Inline image slider logic for SplitTeaser rightContent
+  const [currentImageIndexHowItWorks, setCurrentImageIndexHowItWorks] = useState(0);
+  const howItWorksSliderImages = [
+    '/howitworks/1phonelist.jpg',
+    '/howitworks/2phonecalendar.jpg',
+    '/howitworks/3cardrecived.jpg',
+    '/howitworks/4mailbox.jpg',
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndexHowItWorks((prevIndex) => (prevIndex + 1) % howItWorksSliderImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sticky header bar that includes the holiday banner and top nav
   return (
-    <main>
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Build Your SaaS
-                <span className="block text-orange-500">Faster Than Ever</span>
-              </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Launch your SaaS product in record time with our powerful,
-                ready-to-use template. Packed with modern technologies and
-                essential integrations.
-              </p>
-              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
-                  href="https://vercel.com/templates/next.js/next-js-saas-starter"
-                  target="_blank"
-                >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg rounded-full"
-                  >
-                    Deploy your own
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-              </div>
-            </div>
-            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <Terminal />
+    <>
+      <div className="sticky top-0 z-50 w-full">
+        {nextHoliday && (
+          <div className="text-white text-center py-0.5 text-xs font-medium" style={{ backgroundColor: '#708238', paddingTop: '4px', paddingBottom: '4px' }}>
+            Only {nextHoliday.daysUntil} days until {nextHoliday.name}!
+          </div>
+        )}
+        <div className="bg-black text-white flex justify-between items-center px-6 py-2">
+          <h1 className="text-xl font-semibold">Avoid the Rain</h1>
+          <div className="flex gap-4 items-center">
+            <a href="/pricing" className="text-white text-sm hover:underline">Pricing</a>
+            <Link href="/sign-up" className="bg-white text-black px-4 py-2 rounded-md text-sm font-medium">Sign Up</Link>
+          </div>
+        </div>
+      </div>
+      {/* Hero section with background image, headline, subtext, email input, and CTA button */}
+      <main className="relative min-h-screen w-full overflow-hidden pt-4">
+        <Image
+          src="/hero.png"
+          alt="Hero"
+          fill
+          style={{ objectFit: "cover" }}
+          priority
+        />
+        <div className="absolute inset-0 bg-opacity-40 flex flex-col items-start justify-end px-10 pb-28">
+          <h1 className="text-white text-5xl font-bold mb-2">Avoid the Rain</h1>
+          <p className="text-white text-lg mb-10 max-w-lg">
+            Luxuary cards arrive just in time for holidays, and milestones. You sign, send, and stay connected without the mental load.
+          </p>
+          <div className="flex items-center gap-4 flex-nowrap w-full max-w-md mb-4">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="w-full px-4 py-2 rounded-md border border-white text-white bg-transparent placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <button className="bg-white text-black px-6 py-2 rounded-md text-base font-medium whitespace-nowrap hover:bg-gray-200 transition">
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </main>
+      {/* Rotating quote/testimonial section using animation */}
+      <section className="bg-white text-black py-24 px-6">
+        <div className="text-center max-w-3xl mx-auto">
+          <div className="overflow-hidden relative h-32 transition-all duration-500 ease-in-out">
+            <div className="animate-fade-slide" key={quoteIndex}>
+              <blockquote className="text-5xl italic font-light">
+                ‘{quotes[quoteIndex].text}’
+              </blockquote>
+              <p className="mt-4 text-xl text-gray-700">- {quotes[quoteIndex].source}</p>
             </div>
           </div>
         </div>
+        <style jsx global>{`
+          @keyframes fadeSlide {
+            0%, 100% { opacity: 0; transform: translateY(10px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-slide {
+            animation: fadeSlide 10s ease-in-out infinite;
+          }
+        `}</style>
       </section>
+      {/* Carousel section showing card previews with images and titles */}
+      <section className="bg-white text-black py-12 overflow-visible min-h-[500px]">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-black text-5xl font-semibold">   Our Card Samples</h2>
+          <a href="#" className="text-black underline hover:text-gray-700">View All</a>
+        </div>
+        <Carousel className="relative" setApi={setApi}>
+          <CarouselContent data-carousel-content>
+            {[
+              { src: "/SampleCard1.jpg", title: "Love", price: "$5" },
+              { src: "/SampleCard2.jpg", title: "Anniversary", price: "$6" },
+              { src: "/SampleCard3.jpg", title: "Just Because", price: "$4" },
+              { src: "/SampleCard4.jpg", title: "Congrats!", price: "$3" },
+              { src: "/SampleCard5.jpg", title: "Patriotic", price: "$4" },
+              { src: "/SampleCard6.jpg", title: "Love", price: "$5" },
+              { src: "/SampleCard7.jpg", title: "Happy Birthday", price: "$4" },
+              { src: "/SampleCard8.jpg", title: "Congradulation", price: "$3" }
+            ].map((card, index) => (
+              <CarouselItem key={index} className="basis-1/2 md:basis-1/4 py-4">
+                <div className="bg-white overflow-hidden shadow-md hover:outline hover:outline-1 hover:outline-black transition flex flex-col h-full min-h-[300px]">
+                  <div className="relative aspect-[2/3] w-full">
+                    <img src={card.src} alt={card.title} className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                  <div className="p-3 bg-white">
+                    <h3 className="text-black font-medium text-base">{card.title}</h3>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
 
-      <section className="py-16 bg-white w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-            <div>
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <svg viewBox="0 0 24 24" className="h-6 w-6">
-                  <path
-                    fill="currentColor"
-                    d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"
-                  />
-                </svg>
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Next.js and React
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                  Leverage the power of modern web technologies for optimal
-                  performance and developer experience.
-                </p>
-              </div>
-            </div>
+          {/* Left Navigation Button */}
+          <button
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-white text-black px-3 py-2 rounded-r-md z-10 hover:bg-gray-200"
+            onClick={() => api?.scrollPrev()}
+          >
+            ‹
+          </button>
 
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <Database className="h-6 w-6" />
+          {/* Right Navigation Button */}
+          <button
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white text-black px-3 py-2 rounded-l-md z-10 hover:bg-gray-200"
+            onClick={() => api?.scrollNext()}
+          >
+            ›
+          </button>
+        </Carousel>
+        <Step />
+      </section>
+      {/* Reminder teaser component section */}
+      <section className="bg-white py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <ReminderForm
+            defaultValues={{
+              firstPerson: {
+                first: "Penny",
+                last: "Showers"
+              },
+              address: {
+                street: "123 Rainy Lane",
+                city: "Seattle",
+                state: "WA",
+                zip: "98144"
+              },
+              relationship: "Friend",
+              occasion: "Birthday",
+              date: new Date("1990-05-10"),
+              note: "Remember how much fun we had during the lake trip!"
+            }}
+          />
+        </div>
+      </section>
+      <section>
+        <div className="bg-[#264aa9]">
+          <SplitTeaser
+            leftContent={
+              <div className="text-white px-6 flex flex-col items-start justify-center h-full space-y-6">
+                <h2 className="text-3xl font-bold">How it works</h2>
+                <div className="border border-white w-full max-w-md">
+                  <div className="flex items-center gap-2 border-b border-white px-4 py-3">
+                    <span>1.</span>
+                    <span>Test thing</span>
+                  </div>
+                  <div className="flex items-center gap-2 border-b border-white px-4 py-3">
+                    <span>2</span>
+                    <span>Another test thing</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-3">
+                    <span>3</span>
+                    <span>Super easy right!?</span>
+                  </div>
+                </div>
+                <div className="italic">Thouthfulness delivered to your door!</div>
+                <Button variant="default" className="mt-4">OUR MISSION</Button>
               </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Postgres and Drizzle ORM
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
-                </p>
+            }
+            rightContent={
+              <div className="w-full h-full">
+                <img
+                  src={[
+                    "/howitworks/1phonelist.jpg",
+                    "/howitworks/2phonecalendar.jpg",
+                    "/howitworks/3cardrecived.jpg",
+                    "/howitworks/4mailbox.jpg"
+                  ][currentIndex]}
+                  alt="How it works"
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </div>
-
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <CreditCard className="h-6 w-6" />
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Stripe Integration
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                  Seamless payment processing and subscription management with
-                  industry-leading Stripe integration.
-                </p>
-              </div>
-            </div>
+            }
+          />
+        </div>
+      </section>
+      {/* Updated full-width Holiday section */}
+      <section className="w-full bg-white">
+        <Newsletter />
+        <div className="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-2">
+          <div className="h-full w-full">
+            <Image
+              src="/holidaystack.png"
+              alt="Holiday Image"
+              width={1200}
+              height={800}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-8 py-16 pl-16">
+            <h2 className="text-3xl font-serif mb-4">Need bulk cards?</h2>
+            <p className="text-lg mb-6">
+              Sometimes you need to send cards out all in one-go! With our holiday package you send us a list of recipiants, a reminder to what to write in the card, and we send you variety of hand curriated cards stamped and ready to go!
+            </p>
+            <button className="bg-black text-white px-6 py-3 w-fit">Sign Up</button>
           </div>
         </div>
       </section>
-
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-                Ready to launch your SaaS?
-              </h2>
-              <p className="mt-3 max-w-3xl text-lg text-gray-500">
-                Our template provides everything you need to get your SaaS up
-                and running quickly. Don't waste time on boilerplate - focus on
-                what makes your product unique.
-              </p>
-            </div>
-            <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <a href="https://github.com/nextjs/saas-starter" target="_blank">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg rounded-full"
-                >
-                  View the code
-                  <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
-              </a>
-            </div>
-          </div>
+      {/* FAQ section using Accordion component */}
+      <section className="bg-white py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-semibold text-center mb-8">FAQ</h2>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="faq-1">
+              <AccordionTrigger>Do I get to pick the card?</AccordionTrigger>
+              <AccordionContent>
+                No and that’s intentional! We aim to keep you in touch with the people you care about while removing as much of the mental load as possible.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq-2">
+              <AccordionTrigger>Will the cards be appropriate?</AccordionTrigger>
+              <AccordionContent>
+                Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs. Just smart, subtle, personal and custom to your relationship.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq-3">
+              <AccordionTrigger>What if I’m bad at writing messages?</AccordionTrigger>
+              <AccordionContent>
+                No problem, just sign the card and you're good-to-go. There’s also an optional concierge tier where we write the message for you using your reminder prompt which looks like you wrote it.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
-    </main>
+    </>
   );
 }
