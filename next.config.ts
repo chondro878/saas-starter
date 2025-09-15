@@ -1,13 +1,5 @@
 import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  turbopack: {
-    root: './',
-    rules: {},
-  },
-  experimental: {
-    clientSegmentCache: true,
-  },
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

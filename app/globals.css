@@ -1,4 +1,4 @@
-@import "@tailwindcss/postcss";
+@import "tailwindcss";
 
 @font-face {
   font-family: 'TimesNow Light';
@@ -87,7 +87,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border outline outline-gray-500/50;
   }
   body {
     @apply bg-background text-foreground;
