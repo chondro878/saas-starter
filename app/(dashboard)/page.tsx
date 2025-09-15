@@ -16,13 +16,13 @@ import { getNextHoliday } from "@/lib/occasions";
 import { useMemo } from "react";
 import Image from 'next/image';
 import Link from "next/link";
-import { ReminderForm } from "./components/form/reminder-form";
+import ReminderForm from "./components/form/reminder-form";
 import SplitTeaser from "./components/ui/split-teaser";
 import Newsletter from "./components/ui/newsletter";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Carousel, CarouselItem, CarouselContent } from "@/components/ui/carousel";
-import Step from "@/app/(dashboard)/components/ui/step";
+import { Carousel, CarouselItem, CarouselContent } from "./components/ui/carousel";
+import Step from "./components/ui/step";
 
 // Quotes shown in the rotating testimonial section
 export default function Home() {
@@ -272,7 +272,9 @@ export default function Home() {
       <section>
         <div className="bg-[#264aa9]">
           <SplitTeaser
-            leftContent={
+            title="How it works"
+            imageUrl="/howitworks/1phonelist.jpg"
+            leftContent={(
               <div className="text-white px-6 flex flex-col items-start justify-center h-full space-y-6">
                 <h2 className="text-3xl font-bold">How it works</h2>
                 <div className="border border-white w-full max-w-md">
@@ -292,8 +294,8 @@ export default function Home() {
                 <div className="italic">Thouthfulness delivered to your door!</div>
                 <Button variant="default" className="mt-4">OUR MISSION</Button>
               </div>
-            }
-            rightContent={
+            )}
+            rightContent={(
               <div className="w-full h-full">
                 <img
                   src={[
@@ -306,7 +308,7 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
-            }
+            )}
           />
         </div>
       </section>
