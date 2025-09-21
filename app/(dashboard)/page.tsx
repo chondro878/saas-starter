@@ -16,7 +16,7 @@ import { getNextHoliday } from "@/lib/occasions";
 import { useMemo } from "react";
 import Image from 'next/image';
 import Link from "next/link";
-import ReminderForm from "./components/form/reminder-form";
+import { ReminderForm } from "./components/form/reminder-form";
 import SplitTeaser from "./components/ui/split-teaser";
 import Newsletter from "./components/ui/newsletter";
 import { Button } from "@/components/ui/button";

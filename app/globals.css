@@ -71,28 +71,14 @@
 
 @layer base {
   *,
-  ::after,
   ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+  ::after {
+    /* Provide a light default border color without adding borders */
+    border-color: #e5e7eb; /* Tailwind gray-200 */
   }
 }
 
-@layer utilities {
-  body {
-    font-family: "Manrope", Arial, Helvetica, sans-serif;
-  }
-}
 
-@layer base {
-  * {
-    @apply border outline outline-gray-500/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
 
 body {
   font-family: 'TimesNow Regular', serif;

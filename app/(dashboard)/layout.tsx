@@ -1,28 +1,39 @@
 'use client';
 
+// This is your main layout file for all pages within the /dashboard route.
+// It includes the top user navigation (sign in/sign out, avatar, etc.)
+// and a footer section with newsletter sign-up and links.
+// All page content will render between these two sections via the {children} prop.
+
 import Link from 'next/link';
 import { use, useState, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/(dashboard)/components/ui/button';
 import { CircleIcon, Home, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+} from '@/app/(dashboard)/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/(dashboard)/components/ui/avatar';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
 import useSWR, { mutate } from 'swr';
+import Footer from '@/app/(dashboard)/components/ui/footer';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+// This component displays the user avatar and dropdown menu.
+// If the user is not signed in, it shows Sign Up and Pricing links.
+// If signed in, it shows the dashboard link and sign-out option.
 function UserMenu() {
+  // useSWR fetches current user data from /api/user
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
 
+  // Sign-out function triggers mutation and redirects to home
   async function handleSignOut() {
     await signOut();
     mutate('/api/user');
@@ -78,29 +89,12 @@ function UserMenu() {
   );
 }
 
-function Header() {
-  return (
-    <header className="border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <CircleIcon className="h-6 w-6 text-orange-500" />
-          <span className="ml-2 text-xl font-semibold text-gray-900">ACME</span>
-        </Link>
-        <div className="flex items-center space-x-4">
-          <Suspense fallback={<div className="h-9" />}>
-            <UserMenu />
-          </Suspense>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 export default function Layout({ children }: { children: React.ReactNode }) {
+  // The main layout rendering the children followed by a site footer
   return (
     <section className="flex flex-col min-h-screen">
-      <Header />
       {children}
+      <Footer />
     </section>
   );
 }
