@@ -25,6 +25,7 @@ import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -50,6 +51,7 @@ const signInSchema = z.object({
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
+  const supabase = await createSupabaseServerClient();
   const { email, password } = data;
 
   const userWithTeam = await db
@@ -73,12 +75,23 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   const { user: foundUser, team: foundTeam } = userWithTeam[0];
 
-  const isPasswordValid = await comparePasswords(
-    password,
-    foundUser.passwordHash
-  );
+  // Store session cookie via API route
+  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: foundUser.id })
+  });
 
-  if (!isPasswordValid) {
+  console.log('🟢 Session setup triggered for user ID:', foundUser.id);
+
+
+  const supabaseSignInRes = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+  console.log("🧪 Supabase sign-in response:", supabaseSignInRes);
+
+  if (supabaseSignInRes.error || !supabaseSignInRes.data.session) {
     return {
       error: 'Invalid email or password. Please try again.',
       email,
@@ -86,10 +99,15 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
+  const { access_token, refresh_token } = supabaseSignInRes.data.session;
+
+
   await Promise.all([
-    setSession(foundUser),
+    setSession(access_token, refresh_token),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
   ]);
+
+  console.log('✅ setSession() executed for:', foundUser.email);
 
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
@@ -107,6 +125,7 @@ const signUpSchema = z.object({
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
+  const supabase = await createSupabaseServerClient();
   const { email, password, inviteId } = data;
 
   const existingUser = await db
@@ -206,10 +225,26 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     role: userRole
   };
 
+  const supabaseSignUpRes = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (supabaseSignUpRes.error || !supabaseSignUpRes.data.session) {
+    console.error('Supabase Auth error:', supabaseSignUpRes.error?.message);
+    return {
+      error: 'Failed to sign up with Supabase Auth.',
+      email,
+      password
+    };
+  }
+
+  const { access_token, refresh_token } = supabaseSignUpRes.data.session;
+
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser)
+    setSession(access_token, refresh_token)
   ]);
 
   const redirectTo = formData.get('redirect') as string | null;

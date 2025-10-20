@@ -8,8 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from '@/lib/utils';
 import { saveReminder } from '@/lib/reminders';
-import { cookies } from 'next/headers';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase/browserClient';
 
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -217,7 +216,6 @@ export function ReminderForm({
   // Handles form submission, attaches dates/occasions, and saves the reminder
   const handleFinish = async (data: ReminderFormData) => {
     try {
-      const supabase = createClientComponentClient();
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id;
 
