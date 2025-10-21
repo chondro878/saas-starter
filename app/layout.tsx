@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
   title: 'Avoid the Rain',
-  description: 'Luxary greeting cards delivered to your door.'
+  description: 'Luxury greeting cards delivered to your door. Never miss a special occasion again.'
 };
 
 export const viewport: Viewport = {
@@ -23,9 +23,9 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
+      className="bg-gray-50"
     >
-      <body className="min-h-[100dvh] bg-gray-50">
+      <body className="min-h-[100dvh] bg-gray-50 text-gray-700 antialiased">
         <SWRConfig
           value={{
             fallback: {

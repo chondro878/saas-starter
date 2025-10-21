@@ -54,6 +54,21 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const supabase = await createSupabaseServerClient();
   const { email, password } = data;
 
+  // First, try Supabase authentication
+  const supabaseSignInRes = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (supabaseSignInRes.error || !supabaseSignInRes.data.session) {
+    return {
+      error: 'Invalid email or password. Please try again.',
+      email,
+      password
+    };
+  }
+
+  // Get user from our database
   const userWithTeam = await db
     .select({
       user: users,
@@ -75,39 +90,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   const { user: foundUser, team: foundTeam } = userWithTeam[0];
 
-  // Store session cookie via API route
-  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: foundUser.id })
-  });
-
-  console.log('🟢 Session setup triggered for user ID:', foundUser.id);
-
-
-  const supabaseSignInRes = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-  console.log("🧪 Supabase sign-in response:", supabaseSignInRes);
-
-  if (supabaseSignInRes.error || !supabaseSignInRes.data.session) {
-    return {
-      error: 'Invalid email or password. Please try again.',
-      email,
-      password
-    };
-  }
-
+  // Set Supabase session (this handles cookies automatically)
   const { access_token, refresh_token } = supabaseSignInRes.data.session;
+  await setSession(access_token, refresh_token);
 
-
-  await Promise.all([
-    setSession(access_token, refresh_token),
-    logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
-  ]);
-
-  console.log('✅ setSession() executed for:', foundUser.email);
+  // Log activity
+  await logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN);
 
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
@@ -260,7 +248,9 @@ export async function signOut() {
   const user = (await getUser()) as User;
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
-  (await cookies()).delete('session');
+  
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
 }
 
 const updatePasswordSchema = z.object({
@@ -368,7 +358,8 @@ export const deleteAccount = validatedActionWithUser(
         );
     }
 
-    (await cookies()).delete('session');
+    const supabase = await createSupabaseServerClient();
+    await supabase.auth.signOut();
     redirect('/sign-in');
   }
 );
