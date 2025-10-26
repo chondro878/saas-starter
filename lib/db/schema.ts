@@ -11,6 +11,9 @@ import { relations } from 'drizzle-orm';
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 100 }),
+  firstName: varchar('first_name', { length: 100 }),
+  lastName: varchar('last_name', { length: 100 }),
+  phone: varchar('phone', { length: 20 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   role: varchar('role', { length: 20 }).notNull().default('member'),
@@ -126,6 +129,90 @@ export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;
   })[];
+};
+
+// Recipients table - people who will receive cards
+export const recipients = pgTable('recipients', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  firstName: varchar('first_name', { length: 100 }).notNull(),
+  lastName: varchar('last_name', { length: 100 }).notNull(),
+  relationship: varchar('relationship', { length: 50 }).notNull(), // Romantic, Family, Friend, etc.
+  street: varchar('street', { length: 255 }).notNull(),
+  apartment: varchar('apartment', { length: 100 }),
+  city: varchar('city', { length: 100 }).notNull(),
+  state: varchar('state', { length: 50 }).notNull(),
+  zip: varchar('zip', { length: 20 }).notNull(),
+  country: varchar('country', { length: 100 }).notNull().default('United States'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Occasions table - dates to remember for each recipient
+export const occasions = pgTable('occasions', {
+  id: serial('id').primaryKey(),
+  recipientId: integer('recipient_id')
+    .notNull()
+    .references(() => recipients.id),
+  occasionType: varchar('occasion_type', { length: 50 }).notNull(), // Birthday, Anniversary, etc.
+  occasionDate: timestamp('occasion_date').notNull(), // The actual date
+  notes: text('notes'), // Special notes for this occasion
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// User addresses table - for return addresses and shipping
+export const userAddresses = pgTable('user_addresses', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  isDefault: integer('is_default').notNull().default(0), // 1 = default, 0 = not default
+  street: varchar('street', { length: 255 }).notNull(),
+  apartment: varchar('apartment', { length: 100 }),
+  city: varchar('city', { length: 100 }).notNull(),
+  state: varchar('state', { length: 50 }).notNull(),
+  zip: varchar('zip', { length: 20 }).notNull(),
+  country: varchar('country', { length: 100 }).notNull().default('United States'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Relations
+export const recipientsRelations = relations(recipients, ({ one, many }) => ({
+  user: one(users, {
+    fields: [recipients.userId],
+    references: [users.id],
+  }),
+  occasions: many(occasions),
+}));
+
+export const occasionsRelations = relations(occasions, ({ one }) => ({
+  recipient: one(recipients, {
+    fields: [occasions.recipientId],
+    references: [recipients.id],
+  }),
+}));
+
+export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
+  user: one(users, {
+    fields: [userAddresses.userId],
+    references: [users.id],
+  }),
+}));
+
+// Type exports
+export type Recipient = typeof recipients.$inferSelect;
+export type NewRecipient = typeof recipients.$inferInsert;
+export type Occasion = typeof occasions.$inferSelect;
+export type NewOccasion = typeof occasions.$inferInsert;
+export type UserAddress = typeof userAddresses.$inferSelect;
+export type NewUserAddress = typeof userAddresses.$inferInsert;
+
+export type RecipientWithOccasions = Recipient & {
+  occasions: Occasion[];
 };
 
 export enum ActivityType {

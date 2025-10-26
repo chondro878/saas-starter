@@ -15,9 +15,9 @@ import { getNextHoliday } from "@/lib/occasions";
 import { useMemo } from "react";
 import Image from 'next/image';
 import Link from "next/link";
-import { ReminderForm } from "./components/form/reminder-form";
-import SplitTeaser from "./components/ui/split-teaser";
-import Newsletter from "./components/ui/newsletter";
+import { ReminderForm } from "./(dashboard)/components/form/reminder-form";
+import SplitTeaser from "./(dashboard)/components/ui/split-teaser";
+import Newsletter from "./(dashboard)/components/ui/newsletter";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { supabase } from "@/lib/supabase/browserClient";
@@ -28,6 +28,24 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+
+  // Rotating text for hero section
+  const occasions = [
+    'a birthday',
+    'an anniversary',
+    'Valentine\'s Day',
+    'Christmas',
+    'New Year',
+    'Memorial Day',
+    'Halloween',
+    'Mother\'s Day',
+    'Father\'s Day',
+    'Easter',
+    'Independance Day',
+    'Veterans Day',
+  ];
+  const [currentOccasionIndex, setCurrentOccasionIndex] = useState(0);
+  const [isOccasionFading, setIsOccasionFading] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -52,6 +70,20 @@ export default function Home() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Rotate through occasions with fade effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsOccasionFading(true);
+      
+      setTimeout(() => {
+        setCurrentOccasionIndex((prevIndex) => (prevIndex + 1) % occasions.length);
+        setIsOccasionFading(false);
+      }, 500); // Match the CSS transition duration
+    }, 3000); // Change text every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [occasions.length]);
 
   // Close account menu when clicking outside
   useEffect(() => {
@@ -352,21 +384,32 @@ export default function Home() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-start justify-end px-12 pb-32">
-          <h1 className="text-white text-6xl font-light mb-6 leading-tight">Avoid the Rain</h1>
+          <h1 className="text-white text-6xl font-light mb-6 leading-tight">
+            Never again miss <span 
+              className={`inline-block transition-opacity duration-500 ${isOccasionFading ? 'opacity-0' : 'opacity-100'}`}
+              style={{ minWidth: '280px' }}
+            >
+              {occasions[currentOccasionIndex]}
+            </span>
+          </h1>
           <p className="text-white text-xl mb-12 max-w-2xl leading-relaxed">
-            Luxury cards arrive just in time for holidays and milestones. You sign, send, and stay connected without the mental load.
+            Personalized luxury cards arrive just in time for holidays and milestones. You sign, send, and stay connected without the mental load.
           </p>
           {/* Hide email signup for authenticated users */}
           {!isAuthenticated && (
             <div className="flex items-center gap-4 flex-nowrap w-full max-w-lg mb-6">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-6 py-4 rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
-              />
-              <button className="bg-white text-gray-900 px-8 py-4 rounded-lg text-base font-medium whitespace-nowrap hover:bg-gray-100 transition-colors">
-                Sign Up
-              </button>
+              <Link 
+                href="/pricing" 
+                className="bg-white text-gray-900 px-8 py-4 rounded-lg text-base font-medium whitespace-nowrap hover:bg-gray-100 transition-colors"
+              >
+                View Pricing
+              </Link>
+              <Link 
+                href="/sign-up" 
+                className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg text-base font-medium whitespace-nowrap hover:bg-white/20 transition-colors border border-white/30"
+              >
+                Sign Up Free
+              </Link>
             </div>
           )}
           {/* Show welcome message for authenticated users */}
@@ -506,7 +549,7 @@ export default function Home() {
           <div className="w-full py-16 px-4 md:px-8">
             <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
               <div className="text-gray-900 px-8 flex flex-col items-start justify-center h-full space-y-8">
-                <h2 className="text-4xl font-light">How it works</h2>
+                <h2 className="text-4xl font-light text-gray-900">How it works</h2>
                 <div className="border border-gray-200 rounded-lg w-full max-w-lg bg-white shadow-sm">
                   <div className="flex items-center gap-4 border-b border-gray-100 px-6 py-4">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-700">1</div>
@@ -522,7 +565,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="text-gray-600 italic text-lg">Thoughtfulness delivered to your door!</div>
-                <Button className="mt-6 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors">OUR MISSION</Button>
+                <Link href="/pricing" className="mt-6 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors inline-block">View Pricing</Link>
               </div>
               <div className="w-full h-full">
                 <img
@@ -651,7 +694,7 @@ export default function Home() {
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               Sometimes you need to send cards out all in one-go! With our holiday package you send us a list of recipients, a reminder to what to write in the card, and we send you variety of hand curated cards stamped and ready to go!
             </p>
-            <button className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium">Sign Up</button>
+            <Link href="/pricing" className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium inline-block">View Pricing</Link>
           </div>
         </div>
       </section>

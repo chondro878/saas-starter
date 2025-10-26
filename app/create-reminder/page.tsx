@@ -9,20 +9,20 @@ import { useRouter } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/browserClient';
+import { US_STATES } from '@/lib/us-states';
 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/app/(dashboard)/components/ui/calendar';
+import { MonthDayPicker } from '@/components/ui/month-day-picker';
 import {
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { CalendarIcon } from '@radix-ui/react-icons';
+import { AlertCircle, Check, X } from 'lucide-react';
 
 // --- Schema definition for the reminder form using Zod ---
 const reminderFormSchema = z.object({
@@ -57,6 +57,18 @@ export default function CreateReminderPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  
+  // Address validation state
+  const [addressValidation, setAddressValidation] = useState<{
+    isValidating: boolean;
+    result: any | null;
+    showSuggestion: boolean;
+  }>({
+    isValidating: false,
+    result: null,
+    showSuggestion: false,
+  });
 
   // --- Form setup with react-hook-form and Zod resolver ---
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
@@ -68,6 +80,13 @@ export default function CreateReminderPage() {
   const [selectedCustomOccasions, setSelectedCustomOccasions] = useState<string[]>([]);
   const [selectedHolidayOccasions, setSelectedHolidayOccasions] = useState<string[]>([]);
   const [customDates, setCustomDates] = useState<{ [occasion: string]: Date | undefined }>({});
+
+  // Validate address when reaching step 5
+  useEffect(() => {
+    if (currentStep === 5 && !addressValidation.result) {
+      validateAddressFields();
+    }
+  }, [currentStep]);
 
   // --- Watch form fields for dynamic updates ---
   const firstPerson = watch("firstPerson") || { first: '', last: '' };
@@ -97,7 +116,53 @@ export default function CreateReminderPage() {
     { value: "Christmas", label: "Christmas", dateLabel: "Dec 25" },
   ];
 
-  const relationshipOptions = ['Mother', 'Father', 'Boyfriend', 'Girlfriend', 'Friend', 'Wife', 'Husband', 'Partner', 'CoWorker'];
+  const relationshipOptions = ['Friend', 'Family', 'Romantic', 'Professional'];
+
+  // Get colors based on relationship
+  const getRelationshipColors = (relationship: string) => {
+    switch (relationship.toLowerCase()) {
+      case 'family':
+        return {
+          bg: 'bg-green-100',
+          text: 'text-green-700',
+          border: 'border-green-500',
+          hoverBorder: 'hover:border-green-400',
+          selected: 'bg-green-500 text-white border-green-500'
+        };
+      case 'friend':
+        return {
+          bg: 'bg-blue-100',
+          text: 'text-blue-700',
+          border: 'border-blue-500',
+          hoverBorder: 'hover:border-blue-400',
+          selected: 'bg-blue-500 text-white border-blue-500'
+        };
+      case 'romantic':
+        return {
+          bg: 'bg-pink-100',
+          text: 'text-pink-700',
+          border: 'border-pink-500',
+          hoverBorder: 'hover:border-pink-400',
+          selected: 'bg-pink-500 text-white border-pink-500'
+        };
+      case 'professional':
+        return {
+          bg: 'bg-purple-100',
+          text: 'text-purple-700',
+          border: 'border-purple-500',
+          hoverBorder: 'hover:border-purple-400',
+          selected: 'bg-purple-500 text-white border-purple-500'
+        };
+      default:
+        return {
+          bg: 'bg-gray-100',
+          text: 'text-gray-700',
+          border: 'border-gray-500',
+          hoverBorder: 'hover:border-gray-400',
+          selected: 'bg-gray-900 text-white border-gray-900'
+        };
+    }
+  };
 
   // --- Occasion selection handlers ---
   const toggleCustomOccasion = (val: string) => {
@@ -154,36 +219,170 @@ export default function CreateReminderPage() {
   // --- Save logic ---
   const handleFinish = async (data: ReminderFormData) => {
     setIsLoading(true);
+    setErrorMessage('');
     try {
+      // Check if user is authenticated
       const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id;
-
-      if (!userId) throw new Error('User not logged in');
-
-      const enrichedData = {
-        ...data,
-        customDates,
-        selectedOccasions: [...selectedCustomOccasions, ...selectedHolidayOccasions],
+      if (!user) {
+        setErrorMessage('You must be signed in to create a reminder. Please sign in and try again.');
+        router.push('/sign-in?redirect=/create-reminder');
+        return;
+      }
+      // Prepare recipient data
+      const recipientData = {
+        firstName: data.firstPerson.first,
+        lastName: data.firstPerson.last,
+        relationship: data.relationship || 'Friend',
+        street: data.address.street,
+        apartment: data.address.apartment || '',
+        city: data.address.city,
+        state: data.address.state,
+        zip: data.address.zip,
+        country: 'United States',
+        notes: data.note || '',
       };
 
-      const { error } = await supabase.from('reminders').insert([
-        {
-          user_id: userId,
-          ...enrichedData,
+      // Prepare occasions data
+      const occasionsData = [];
+      
+      // Add custom occasions with their dates
+      for (const occasion of selectedCustomOccasions) {
+        if (customDates[occasion]) {
+          // Ensure the date is a proper Date object
+          const dateValue = customDates[occasion];
+          const dateObj = dateValue instanceof Date ? dateValue : new Date(dateValue!);
+          
+          if (isNaN(dateObj.getTime())) {
+            console.error(`Invalid date for ${occasion}:`, dateValue);
+            continue; // Skip invalid dates
+          }
+          
+          occasionsData.push({
+            occasionType: occasion,
+            occasionDate: dateObj.toISOString(),
+            notes: data.occasionNotes?.[occasion] || '',
+          });
+        }
+      }
+
+      // Add holiday occasions (we'll need to calculate their dates later)
+      for (const occasion of selectedHolidayOccasions) {
+        const nextYear = new Date().getFullYear();
+        let occasionDate = new Date();
+        
+        // Set approximate dates for holidays (can be refined later)
+        switch (occasion) {
+          case "New Year's":
+            occasionDate = new Date(nextYear, 0, 1);
+            break;
+          case "Valentine's Day":
+            occasionDate = new Date(nextYear, 1, 14);
+            break;
+          case "St. Patrick's Day":
+            occasionDate = new Date(nextYear, 2, 17);
+            break;
+          case "Independence Day":
+            occasionDate = new Date(nextYear, 6, 4);
+            break;
+          case "Halloween":
+            occasionDate = new Date(nextYear, 9, 31);
+            break;
+          case "Christmas":
+            occasionDate = new Date(nextYear, 11, 25);
+            break;
+          default:
+            occasionDate = new Date(nextYear, 0, 1); // Default to Jan 1
+        }
+        
+        occasionsData.push({
+          occasionType: occasion,
+          occasionDate: occasionDate.toISOString(),
+          notes: data.occasionNotes?.[occasion] || '',
+        });
+      }
+
+      // Save via API
+      console.log('Sending recipient data:', { recipientData, occasionsData });
+      
+      const response = await fetch('/api/recipients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ]);
+        body: JSON.stringify({
+          recipientData,
+          occasionsData,
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || 'Failed to save recipient');
+      }
 
+      const result = await response.json();
+      console.log('Recipient created successfully:', result);
+      
       setCurrentStep(6);
     } catch (error) {
       console.error('Failed to save reminder:', error);
+      const message = error instanceof Error ? error.message : 'Failed to save reminder. Please try again.';
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
+
+  // Address validation function
+  const validateAddressFields = async () => {
+    const addressData = watch('address');
+    if (!addressData.street || !addressData.city || !addressData.state || !addressData.zip) {
+      return;
+    }
+
+    setAddressValidation({ isValidating: true, result: null, showSuggestion: false });
+
+    try {
+      const response = await fetch('/api/validate-address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          street: addressData.street,
+          apartment: addressData.apartment || '',
+          city: addressData.city,
+          state: addressData.state,
+          zip: addressData.zip,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setAddressValidation({
+          isValidating: false,
+          result,
+          showSuggestion: result.verdict === 'CORRECTABLE' || result.verdict === 'UNDELIVERABLE',
+        });
+      }
+    } catch (error) {
+      console.error('Address validation failed:', error);
+      setAddressValidation({ isValidating: false, result: null, showSuggestion: false });
+    }
+  };
+
+  const applySuggestedAddress = () => {
+    if (addressValidation.result?.suggestedAddress) {
+      const suggested = addressValidation.result.suggestedAddress;
+      setValue('address.street', suggested.street);
+      setValue('address.apartment', suggested.apartment || '');
+      setValue('address.city', suggested.city);
+      setValue('address.state', suggested.state);
+      setValue('address.zip', suggested.zip);
+      setAddressValidation({ ...addressValidation, showSuggestion: false });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -288,7 +487,9 @@ export default function CreateReminderPage() {
                 )}
 
                 <div className="border-t border-gray-100 pt-6">
-                  <Label className="block text-sm font-medium text-gray-700 mb-4">Recipient's Address</Label>
+                  <Label className="block text-sm font-medium text-gray-700 mb-4">
+                    Recipient's Address (US only)
+                  </Label>
                   <div className="space-y-4">
                     <Input
                       placeholder="Street Address"
@@ -306,14 +507,21 @@ export default function CreateReminderPage() {
                         {...register("address.city")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                       />
-                      <Input
-                        placeholder="State"
+                      <select
                         {...register("address.state")}
-                        className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
-                      />
+                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none text-gray-900"
+                      >
+                        <option value="">Select State</option>
+                        {US_STATES.map((state) => (
+                          <option key={state.code} value={state.code}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </select>
                       <Input
                         placeholder="Zip Code"
                         {...register("address.zip")}
+                        maxLength={5}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                       />
                     </div>
@@ -345,26 +553,29 @@ export default function CreateReminderPage() {
           {currentStep === 2 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">Who are they to you?</h2>
+                <h2 className="text-3xl font-light text-gray-900 mb-4">What kind of relationship is this?</h2>
                 <p className="text-gray-600">This helps us personalize the card.</p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                {relationshipOptions.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setValue("relationship", option)}
-                    className={cn(
-                      "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
-                      relationship === option 
-                        ? "bg-gray-900 text-white border-gray-900" 
-                        : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
-                    )}
-                  >
-                    {option}
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {relationshipOptions.map((option) => {
+                  const colors = getRelationshipColors(option);
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setValue("relationship", option)}
+                      className={cn(
+                        "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
+                        relationship === option 
+                          ? colors.selected
+                          : `${colors.bg} ${colors.text} border-gray-200 ${colors.hoverBorder}`
+                      )}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="flex justify-between pt-6">
@@ -469,45 +680,22 @@ export default function CreateReminderPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
                 <h2 className="text-3xl font-light text-gray-900 mb-4">When is it?</h2>
-                <p className="text-gray-600">Pick the dates for each occasion.</p>
+                <p className="text-gray-600">Pick the month and day for each occasion.</p>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {selectedCustomOccasions.map((oc) => (
-                  <div key={oc}>
-                    <Label className="block text-sm font-medium text-gray-700 mb-3">{oc} date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal border-gray-200",
-                            !customDates[oc] && "text-gray-500"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {customDates[oc] ? format(customDates[oc]!, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={customDates[oc]}
-                          onSelect={(val: Date | undefined) => {
-                            setCustomDates((prev) => ({
-                              ...prev,
-                              [oc]: val ?? undefined,
-                            }));
-                          }}
-                          initialFocus
-                          defaultMonth={new Date()}
-                          captionLayout="dropdown"
-                          fromYear={1900}
-                          toYear={new Date().getFullYear() + 1}
-                          disabled={(date: Date) => date < new Date(new Date().setDate(new Date().getDate() + 10))}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div key={oc} className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-xl font-medium text-gray-900 mb-4">{oc}</h3>
+                    <MonthDayPicker
+                      value={customDates[oc]}
+                      onChange={(date: Date) => {
+                        setCustomDates((prev) => ({
+                          ...prev,
+                          [oc]: date,
+                        }));
+                      }}
+                    />
                   </div>
                 ))}
               </div>
@@ -533,13 +721,111 @@ export default function CreateReminderPage() {
             </div>
           )}
 
-          {/* Step 5: Notes */}
+          {/* Step 5: Notes & Review */}
           {currentStep === 5 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">Add a reminder note?</h2>
-                <p className="text-gray-600">Help us personalize the card with your thoughts.</p>
+                <h2 className="text-3xl font-light text-gray-900 mb-4">Review & Add Notes</h2>
+                <p className="text-gray-600">Review the details and add optional notes for personalization.</p>
               </div>
+
+              {/* Address Review */}
+              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Recipient Address</h3>
+                <div className="text-gray-700 space-y-1">
+                  <p className="font-medium">{address.street}{address.apartment ? `, ${address.apartment}` : ''}</p>
+                  <p>{address.city}, {address.state} {address.zip}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="text-sm text-gray-600 hover:text-gray-900 underline mt-2"
+                >
+                  Edit Address
+                </button>
+              </div>
+
+              {/* Address Validation Messages */}
+              {addressValidation.isValidating && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg mb-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                  <span>Validating address...</span>
+                </div>
+              )}
+
+              {addressValidation.showSuggestion && addressValidation.result?.verdict === 'CORRECTABLE' && (
+                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg mb-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-base font-medium text-blue-900 mb-3">
+                        We found a suggested address
+                      </p>
+                      <div className="bg-white rounded-lg p-4 mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">Original:</p>
+                        <p className="text-sm text-gray-700">
+                          {address.street}{address.apartment ? `, ${address.apartment}` : ''}<br />
+                          {address.city}, {address.state} {address.zip}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">Suggested:</p>
+                        <p className="text-sm text-gray-700">
+                          {addressValidation.result.suggestedAddress?.street}
+                          {addressValidation.result.suggestedAddress?.apartment && `, ${addressValidation.result.suggestedAddress.apartment}`}<br />
+                          {addressValidation.result.suggestedAddress?.city}, {addressValidation.result.suggestedAddress?.state} {addressValidation.result.suggestedAddress?.zip}
+                        </p>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          onClick={applySuggestedAddress}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Use Suggested Address
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setAddressValidation({ ...addressValidation, showSuggestion: false })}
+                          className="px-6 py-2"
+                        >
+                          Keep My Address
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {addressValidation.showSuggestion && addressValidation.result?.verdict === 'UNDELIVERABLE' && (
+                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-lg mb-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-base font-medium text-red-900 mb-2">
+                        Address Cannot Be Verified
+                      </p>
+                      <p className="text-sm text-red-800 mb-4">
+                        {addressValidation.result.message || 'The address you entered cannot be validated. Please check for typos or formatting issues.'}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false });
+                          setCurrentStep(1);
+                        }}
+                        className="px-6 py-2 border-red-300 text-red-700 hover:bg-red-50"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Go Back & Fix Address
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-6">
                 <div>
@@ -574,21 +860,28 @@ export default function CreateReminderPage() {
                 </div>
               </div>
 
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+                  <p className="text-red-600 text-sm">{errorMessage}</p>
+                </div>
+              )}
+
               <div className="flex justify-between pt-8">
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={handleBack}
                   className="px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  disabled={isLoading || addressValidation.isValidating}
                 >
                   Back
                 </Button>
                 <Button 
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || addressValidation.isValidating || (addressValidation.result?.verdict === 'UNDELIVERABLE')}
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? 'Creating...' : 'Create Reminder'}
+                  {isLoading ? 'Creating...' : addressValidation.isValidating ? 'Validating...' : 'Create Reminder'}
                 </Button>
               </div>
             </div>

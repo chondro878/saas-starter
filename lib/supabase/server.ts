@@ -14,10 +14,20 @@ export async function createSupabaseServerClient() {
           return cookie?.value
         },
         set: (name: string, value: string, options: any) => {
-          cookieStore.set({ name, value, ...options })
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can only be set in Server Actions/Route Handlers
+            // Silently fail during page rendering
+          }
         },
         remove: (name: string, options: any) => {
-          cookieStore.delete({ name, ...options })
+          try {
+            cookieStore.delete({ name, ...options })
+          } catch (error) {
+            // Cookies can only be removed in Server Actions/Route Handlers
+            // Silently fail during page rendering
+          }
         },
       },
     }

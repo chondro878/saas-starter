@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut } from 'lucide-react';
+import { User } from '@/lib/db/schema';
+import useSWR from 'swr';
+import { signOut } from '@/app/(login)/actions';
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DashboardLayout({
   children
@@ -12,62 +16,91 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const router = useRouter();
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
 
   const navItems = [
-    { href: '/dashboard', icon: Users, label: 'Team' },
-    { href: '/dashboard/general', icon: Settings, label: 'General' },
-    { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-    { href: '/dashboard/security', icon: Shield, label: 'Security' }
+    { href: '/dashboard', icon: Home, label: 'Home' },
+    { href: '/dashboard/general', icon: Grid, label: 'Friends & Family' },
+    { href: '/dashboard/security', icon: CreditCard, label: 'Account Settings' },
+    { href: '/dashboard/holiday-packs', icon: Package, label: 'Holiday Packs' },
+    { href: '/dashboard/subscriptions', icon: RefreshCw, label: 'Subscriptions' },
   ];
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
-      {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center">
-          <span className="font-medium">Settings</span>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        {/* User Profile Section */}
+        <div className="p-8 border-b border-gray-200">
+          <Avatar className="w-24 h-24 mb-4">
+            <AvatarFallback className="bg-gray-300 text-gray-600 text-2xl">
+              {user?.firstName && user?.lastName
+                ? `${user.firstName[0]}${user.lastName[0]}`
+                : user?.name?.split(' ').map(n => n[0]).join('') || user?.email?.[0]?.toUpperCase() || '?'}
+            </AvatarFallback>
+          </Avatar>
+          <h2 className="text-xl font-normal text-gray-900 mb-1">
+            {user?.firstName && user?.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : user?.name || 'User'}
+          </h2>
+          <p className="text-sm text-gray-600">{user?.email}</p>
         </div>
-        <Button
-          className="-mr-3"
-          variant="ghost"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Toggle sidebar</span>
-        </Button>
-      </div>
 
-      <div className="flex flex-1 overflow-hidden h-full">
-        {/* Sidebar */}
-        <aside
-          className={`w-64 bg-white lg:bg-gray-50 border-r border-gray-200 lg:block ${
-            isSidebarOpen ? 'block' : 'hidden'
-          } lg:relative absolute inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <nav className="h-full overflow-y-auto p-4">
+        {/* Navigation */}
+        <nav className="flex-1 p-6">
+          <ul className="space-y-2">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} passHref>
-                <Button
-                  variant={pathname === item.href ? 'secondary' : 'ghost'}
-                  className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? 'bg-gray-100' : ''
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${
+                    pathname === item.href
+                      ? 'bg-gray-100 text-gray-900 font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setIsSidebarOpen(false)}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="w-5 h-5" />
                   {item.label}
-                </Button>
-              </Link>
+                </Link>
+              </li>
             ))}
-          </nav>
-        </aside>
+          </ul>
+        </nav>
 
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-0 lg:p-4">{children}</main>
-      </div>
+        {/* Bottom Navigation */}
+        <div className="p-6 border-t border-gray-200">
+          <ul className="space-y-2">
+            <li>
+              <Link
+                href="/dashboard/help"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-base text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <HelpCircle className="w-5 h-5" />
+                Help & Support
+              </Link>
+            </li>
+            <li>
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-y-auto bg-gray-50">{children}</main>
     </div>
   );
 }

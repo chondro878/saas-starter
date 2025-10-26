@@ -1,287 +1,153 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@/components/ui/card';
-import { customerPortalAction } from '@/lib/payments/actions';
-import { useActionState } from 'react';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { removeTeamMember, inviteTeamMember } from '@/app/(login)/actions';
+import Link from 'next/link';
+import { User, RecipientWithOccasions } from '@/lib/db/schema';
 import useSWR from 'swr';
-import { Suspense } from 'react';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Loader2, PlusCircle } from 'lucide-react';
-
-type ActionState = {
-  error?: string;
-  success?: string;
-};
+import { Plus } from 'lucide-react';
+import { HolidayCarousel } from '../components/holiday-carousel';
+import { IOSDownload } from '../components/ios-download';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function SubscriptionSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Team Subscription</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function ManageSubscription() {
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-
-  return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Team Subscription</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div className="mb-4 sm:mb-0">
-              <p className="font-medium">
-                Current Plan: {teamData?.planName || 'Free'}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {teamData?.subscriptionStatus === 'active'
-                  ? 'Billed monthly'
-                  : teamData?.subscriptionStatus === 'trialing'
-                  ? 'Trial period'
-                  : 'No active subscription'}
-              </p>
-            </div>
-            <form action={customerPortalAction}>
-              <Button type="submit" variant="outline">
-                Manage Subscription
-              </Button>
-            </form>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TeamMembersSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4 mt-1">
-          <div className="flex items-center space-x-4">
-            <div className="size-8 rounded-full bg-gray-200"></div>
-            <div className="space-y-2">
-              <div className="h-4 w-32 bg-gray-200 rounded"></div>
-              <div className="h-3 w-14 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TeamMembers() {
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-  const [removeState, removeAction, isRemovePending] = useActionState<
-    ActionState,
-    FormData
-  >(removeTeamMember, {});
-
-  const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
-    return user.name || user.email || 'Unknown User';
-  };
-
-  if (!teamData?.teamMembers?.length) {
-    return (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No team members yet.</p>
-        </CardContent>
-      </Card>
-    );
+// Get colors based on relationship
+const getRelationshipColors = (relationship: string) => {
+  switch (relationship.toLowerCase()) {
+    case 'family':
+      return {
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        avatar: 'bg-green-500'
+      };
+    case 'friend':
+      return {
+        bg: 'bg-blue-100',
+        text: 'text-blue-700',
+        avatar: 'bg-blue-500'
+      };
+    case 'romantic':
+      return {
+        bg: 'bg-pink-100',
+        text: 'text-pink-700',
+        avatar: 'bg-pink-500'
+      };
+    case 'professional':
+      return {
+        bg: 'bg-purple-100',
+        text: 'text-purple-700',
+        avatar: 'bg-purple-500'
+      };
+    default:
+      return {
+        bg: 'bg-gray-100',
+        text: 'text-gray-700',
+        avatar: 'bg-gray-500'
+      };
   }
+};
 
+function RecipientCard({ recipient }: { recipient: RecipientWithOccasions }) {
+  const initials = `${recipient.firstName[0]}${recipient.lastName[0]}`;
+  const colors = getRelationshipColors(recipient.relationship);
+  
+  // Get the next upcoming occasion
+  const nextOccasion = recipient.occasions?.[0];
+  
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {teamData.teamMembers.map((member, index) => (
-            <li key={member.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  {/* 
-                    This app doesn't save profile images, but here
-                    is how you'd show them:
-
-                    <AvatarImage
-                      src={member.user.image || ''}
-                      alt={getUserDisplayName(member.user)}
-                    />
-                  */}
-                  <AvatarFallback>
-                    {getUserDisplayName(member.user)
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">
-                    {getUserDisplayName(member.user)}
-                  </p>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {member.role}
-                  </p>
-                </div>
-              </div>
-              {index > 1 ? (
-                <form action={removeAction}>
-                  <input type="hidden" name="memberId" value={member.id} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    disabled={isRemovePending}
-                  >
-                    {isRemovePending ? 'Removing...' : 'Remove'}
-                  </Button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        {removeState?.error && (
-          <p className="text-red-500 mt-4">{removeState.error}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="flex-shrink-0 flex flex-col items-center space-y-3">
+      <div className={`w-40 h-40 ${colors.avatar} rounded-full flex items-center justify-center`}>
+        <span className="text-white text-5xl font-light">{initials}</span>
+      </div>
+      <div className="text-center">
+        <h3 className="text-xl font-normal text-gray-900">
+          {recipient.firstName} {recipient.lastName}
+        </h3>
+        <span className={`text-sm ${colors.text} ${colors.bg} px-3 py-1 rounded-full inline-block`}>
+          {recipient.relationship}
+        </span>
+      </div>
+    </div>
   );
 }
 
-function InviteTeamMemberSkeleton() {
-  return (
-    <Card className="h-[260px]">
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function InviteTeamMember() {
+export default function DashboardHomePage() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  const isOwner = user?.role === 'owner';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
-    ActionState,
-    FormData
-  >(inviteTeamMember, {});
+  const { data: recipients, error, isLoading } = useSWR<RecipientWithOccasions[]>('/api/recipients', fetcher);
+  
+  // Extract first name from profile, name, or email
+  const firstName = user?.firstName || user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={inviteAction} className="space-y-4">
-          <div>
-            <Label htmlFor="email" className="mb-2">
-              Email
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter email"
-              required
-              disabled={!isOwner}
-            />
-          </div>
-          <div>
-            <Label>Role</Label>
-            <RadioGroup
-              defaultValue="member"
-              name="role"
-              className="flex space-x-4"
-              disabled={!isOwner}
-            >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="member" id="member" />
-                <Label htmlFor="member">Member</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="owner" id="owner" />
-                <Label htmlFor="owner">Owner</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {inviteState?.error && (
-            <p className="text-red-500">{inviteState.error}</p>
-          )}
-          {inviteState?.success && (
-            <p className="text-green-500">{inviteState.success}</p>
-          )}
-          <Button
-            type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-            disabled={isInvitePending || !isOwner}
-          >
-            {isInvitePending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inviting...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Invite Member
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-      {!isOwner && (
-        <CardFooter>
-          <p className="text-sm text-muted-foreground">
-            You must be a team owner to invite new members.
+    <div className="flex-1 p-8 lg:p-12">
+      {/* Header */}
+      <h1 className="text-5xl font-light text-gray-900 mb-12">
+        Hi, {firstName}
+      </h1>
+
+      {/* Holiday Promotion Carousel */}
+      <HolidayCarousel />
+
+      {/* iOS App Download */}
+      <IOSDownload />
+
+      {/* Friends & Family Section */}
+      <div className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl p-8 mb-8">
+        <div className="mb-6">
+          <h2 className="text-3xl font-normal text-gray-900 mb-2">Friends & Family</h2>
+          <p className="text-gray-600">
+            Keep track of all the special people in your life
           </p>
-        </CardFooter>
-      )}
-    </Card>
-  );
-}
+        </div>
+        
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex gap-8 overflow-x-auto pb-8 mb-6">
+            <div className="flex-shrink-0 flex flex-col items-center space-y-3">
+              <div className="w-40 h-40 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-32 h-4 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        )}
 
-export default function SettingsPage() {
-  return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">Team Settings</h1>
-      <Suspense fallback={<SubscriptionSkeleton />}>
-        <ManageSubscription />
-      </Suspense>
-      <Suspense fallback={<TeamMembersSkeleton />}>
-        <TeamMembers />
-      </Suspense>
-      <Suspense fallback={<InviteTeamMemberSkeleton />}>
-        <InviteTeamMember />
-      </Suspense>
-    </section>
+        {/* Error State */}
+        {error && (
+          <p className="text-red-500 mb-6">Failed to load recipients. Please try again.</p>
+        )}
+
+        {/* Recipients Carousel */}
+        {!isLoading && !error && (
+          <>
+            {recipients && recipients.length > 0 ? (
+              <div className="flex gap-8 overflow-x-auto pb-8 mb-6">
+                {recipients.map((recipient) => (
+                  <RecipientCard key={recipient.id} recipient={recipient} />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg p-12 text-center mb-6 shadow-sm">
+                <Plus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-900 mb-2">No recipients yet</h3>
+                <p className="text-gray-600 mb-6">Start by adding people you'd like to send cards to</p>
+                <Link
+                  href="/dashboard/general"
+                  className="inline-block px-8 py-3 bg-gray-900 text-white rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Add Your First Recipient
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Manage Recipients Button */}
+        {recipients && recipients.length > 0 && (
+          <Link
+            href="/dashboard/general"
+            className="inline-block px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-base font-medium hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md"
+          >
+            Manage Recipients
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }
