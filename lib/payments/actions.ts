@@ -2,14 +2,27 @@
 
 import { redirect } from 'next/navigation';
 import { createCheckoutSession, createCustomerPortalSession } from './stripe';
-import { withTeam } from '@/lib/auth/middleware';
+import { getTeamForUser } from '@/lib/db/queries';
 
-export const checkoutAction = withTeam(async (formData, team) => {
-  const priceId = formData.get('priceId') as string;
-  await createCheckoutSession({ team: team, priceId });
-});
+export async function checkoutAction(priceId: string) {
+  const team = await getTeamForUser();
+  
+  if (!team) {
+    // User needs to sign in first
+    redirect(`/sign-in?redirect=/pricing&priceId=${priceId}`);
+  }
 
-export const customerPortalAction = withTeam(async (_, team) => {
+  // Create Stripe checkout session
+  await createCheckoutSession({ team, priceId });
+}
+
+export async function manageBillingAction() {
+  const team = await getTeamForUser();
+  
+  if (!team) {
+    redirect('/sign-in');
+  }
+
   const portalSession = await createCustomerPortalSession(team);
   redirect(portalSession.url);
-});
+}

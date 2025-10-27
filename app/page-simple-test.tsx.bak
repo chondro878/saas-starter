@@ -1,9 +1,0 @@
-export default function HomePage() {
-  return (
-    <div>
-      <h1>Home Page Works!</h1>
-      <p>If you can see this, the routing is working.</p>
-    </div>
-  );
-}
-

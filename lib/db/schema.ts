@@ -215,6 +215,85 @@ export type RecipientWithOccasions = Recipient & {
   occasions: Occasion[];
 };
 
+// Orders table - tracks cards to be printed and sent
+export const orders = pgTable('orders', {
+  id: serial('id').primaryKey(),
+  recipientId: integer('recipient_id')
+    .references(() => recipients.id),
+  occasionId: integer('occasion_id')
+    .references(() => occasions.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  
+  // Card type: subscription, bulk, or individual
+  cardType: varchar('card_type', { length: 20 }).notNull().default('subscription'),
+  // subscription = included in user's plan
+  // bulk = from bulk holiday pack purchase
+  // individual = extra card purchased individually
+  
+  // Key dates
+  occasionDate: timestamp('occasion_date').notNull(), // The actual birthday/anniversary/holiday
+  printDate: timestamp('print_date'), // When you printed the labels
+  mailDate: timestamp('mail_date'), // When you marked as mailed
+  
+  // Status tracking
+  status: varchar('status', { length: 20 }).notNull().default('pending'), 
+  // pending = needs to be printed today
+  // printed = you printed but haven't mailed yet
+  // mailed = you've sent it
+  // cancelled = user cancelled/deleted recipient
+  
+  // Recipient address (snapshot at time of order creation)
+  recipientFirstName: varchar('recipient_first_name', { length: 100 }).notNull(),
+  recipientLastName: varchar('recipient_last_name', { length: 100 }).notNull(),
+  recipientStreet: varchar('recipient_street', { length: 255 }).notNull(),
+  recipientApartment: varchar('recipient_apartment', { length: 100 }),
+  recipientCity: varchar('recipient_city', { length: 100 }).notNull(),
+  recipientState: varchar('recipient_state', { length: 50 }).notNull(),
+  recipientZip: varchar('recipient_zip', { length: 20 }).notNull(),
+  
+  // Return address (from user's default address)
+  returnName: varchar('return_name', { length: 200 }).notNull(), // Customer's name
+  returnStreet: varchar('return_street', { length: 255 }).notNull(),
+  returnApartment: varchar('return_apartment', { length: 100 }),
+  returnCity: varchar('return_city', { length: 100 }).notNull(),
+  returnState: varchar('return_state', { length: 50 }).notNull(),
+  returnZip: varchar('return_zip', { length: 20 }).notNull(),
+  
+  // Occasion details
+  occasionType: varchar('occasion_type', { length: 50 }).notNull(), // Birthday, Anniversary, etc.
+  occasionNotes: text('occasion_notes'), // Any notes from the occasion
+  
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const ordersRelations = relations(orders, ({ one }) => ({
+  recipient: one(recipients, {
+    fields: [orders.recipientId],
+    references: [recipients.id],
+  }),
+  occasion: one(occasions, {
+    fields: [orders.occasionId],
+    references: [occasions.id],
+  }),
+  user: one(users, {
+    fields: [orders.userId],
+    references: [users.id],
+  }),
+  team: one(teams, {
+    fields: [orders.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+
 export enum ActivityType {
   SIGN_UP = 'SIGN_UP',
   SIGN_IN = 'SIGN_IN',

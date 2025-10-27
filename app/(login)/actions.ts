@@ -109,12 +109,14 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  firstName: z.string().min(1).max(50).optional(),
+  lastName: z.string().min(1).max(50).optional(),
   inviteId: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const supabase = await createSupabaseServerClient();
-  const { email, password, inviteId } = data;
+  const { email, password, firstName, lastName, inviteId } = data;
 
   const existingUser = await db
     .select()
@@ -135,6 +137,8 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
+    firstName: firstName || null,
+    lastName: lastName || null,
     role: 'owner' // Default role, will be overridden if there's an invitation
   };
 

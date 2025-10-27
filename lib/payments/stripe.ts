@@ -37,10 +37,7 @@ export async function createCheckoutSession({
     cancel_url: `${process.env.BASE_URL}/pricing`,
     customer: team.stripeCustomerId || undefined,
     client_reference_id: user.id.toString(),
-    allow_promotion_codes: true,
-    subscription_data: {
-      trial_period_days: 14
-    }
+    allow_promotion_codes: true
   });
 
   redirect(session.url!);
@@ -128,7 +125,7 @@ export async function handleSubscriptionChange(
     return;
   }
 
-  if (status === 'active' || status === 'trialing') {
+  if (status === 'active') {
     const plan = subscription.items.data[0]?.plan;
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscriptionId,
@@ -136,7 +133,7 @@ export async function handleSubscriptionChange(
       planName: (plan?.product as Stripe.Product).name,
       subscriptionStatus: status
     });
-  } else if (status === 'canceled' || status === 'unpaid') {
+  } else if (status === 'canceled' || status === 'unpaid' || status === 'trialing') {
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
       stripeProductId: null,

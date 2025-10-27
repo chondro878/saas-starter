@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut } from 'lucide-react';
+import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut, Printer, FileText } from 'lucide-react';
 import { User } from '@/lib/db/schema';
 import useSWR from 'swr';
 import { signOut } from '@/app/(login)/actions';
@@ -26,6 +26,8 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Home' },
+    { href: '/dashboard/fulfillment', icon: Printer, label: 'Fulfillment', adminOnly: true },
+    { href: '/dashboard/orders', icon: FileText, label: 'My Orders' },
     { href: '/dashboard/general', icon: Grid, label: 'Friends & Family' },
     { href: '/dashboard/security', icon: CreditCard, label: 'Account Settings' },
     { href: '/dashboard/holiday-packs', icon: Package, label: 'Holiday Packs' },
@@ -56,21 +58,28 @@ export default function DashboardLayout({
         {/* Navigation */}
         <nav className="flex-1 p-6">
           <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${
-                    pathname === item.href
-                      ? 'bg-gray-100 text-gray-900 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {navItems.map((item) => {
+              // Hide admin-only items for non-admin users
+              if (item.adminOnly && user?.role !== 'owner') {
+                return null;
+              }
+              
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${
+                      pathname === item.href
+                        ? 'bg-gray-100 text-gray-900 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
