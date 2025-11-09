@@ -18,11 +18,12 @@ export function FetchOrdersButton() {
         method: 'POST',
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        console.error('API Error:', data);
+        throw new Error(data.details || 'Failed to fetch orders');
+      }
       
       if (data.created > 0) {
         setMessage(`✓ Created ${data.created} new order${data.created !== 1 ? 's' : ''}`);

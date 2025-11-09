@@ -16,6 +16,8 @@ export async function POST() {
 
     // Get current year to construct dates for comparison
     const currentYear = today.getFullYear();
+    const todayFormatted = today.toISOString().split('T')[0];
+    const endDateFormatted = endDate.toISOString().split('T')[0];
 
     // Get upcoming occasions that need orders
     const upcomingOccasions = await db
@@ -31,11 +33,12 @@ export async function POST() {
       .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
       .where(
         sql`
-          MAKE_DATE(
-            ${currentYear},
-            EXTRACT(MONTH FROM ${occasions.occasionDate})::integer,
-            EXTRACT(DAY FROM ${occasions.occasionDate})::integer
-          ) BETWEEN ${today} AND ${endDate}
+          TO_DATE(
+            ${currentYear}::text || '-' || 
+            LPAD(EXTRACT(MONTH FROM ${occasions.occasionDate})::text, 2, '0') || '-' || 
+            LPAD(EXTRACT(DAY FROM ${occasions.occasionDate})::text, 2, '0'),
+            'YYYY-MM-DD'
+          ) BETWEEN ${todayFormatted}::date AND ${endDateFormatted}::date
         `
       );
 
@@ -63,12 +66,29 @@ export async function POST() {
         continue;
       }
 
-      // Get user's default address (first address or null)
-      const userAddress = item.user.defaultAddressId 
-        ? await db.query.addresses.findFirst({
+      // Get user's default address or first available address
+      let userAddress = null;
+      
+      if (item.user.defaultAddressId) {
+        try {
+          userAddress = await db.query.addresses.findFirst({
             where: (addresses, { eq }) => eq(addresses.id, item.user.defaultAddressId!),
-          })
-        : null;
+          });
+        } catch (err) {
+          console.error('Error fetching default address:', err);
+        }
+      }
+      
+      // If no default address, try to get the first address for this user
+      if (!userAddress) {
+        try {
+          userAddress = await db.query.addresses.findFirst({
+            where: (addresses, { eq }) => eq(addresses.userId, item.user.id),
+          });
+        } catch (err) {
+          console.error('Error fetching user address:', err);
+        }
+      }
 
       if (!userAddress) {
         skippedOrders.push({
@@ -116,8 +136,15 @@ export async function POST() {
     });
   } catch (error) {
     console.error('Error fetching recent orders:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error('Error details:', errorMessage, errorStack);
     return NextResponse.json(
-      { error: 'Failed to fetch recent orders' },
+      { 
+        error: 'Failed to fetch recent orders',
+        details: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      },
       { status: 500 }
     );
   }
