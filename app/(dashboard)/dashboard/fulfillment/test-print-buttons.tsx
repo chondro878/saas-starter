@@ -188,9 +188,8 @@ export function TestPrintButtons() {
 
       const recipientName = `${order.recipientFirstName} ${order.recipientLastName}`;
       const occasionDate = new Date(order.occasionDate).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
+        month: 'short',
+        day: 'numeric'
       });
 
       // Header: "A card for: {Name}: {Occasion} is on {DATE}"
