@@ -186,51 +186,63 @@ export function TestPrintButtons() {
         doc.addPage();
       }
 
-      // Card content
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text('REMINDER CARD', cardWidth / 2, 0.5, { align: 'center' });
+      const recipientName = `${order.recipientFirstName} ${order.recipientLastName}`;
+      const occasionDate = new Date(order.occasionDate).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
 
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'normal');
-      doc.text(
-        `${order.recipientFirstName} ${order.recipientLastName}`,
-        cardWidth / 2,
-        1.0,
-        { align: 'center' }
-      );
-
+      // Header: "A card for: {Name}: {Occasion} is on {DATE}"
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text(order.occasionType, cardWidth / 2, 1.4, { align: 'center' });
-
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
       doc.text(
-        new Date(order.occasionDate).toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric'
-        }),
+        `A card for: ${recipientName}: ${order.occasionType} is on ${occasionDate}`,
         cardWidth / 2,
-        1.75,
+        0.4,
         { align: 'center' }
       );
 
+      // Horizontal line below header
+      doc.setLineWidth(0.01);
+      doc.line(0.3, 0.55, cardWidth - 0.3, 0.55);
+
+      // Subheading: "~ A little nudge from your past self ~"
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.text(
+        '~ A little nudge from your past self ~',
+        cardWidth / 2,
+        0.8,
+        { align: 'center' }
+      );
+
+      // Main reminder text in center (in quotes)
       if (order.occasionNotes) {
-        doc.setFontSize(10);
-        const lines = doc.splitTextToSize(order.occasionNotes, cardWidth - 0.5);
-        doc.text(lines, 0.25, 2.2);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const reminderText = `" ${order.occasionNotes} "`;
+        const lines = doc.splitTextToSize(reminderText, cardWidth - 0.8);
+        const textHeight = lines.length * 0.18;
+        const startY = (cardHeight - textHeight) / 2;
+        
+        doc.text(
+          lines,
+          cardWidth / 2,
+          startY,
+          { align: 'center' }
+        );
       }
 
-      // Card type indicator
-      doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      const cardTypeLabel = order.cardType === 'bulk' ? 'Bulk Pack' : 
-                           order.cardType === 'individual' ? 'Individual' : 
-                           'Subscription';
-      doc.text(cardTypeLabel, cardWidth - 0.2, cardHeight - 0.15, { align: 'right' });
-      doc.setTextColor(0, 0, 0);
+      // Footer: "- Avoid the Rain -"
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(
+        '- Avoid the Rain -',
+        cardWidth / 2,
+        cardHeight - 0.3,
+        { align: 'center' }
+      );
     });
 
     doc.autoPrint();
