@@ -192,11 +192,11 @@ export function TestPrintButtons() {
         day: 'numeric'
       });
 
-      // Header: "A card for: {Name}: {Occasion} is on {DATE}"
+      // Header: "{Name}: {Occasion} is on {DATE}"
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text(
-        `A card for: ${recipientName}: ${order.occasionType} is on ${occasionDate}`,
+        `${recipientName}: ${order.occasionType} is on ${occasionDate}`,
         cardWidth / 2,
         0.4,
         { align: 'center' }
