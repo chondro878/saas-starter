@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { orders, occasions, recipients, users, teamMembers } from '@/lib/db/schema';
+import { orders, occasions, recipients, users, teamMembers, userAddresses } from '@/lib/db/schema';
 import { and, sql, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -83,25 +83,23 @@ export async function POST() {
       // Get user's default address or first available address
       let userAddress = null;
       
-      if (item.user.defaultAddressId) {
-        try {
-          userAddress = await db.query.addresses.findFirst({
-            where: (addresses, { eq }) => eq(addresses.id, item.user.defaultAddressId!),
+      try {
+        // First, try to get the default address (isDefault = 1)
+        userAddress = await db.query.userAddresses.findFirst({
+          where: (userAddresses, { and, eq }) => and(
+            eq(userAddresses.userId, item.user.id),
+            eq(userAddresses.isDefault, 1)
+          ),
+        });
+        
+        // If no default address, get any address for this user
+        if (!userAddress) {
+          userAddress = await db.query.userAddresses.findFirst({
+            where: (userAddresses, { eq }) => eq(userAddresses.userId, item.user.id),
           });
-        } catch (err) {
-          console.error('Error fetching default address:', err);
         }
-      }
-      
-      // If no default address, try to get the first address for this user
-      if (!userAddress) {
-        try {
-          userAddress = await db.query.addresses.findFirst({
-            where: (addresses, { eq }) => eq(addresses.userId, item.user.id),
-          });
-        } catch (err) {
-          console.error('Error fetching user address:', err);
-        }
+      } catch (err) {
+        console.error('Error fetching user address:', err);
       }
 
       if (!userAddress) {
