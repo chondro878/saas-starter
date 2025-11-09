@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Calendar, MapPin, Edit2, Trash2, X, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Calendar, MapPin, Trash2, X, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RecipientWithOccasions } from '@/lib/db/schema';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
@@ -102,10 +102,9 @@ const getRelationshipColors = (relationship: string) => {
 interface RecipientCardProps {
   recipient: RecipientWithOccasions;
   onEdit: (recipient: RecipientWithOccasions) => void;
-  onDelete: (recipient: RecipientWithOccasions) => void;
 }
 
-function RecipientCard({ recipient, onEdit, onDelete }: RecipientCardProps) {
+function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
   const initials = `${recipient.firstName[0]}${recipient.lastName[0]}`;
   const colors = getRelationshipColors(recipient.relationship);
   
@@ -113,7 +112,10 @@ function RecipientCard({ recipient, onEdit, onDelete }: RecipientCardProps) {
   const nextOccasion = recipient.occasions?.[0];
   
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div 
+      onClick={() => onEdit(recipient)}
+      className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+    >
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className={`w-16 h-16 ${colors.avatar} rounded-full flex items-center justify-center flex-shrink-0`}>
@@ -151,24 +153,6 @@ function RecipientCard({ recipient, onEdit, onDelete }: RecipientCardProps) {
               </p>
             )}
           </div>
-        </div>
-        
-        {/* Actions */}
-        <div className="flex flex-col gap-2">
-          <button 
-            onClick={() => onEdit(recipient)}
-            className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm"
-          >
-            <Edit2 className="w-4 h-4" />
-            <span>Edit</span>
-          </button>
-          <button 
-            onClick={() => onDelete(recipient)}
-            className="flex items-center gap-1 text-red-600 hover:text-red-700 text-sm"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Delete</span>
-          </button>
         </div>
       </div>
     </div>
@@ -234,9 +218,10 @@ interface EditRecipientModalProps {
   recipient: RecipientWithOccasions;
   onClose: () => void;
   onSave: () => void;
+  onDelete: (recipient: RecipientWithOccasions) => void;
 }
 
-function EditRecipientModal({ recipient, onClose, onSave }: EditRecipientModalProps) {
+function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipientModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     firstName: recipient.firstName,
@@ -637,22 +622,36 @@ function EditRecipientModal({ recipient, onClose, onSave }: EditRecipientModalPr
           </div>
         </div>
 
-        <div className="flex gap-3 justify-end mt-6 pt-6 border-t">
+        <div className="flex gap-3 justify-between mt-6 pt-6 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={() => {
+              onDelete(recipient);
+              onClose();
+            }}
             disabled={isSaving}
-            className="px-6"
+            className="px-6 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
           >
-            Cancel
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Recipient
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !formData.firstName || !formData.lastName || !formData.street || !formData.city || !formData.state || !formData.zip}
-            className="px-6 bg-gray-900 hover:bg-gray-800 text-white"
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isSaving}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSaving || !formData.firstName || !formData.lastName || !formData.street || !formData.city || !formData.state || !formData.zip}
+              className="px-6 bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </div>
       </div>
       
@@ -868,7 +867,6 @@ export default function FriendsAndFamilyPage() {
                   key={recipient.id} 
                   recipient={recipient}
                   onEdit={setRecipientToEdit}
-                  onDelete={setRecipientToDelete}
                 />
               ))}
             </div>
@@ -915,6 +913,7 @@ export default function FriendsAndFamilyPage() {
             await mutate();
             setRecipientToEdit(null);
           }}
+          onDelete={setRecipientToDelete}
         />
       )}
     </div>
