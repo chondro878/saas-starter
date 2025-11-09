@@ -37,11 +37,11 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
         day: 'numeric'
       });
 
-      // Header: "{Name}: {Occasion} is on {DATE}"
+      // Header: "{Occasion} for {Name} – {Date}"
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text(
-        `${recipientName}: ${order.occasionType} is on ${occasionDate}`,
+        `${order.occasionType} for ${recipientName} – ${occasionDate}`,
         cardWidth / 2,
         0.4,
         { align: 'center' }
