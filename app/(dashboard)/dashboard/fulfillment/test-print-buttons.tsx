@@ -134,8 +134,8 @@ export function TestPrintButtons() {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       
-      const recipientStartX = 3.0;
-      let recipientY = 2.2;
+      const recipientStartX = 2.5;
+      let recipientY = 1.9;
       
       doc.text(
         `${order.recipientFirstName} ${order.recipientLastName}`,
