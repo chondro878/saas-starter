@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut, Printer, FileText } from 'lucide-react';
-import { User } from '@/lib/db/schema';
+import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut, Printer, FileText, AlertCircle } from 'lucide-react';
+import { User, Team } from '@/lib/db/schema';
 import useSWR from 'swr';
 import { signOut } from '@/app/(login)/actions';
 
@@ -18,11 +18,22 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: team } = useSWR<Team>('/api/team', fetcher);
 
   const handleSignOut = async () => {
     await signOut();
     router.push('/');
   };
+
+  // Check if subscription needs attention
+  const needsSubscriptionAttention = team && (
+    !team.subscriptionStatus || 
+    team.subscriptionStatus === 'canceled' || 
+    team.subscriptionStatus === 'unpaid' || 
+    team.subscriptionStatus === 'trialing' ||
+    team.subscriptionStatus === 'past_due' ||
+    team.subscriptionStatus === 'incomplete'
+  );
 
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Home' },
@@ -64,18 +75,27 @@ export default function DashboardLayout({
                 return null;
               }
               
+              // Check if this is the subscriptions item and needs attention
+              const isSubscriptionsItem = item.href === '/dashboard/subscriptions';
+              const shouldHighlight = isSubscriptionsItem && needsSubscriptionAttention;
+              
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors relative ${
                       pathname === item.href
                         ? 'bg-gray-100 text-gray-900 font-medium'
+                        : shouldHighlight
+                        ? 'bg-red-50 text-red-700 hover:bg-red-100 font-medium border-2 border-red-300'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
                     {item.label}
+                    {shouldHighlight && (
+                      <AlertCircle className="w-4 h-4 text-red-600 ml-auto animate-pulse" />
+                    )}
                   </Link>
                 </li>
               );

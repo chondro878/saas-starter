@@ -25,29 +25,6 @@ export default async function SubscriptionsPage() {
         <p className="text-gray-600">Manage your plan and payment information</p>
       </div>
 
-      {/* Payment Alert */}
-      {needsPayment && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-red-900 mb-2">
-                Subscription Required
-              </h3>
-              <p className="text-red-700 mb-4">
-                You don't have an active subscription. Choose a plan below to start receiving automated card orders.
-              </p>
-              <a 
-                href="/pricing" 
-                className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors"
-              >
-                View Plans
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="grid md:grid-cols-2 gap-8 mb-8">
         {/* Current Plan */}
         <div className="bg-white rounded-lg shadow p-6">
