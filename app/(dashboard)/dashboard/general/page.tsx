@@ -105,7 +105,6 @@ interface RecipientCardProps {
 }
 
 function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
-  const initials = `${recipient.firstName[0]}${recipient.lastName[0]}`;
   const colors = getRelationshipColors(recipient.relationship);
   
   // Get next upcoming occasion
@@ -116,43 +115,35 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
       onClick={() => onEdit(recipient)}
       className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
     >
-      <div className="flex items-start gap-4">
-        {/* Avatar */}
-        <div className={`w-16 h-16 ${colors.avatar} rounded-full flex items-center justify-center flex-shrink-0`}>
-          <span className="text-white text-xl font-light">{initials}</span>
-        </div>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-1">
+          {recipient.firstName} {recipient.lastName}
+        </h3>
+        <span className={`text-sm ${colors.text} ${colors.bg} px-2 py-1 rounded-md inline-block mb-3`}>
+          {recipient.relationship}
+        </span>
         
-        {/* Info */}
-        <div className="flex-1">
-          <h3 className="text-lg font-medium text-gray-900 mb-1">
-            {recipient.firstName} {recipient.lastName}
-          </h3>
-          <span className={`text-sm ${colors.text} ${colors.bg} px-2 py-1 rounded-md inline-block mb-3`}>
-            {recipient.relationship}
-          </span>
-          
-          <div className="space-y-1">
-            {/* Address */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className={`w-4 h-4 ${colors.icon}`} />
-              <span>{recipient.city}, {recipient.state}</span>
-            </div>
-            
-            {/* Next Occasion */}
-            {nextOccasion && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className={`w-4 h-4 ${colors.icon}`} />
-                <span>{nextOccasion.occasionType} - {new Date(nextOccasion.occasionDate).toLocaleDateString()}</span>
-              </div>
-            )}
-            
-            {/* Occasions count */}
-            {recipient.occasions && recipient.occasions.length > 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                {recipient.occasions.length} occasion{recipient.occasions.length !== 1 ? 's' : ''} tracked
-              </p>
-            )}
+        <div className="space-y-1">
+          {/* Address */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className={`w-4 h-4 ${colors.icon}`} />
+            <span>{recipient.city}, {recipient.state}</span>
           </div>
+          
+          {/* Next Occasion */}
+          {nextOccasion && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className={`w-4 h-4 ${colors.icon}`} />
+              <span>{nextOccasion.occasionType} - {new Date(nextOccasion.occasionDate).toLocaleDateString()}</span>
+            </div>
+          )}
+          
+          {/* Occasions count */}
+          {recipient.occasions && recipient.occasions.length > 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              {recipient.occasions.length} occasion{recipient.occasions.length !== 1 ? 's' : ''} tracked
+            </p>
+          )}
         </div>
       </div>
     </div>
