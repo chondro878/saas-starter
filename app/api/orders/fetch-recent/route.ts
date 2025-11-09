@@ -11,11 +11,11 @@ export async function POST() {
     today.setHours(0, 0, 0, 0);
     
     // Look for occasions in the next 30 days that don't have orders yet
-    const targetDate = new Date(today);
-    targetDate.setDate(targetDate.getDate() + 30);
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + 30);
 
-    const targetMonth = targetDate.getMonth() + 1;
-    const targetDay = targetDate.getDate();
+    // Get current year to construct dates for comparison
+    const currentYear = today.getFullYear();
 
     // Get upcoming occasions that need orders
     const upcomingOccasions = await db
@@ -30,7 +30,13 @@ export async function POST() {
       .innerJoin(users, eq(recipients.userId, users.id))
       .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
       .where(
-        sql`EXTRACT(MONTH FROM ${occasions.occasionDate}) = ${targetMonth} AND EXTRACT(DAY FROM ${occasions.occasionDate}) = ${targetDay}`
+        sql`
+          MAKE_DATE(
+            ${currentYear},
+            EXTRACT(MONTH FROM ${occasions.occasionDate})::integer,
+            EXTRACT(DAY FROM ${occasions.occasionDate})::integer
+          ) BETWEEN ${today} AND ${endDate}
+        `
       );
 
     const createdOrders = [];
