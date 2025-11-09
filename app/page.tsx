@@ -168,15 +168,16 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="relative w-screen h-screen overflow-hidden">
-        <Image
-          src="/hero.png"
-          alt="Hero background image"
-          fill
-          style={{ objectFit: "cover" }}
-          priority
-          quality={90}
-          sizes="100vw"
-        />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/HeroBanner.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-start justify-end px-12 pb-32">
           <h1 className="text-white text-6xl md:text-7xl font-light mb-6 leading-tight">
             Never again miss <span 
