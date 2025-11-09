@@ -2,6 +2,7 @@ import { db } from '@/lib/db/drizzle';
 import { orders } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { PrintLabelsButton } from './print-labels-button';
+import { PrintEnvelopesButton } from './print-envelopes-button';
 import { PrintReminderCardsButton } from './print-cards-button';
 import { MarkAsSentButton } from './mark-sent-button';
 import { TestPrintButtons } from './test-print-buttons';
@@ -83,7 +84,7 @@ export default async function FulfillmentPage() {
           </div>
           {pendingOrders.length > 0 && (
             <div className="flex gap-3">
-              <PrintLabelsButton orders={pendingOrders} />
+              <PrintEnvelopesButton orders={pendingOrders} />
               <PrintReminderCardsButton orders={pendingOrders} />
             </div>
           )}
@@ -198,7 +199,7 @@ function OrderCard({ order }: { order: Order }) {
         </div>
 
         <div className="flex flex-col gap-2 ml-4">
-          <PrintLabelsButton orders={[order]} single />
+          <PrintEnvelopesButton orders={[order]} single />
           <PrintReminderCardsButton orders={[order]} single />
           <MarkAsSentButton orderId={order.id} compact />
         </div>

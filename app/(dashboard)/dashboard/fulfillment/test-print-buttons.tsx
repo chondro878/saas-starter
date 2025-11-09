@@ -144,6 +144,82 @@ export function TestPrintButtons() {
     window.open(doc.output('bloburl'), '_blank');
   };
 
+  const handleTestEnvelopes = () => {
+    const doc = new jsPDF({
+      format: [6.5, 4.75],
+      unit: 'in',
+      orientation: 'landscape'
+    });
+
+    const envelopeWidth = 6.5;
+    const envelopeHeight = 4.75;
+
+    sampleOrders.forEach((order, index) => {
+      if (index > 0) {
+        doc.addPage();
+      }
+
+      // RETURN ADDRESS (upper left corner)
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      
+      let returnY = 0.4;
+      const returnX = 0.4;
+      
+      doc.text(order.returnName, returnX, returnY);
+      
+      returnY += 0.15;
+      doc.text(order.returnStreet, returnX, returnY);
+      
+      if (order.returnApartment) {
+        returnY += 0.15;
+        doc.text(order.returnApartment, returnX, returnY);
+      }
+      
+      returnY += 0.15;
+      doc.text(`${order.returnCity}, ${order.returnState} ${order.returnZip}`, returnX, returnY);
+
+      // RECIPIENT ADDRESS (centered, slightly lower and to the right)
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      
+      const recipientStartX = 3.0;
+      let recipientY = 2.2;
+      
+      doc.text(
+        `${order.recipientFirstName} ${order.recipientLastName}`,
+        recipientStartX,
+        recipientY
+      );
+      
+      recipientY += 0.2;
+      doc.text(
+        order.recipientStreet,
+        recipientStartX,
+        recipientY
+      );
+      
+      if (order.recipientApartment) {
+        recipientY += 0.2;
+        doc.text(
+          order.recipientApartment,
+          recipientStartX,
+          recipientY
+        );
+      }
+      
+      recipientY += 0.2;
+      doc.text(
+        `${order.recipientCity}, ${order.recipientState} ${order.recipientZip}`,
+        recipientStartX,
+        recipientY
+      );
+    });
+
+    doc.autoPrint();
+    window.open(doc.output('bloburl'), '_blank');
+  };
+
   const handleTestCards = () => {
     const doc = new jsPDF({
       format: [5, 3],
@@ -213,10 +289,10 @@ export function TestPrintButtons() {
   return (
     <>
       <button
-        onClick={handleTestLabels}
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+        onClick={handleTestEnvelopes}
+        className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors"
       >
-        Test Print Labels (4 labels - Avery 5160)
+        Test Print Envelopes (2 envelopes - 6.5×4.75")
       </button>
       <button
         onClick={handleTestCards}
@@ -224,6 +300,17 @@ export function TestPrintButtons() {
       >
         Test Print Cards (2 cards - 3×5")
       </button>
+      <details className="mt-4">
+        <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+          Backup: Test Avery Labels
+        </summary>
+        <button
+          onClick={handleTestLabels}
+          className="mt-2 w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+        >
+          Test Print Labels (4 labels - Avery 5160)
+        </button>
+      </details>
       <p className="text-xs text-gray-500 mt-4">
         These test buttons use sample data and will not mark any real orders as printed.
       </p>
