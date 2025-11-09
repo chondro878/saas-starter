@@ -39,35 +39,6 @@ const getSampleOrders = (): Order[] => {
       createdAt: today,
       updatedAt: today,
     },
-    {
-      id: 998,
-      recipientId: null,
-      occasionId: null,
-      userId: 0,
-      teamId: 0,
-      cardType: 'bulk',
-      occasionDate: occasionDate,
-      printDate: null,
-      mailDate: null,
-      status: 'pending',
-      recipientFirstName: 'Jane',
-      recipientLastName: 'Doe',
-      recipientStreet: '789 Elm Drive',
-      recipientApartment: null,
-      recipientCity: 'Houston',
-      recipientState: 'TX',
-      recipientZip: '77001',
-      returnName: 'Your Business Name',
-      returnStreet: '456 Oak Avenue',
-      returnApartment: 'Suite 200',
-      returnCity: 'Dallas',
-      returnState: 'TX',
-      returnZip: '75201',
-      occasionType: 'Anniversary',
-      occasionNotes: 'Test card - celebrates 10 years',
-      createdAt: today,
-      updatedAt: today,
-    },
   ];
 };
 
@@ -159,27 +130,7 @@ export function TestPrintButtons() {
         doc.addPage();
       }
 
-      // RETURN ADDRESS (upper left corner)
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      
-      let returnY = 0.4;
-      const returnX = 0.4;
-      
-      doc.text(order.returnName, returnX, returnY);
-      
-      returnY += 0.15;
-      doc.text(order.returnStreet, returnX, returnY);
-      
-      if (order.returnApartment) {
-        returnY += 0.15;
-        doc.text(order.returnApartment, returnX, returnY);
-      }
-      
-      returnY += 0.15;
-      doc.text(`${order.returnCity}, ${order.returnState} ${order.returnZip}`, returnX, returnY);
-
-      // RECIPIENT ADDRESS (centered, slightly lower and to the right)
+      // RECIPIENT ADDRESS (centered on envelope)
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       
@@ -292,13 +243,13 @@ export function TestPrintButtons() {
         onClick={handleTestEnvelopes}
         className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors"
       >
-        Test Print Envelopes (2 envelopes - 6.5×4.75")
+        Test Print Envelope (1 envelope - 6.5×4.75")
       </button>
       <button
         onClick={handleTestCards}
         className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
       >
-        Test Print Cards (2 cards - 3×5")
+        Test Print Card (1 card - 3×5")
       </button>
       <details className="mt-4">
         <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
@@ -308,7 +259,7 @@ export function TestPrintButtons() {
           onClick={handleTestLabels}
           className="mt-2 w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
         >
-          Test Print Labels (4 labels - Avery 5160)
+          Test Print Labels (1 order - Avery 5160)
         </button>
       </details>
       <p className="text-xs text-gray-500 mt-4">

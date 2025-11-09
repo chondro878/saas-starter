@@ -24,27 +24,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
         doc.addPage();
       }
 
-      // RETURN ADDRESS (upper left corner)
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      
-      let returnY = 0.4;
-      const returnX = 0.4;
-      
-      doc.text(order.returnName, returnX, returnY);
-      
-      returnY += 0.15;
-      doc.text(order.returnStreet, returnX, returnY);
-      
-      if (order.returnApartment) {
-        returnY += 0.15;
-        doc.text(order.returnApartment, returnX, returnY);
-      }
-      
-      returnY += 0.15;
-      doc.text(`${order.returnCity}, ${order.returnState} ${order.returnZip}`, returnX, returnY);
-
-      // RECIPIENT ADDRESS (centered, slightly lower and to the right)
+      // RECIPIENT ADDRESS (centered on envelope)
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       
