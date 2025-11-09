@@ -65,17 +65,17 @@ export default async function OrderHistoryPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2 text-green-700">📬 Sent</h3>
+          <h3 className="text-lg font-semibold mb-2 text-green-700">Sent</h3>
           <p className="text-3xl font-bold">{ordersByStatus.mailed.length}</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2 text-yellow-700">📦 In Process</h3>
+          <h3 className="text-lg font-semibold mb-2 text-yellow-700">In Process</h3>
           <p className="text-3xl font-bold">
             {ordersByStatus.printed.length + ordersByStatus.pending.length}
           </p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2 text-blue-700">📊 This Year</h3>
+          <h3 className="text-lg font-semibold mb-2 text-blue-700">This Year</h3>
           <p className="text-3xl font-bold">{userOrders.filter(o => {
             const orderYear = new Date(o.createdAt).getFullYear();
             const currentYear = new Date().getFullYear();
@@ -83,7 +83,7 @@ export default async function OrderHistoryPage() {
           }).length}</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2 text-purple-700">🎯 Total</h3>
+          <h3 className="text-lg font-semibold mb-2 text-purple-700">Total</h3>
           <p className="text-3xl font-bold">{userOrders.filter(o => o.status !== 'cancelled').length}</p>
         </div>
       </div>
@@ -192,37 +192,32 @@ function OrderStatusBadge({ status }: { status: string }) {
     mailed: { 
       bg: 'bg-green-100', 
       text: 'text-green-800', 
-      icon: '✅', 
       label: 'Sent' 
     },
     printed: { 
       bg: 'bg-yellow-100', 
       text: 'text-yellow-800', 
-      icon: '🖨️', 
       label: 'Printed' 
     },
     pending: { 
       bg: 'bg-blue-100', 
       text: 'text-blue-800', 
-      icon: '⏳', 
       label: 'Pending' 
     },
     cancelled: { 
       bg: 'bg-gray-100', 
       text: 'text-gray-800', 
-      icon: '❌', 
       label: 'Cancelled' 
     },
   }[status] || { 
     bg: 'bg-gray-100', 
     text: 'text-gray-800', 
-    icon: '❓', 
     label: status 
   };
 
   return (
     <span className={`px-3 py-1 rounded text-sm font-medium ${statusConfig.bg} ${statusConfig.text}`}>
-      {statusConfig.icon} {statusConfig.label}
+      {statusConfig.label}
     </span>
   );
 }

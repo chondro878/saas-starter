@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ChevronRight, Plus, X, Edit2, Trash2, AlertCircle } from 'lucide-react';
 import { User, UserAddress } from '@/lib/db/schema';
 import useSWR from 'swr';
@@ -541,6 +542,15 @@ export default function AccountSettingsPage() {
         <span className="text-xl font-normal text-gray-900">Change password</span>
         <ChevronRight className="w-6 h-6 text-gray-900" />
       </button>
+
+      {/* View Order History */}
+      <Link 
+        href="/dashboard/orders"
+        className="w-full bg-gray-100 rounded-lg p-6 mb-6 flex justify-between items-center hover:bg-gray-200 transition-colors"
+      >
+        <span className="text-xl font-normal text-gray-900">View order history</span>
+        <ChevronRight className="w-6 h-6 text-gray-900" />
+      </Link>
 
       {/* Delete Account & Data */}
       <button className="w-full bg-gray-100 rounded-lg p-6 flex justify-between items-center hover:bg-gray-200 transition-colors">
