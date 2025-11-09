@@ -1,17 +1,19 @@
 import { db } from '@/lib/db/drizzle';
 import { orders } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { PrintLabelsButton } from './print-labels-button';
 import { PrintEnvelopesButton } from './print-envelopes-button';
 import { PrintReminderCardsButton } from './print-cards-button';
 import { MarkAsSentButton } from './mark-sent-button';
 import { TestPrintButtons } from './test-print-buttons';
 import { FetchOrdersButton } from './fetch-orders-button';
+import { SentOrdersSection } from './sent-orders-section';
 import type { Order } from '@/lib/db/schema';
 
 export default async function FulfillmentPage() {
   let pendingOrders: Order[] = [];
   let printedOrders: Order[] = [];
+  let sentOrders: Order[] = [];
 
   try {
     // Get all pending orders (need to be printed today)
@@ -27,6 +29,13 @@ export default async function FulfillmentPage() {
       .from(orders)
       .where(eq(orders.status, 'printed'))
       .orderBy(orders.printDate);
+
+    // Get sent/mailed orders (most recent first)
+    sentOrders = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.status, 'mailed'))
+      .orderBy(desc(orders.mailDate));
   } catch (error) {
     console.error('Error fetching orders:', error);
     // Continue with empty arrays
@@ -91,7 +100,7 @@ export default async function FulfillmentPage() {
 
       {/* Printed But Not Mailed Section */}
       {printedOrders.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">
             Printed - Waiting to Mail ({printedOrders.length})
           </h2>
@@ -117,6 +126,9 @@ export default async function FulfillmentPage() {
           </div>
         </div>
       )}
+
+      {/* Sent Orders Section with Search */}
+      <SentOrdersSection sentOrders={sentOrders} />
     </div>
   );
 }
