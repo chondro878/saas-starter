@@ -25,7 +25,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
       }
 
       // RECIPIENT ADDRESS (centered on envelope)
-      doc.setFontSize(11);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'normal');
       
       const recipientStartX = 2.1; // Centered position
@@ -37,7 +37,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
         recipientY
       );
       
-      recipientY += 0.2;
+      recipientY += 0.35;
       doc.text(
         order.recipientStreet,
         recipientStartX,
@@ -45,7 +45,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
       );
       
       if (order.recipientApartment) {
-        recipientY += 0.2;
+        recipientY += 0.35;
         doc.text(
           order.recipientApartment,
           recipientStartX,
@@ -53,7 +53,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
         );
       }
       
-      recipientY += 0.2;
+      recipientY += 0.35;
       doc.text(
         `${order.recipientCity}, ${order.recipientState} ${order.recipientZip}`,
         recipientStartX,
