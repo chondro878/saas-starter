@@ -173,12 +173,12 @@ export default function Home() {
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover z-0"
         >
           <source src="/HeroBanner.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-start justify-end px-12 pb-32">
+        <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-start justify-end px-12 pb-32 z-10">
           <h1 className="text-white text-6xl md:text-7xl font-light mb-6 leading-tight">
             Never again miss <span 
               className={`inline-block transition-opacity duration-500 ${isOccasionFading ? 'opacity-0' : 'opacity-100'}`}
