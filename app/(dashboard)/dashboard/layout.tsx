@@ -36,11 +36,11 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Home' },
-    { href: '/dashboard/fulfillment', icon: Printer, label: 'Fulfillment', adminOnly: true },
     { href: '/dashboard/general', icon: Grid, label: 'Friends & Family' },
-    { href: '/dashboard/security', icon: CreditCard, label: 'Account Settings' },
     { href: '/dashboard/holiday-packs', icon: Package, label: 'Holiday Packs' },
     { href: '/dashboard/subscriptions', icon: RefreshCw, label: 'Subscriptions' },
+    { href: '/dashboard/security', icon: CreditCard, label: 'Account Settings' },
+    { href: '/dashboard/fulfillment', icon: Printer, label: 'Fulfillment Dashboard', adminOnly: true },
   ];
 
   return (
