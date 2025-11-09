@@ -19,6 +19,11 @@ export async function POST() {
     const todayFormatted = today.toISOString().split('T')[0];
     const endDateFormatted = endDate.toISOString().split('T')[0];
 
+    console.log('=== Fetch Recent Orders Debug ===');
+    console.log('Today:', todayFormatted);
+    console.log('End Date:', endDateFormatted);
+    console.log('Current Year:', currentYear);
+
     // Get upcoming occasions that need orders
     const upcomingOccasions = await db
       .select({
@@ -42,10 +47,18 @@ export async function POST() {
         `
       );
 
+    console.log('Found occasions:', upcomingOccasions.length);
+    upcomingOccasions.forEach(item => {
+      const occasionDate = new Date(item.occasion.occasionDate);
+      console.log(`  - ${item.recipient.firstName} ${item.recipient.lastName}: ${item.occasion.occasionType} on ${occasionDate.toISOString()}`);
+    });
+
     const createdOrders = [];
     const skippedOrders = [];
 
     for (const item of upcomingOccasions) {
+      console.log(`\nProcessing: ${item.recipient.firstName} ${item.recipient.lastName}`);
+      
       // Check if order already exists for this occasion
       const existingOrder = await db
         .select()
@@ -59,6 +72,7 @@ export async function POST() {
         .limit(1);
 
       if (existingOrder.length > 0) {
+        console.log('  ✗ Skipped: Order already exists');
         skippedOrders.push({
           reason: 'Order already exists',
           recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
@@ -91,13 +105,16 @@ export async function POST() {
       }
 
       if (!userAddress) {
+        console.log('  ✗ Skipped: No address found for user');
         skippedOrders.push({
-          reason: 'No default address',
+          reason: 'No address found',
           recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
         });
         continue;
       }
 
+      console.log('  ✓ Creating order...');
+      
       // Create the order
       const newOrder = await db.insert(orders).values({
         recipientId: item.recipient.id,
@@ -124,8 +141,13 @@ export async function POST() {
         occasionNotes: item.occasion.notes || null,
       }).returning();
 
+      console.log('  ✓ Order created successfully');
       createdOrders.push(newOrder[0]);
     }
+
+    console.log('\n=== Summary ===');
+    console.log('Created:', createdOrders.length);
+    console.log('Skipped:', skippedOrders.length);
 
     return NextResponse.json({
       success: true,
