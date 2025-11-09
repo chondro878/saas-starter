@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { PrintLabelsButton } from './print-labels-button';
 import { PrintReminderCardsButton } from './print-cards-button';
 import { MarkAsSentButton } from './mark-sent-button';
+import { TestPrintButtons } from './test-print-buttons';
 import type { Order } from '@/lib/db/schema';
 
 export default async function FulfillmentPage() {
@@ -90,7 +91,16 @@ export default async function FulfillmentPage() {
 
         {pendingOrders.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No orders to print today!</p>
+            <p className="text-gray-500 text-lg mb-8">No orders to print today!</p>
+            
+            {/* Test Print Buttons */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-2xl mx-auto">
+              <h3 className="text-lg font-semibold mb-4">Test Print Functions</h3>
+              <p className="text-sm text-gray-600 mb-6">Use these buttons to test your printer setup</p>
+              <div className="flex flex-col gap-3">
+                <TestPrintButtons />
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
