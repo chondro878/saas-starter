@@ -6,6 +6,7 @@ import { PrintEnvelopesButton } from './print-envelopes-button';
 import { PrintReminderCardsButton } from './print-cards-button';
 import { MarkAsSentButton } from './mark-sent-button';
 import { TestPrintButtons } from './test-print-buttons';
+import { FetchOrdersButton } from './fetch-orders-button';
 import type { Order } from '@/lib/db/schema';
 
 export default async function FulfillmentPage() {
@@ -40,9 +41,12 @@ export default async function FulfillmentPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Daily Fulfillment</h1>
-        <p className="text-gray-600">{today}</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Daily Fulfillment</h1>
+          <p className="text-gray-600">{today}</p>
+        </div>
+        <FetchOrdersButton />
       </div>
 
       {/* Pending Orders Section */}
