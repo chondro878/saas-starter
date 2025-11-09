@@ -13,19 +13,19 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
     const doc = new jsPDF({
       format: 'letter',
       unit: 'in',
-      orientation: 'portrait'
+      orientation: 'landscape'
     });
 
-    // 3" x 5" cards, 2 per page (one on top half, one on bottom half)
+    // 3" x 5" cards, 2 per page (one on left half, one on right half)
     const cardWidth = 5;
     const cardHeight = 3;
-    const pageWidth = 8.5;
-    const pageHeight = 11;
+    const pageWidth = 11;  // landscape: 11" wide
+    const pageHeight = 8.5; // landscape: 8.5" tall
 
-    // Center cards on page
-    const leftMargin = (pageWidth - cardWidth) / 2;
-    const topCard1 = 1.5;
-    const topCard2 = pageHeight - cardHeight - 1.5;
+    // Center cards on page - side by side
+    const topMargin = (pageHeight - cardHeight) / 2;
+    const leftCard1 = 0.75;
+    const leftCard2 = pageWidth - cardWidth - 0.75;
 
     orders.forEach((order, index) => {
       if (index > 0 && index % 2 === 0) {
@@ -33,18 +33,19 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
       }
 
       const isFirstCard = index % 2 === 0;
-      const y = isFirstCard ? topCard1 : topCard2;
+      const x = isFirstCard ? leftCard1 : leftCard2;
+      const y = topMargin;
 
       // Draw border
       doc.setLineWidth(0.01);
-      doc.rect(leftMargin, y, cardWidth, cardHeight);
+      doc.rect(x, y, cardWidth, cardHeight);
 
       // Card content
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.text(
         'REMINDER CARD',
-        leftMargin + cardWidth / 2,
+        x + cardWidth / 2,
         y + 0.5,
         { align: 'center' }
       );
@@ -53,7 +54,7 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
       doc.setFont('helvetica', 'normal');
       doc.text(
         `${order.recipientFirstName} ${order.recipientLastName}`,
-        leftMargin + cardWidth / 2,
+        x + cardWidth / 2,
         y + 1.0,
         { align: 'center' }
       );
@@ -62,7 +63,7 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
       doc.setFont('helvetica', 'bold');
       doc.text(
         order.occasionType,
-        leftMargin + cardWidth / 2,
+        x + cardWidth / 2,
         y + 1.4,
         { align: 'center' }
       );
@@ -75,7 +76,7 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
           day: 'numeric',
           year: 'numeric'
         }),
-        leftMargin + cardWidth / 2,
+        x + cardWidth / 2,
         y + 1.75,
         { align: 'center' }
       );
@@ -85,7 +86,7 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
         const lines = doc.splitTextToSize(order.occasionNotes, cardWidth - 0.5);
         doc.text(
           lines,
-          leftMargin + 0.25,
+          x + 0.25,
           y + 2.2
         );
       }
@@ -98,16 +99,16 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
                            'Subscription';
       doc.text(
         cardTypeLabel,
-        leftMargin + cardWidth - 0.2,
+        x + cardWidth - 0.2,
         y + cardHeight - 0.15,
         { align: 'right' }
       );
       doc.setTextColor(0, 0, 0);
 
-      // Dotted cut line
-      if (!isFirstCard || index < orders.length - 1) {
+      // Dotted cut line (vertical, between cards)
+      if (isFirstCard && index < orders.length - 1 && orders.length > 1) {
         doc.setLineDash([0.05, 0.1]);
-        doc.line(0, y + cardHeight, pageWidth, y + cardHeight);
+        doc.line(x + cardWidth, 0, x + cardWidth, pageHeight);
         doc.setLineDash([]);
       }
     });
