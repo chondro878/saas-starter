@@ -38,38 +38,11 @@ export default async function FulfillmentPage() {
     day: 'numeric' 
   });
 
-  // Group orders by card type
-  const pendingByType = {
-    subscription: pendingOrders.filter(o => o.cardType === 'subscription'),
-    bulk: pendingOrders.filter(o => o.cardType === 'bulk'),
-    individual: pendingOrders.filter(o => o.cardType === 'individual'),
-  };
-
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Daily Fulfillment</h1>
         <p className="text-gray-600">{today}</p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Total Pending</h3>
-          <p className="text-3xl font-bold text-blue-600">{pendingOrders.length}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Subscription</h3>
-          <p className="text-3xl font-bold text-green-600">{pendingByType.subscription.length}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Bulk Packs</h3>
-          <p className="text-3xl font-bold text-purple-600">{pendingByType.bulk.length}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Individual</h3>
-          <p className="text-3xl font-bold text-orange-600">{pendingByType.individual.length}</p>
-        </div>
       </div>
 
       {/* Pending Orders Section */}
