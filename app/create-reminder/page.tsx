@@ -22,7 +22,8 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { AlertCircle, Check, X } from 'lucide-react';
+import { AlertCircle, Check, X, HelpCircle } from 'lucide-react';
+import { calculateHolidayDate } from '@/lib/holiday-calculator';
 
 // --- Schema definition for the reminder form using Zod ---
 const reminderFormSchema = z.object({
@@ -164,6 +165,115 @@ export default function CreateReminderPage() {
     }
   };
 
+  // Get colors for occasions based on relationship correlations
+  const getOccasionColors = (occasion: string) => {
+    const occasionLower = occasion.toLowerCase();
+    
+    // Personal occasions - correlate with relationships
+    if (occasionLower.includes('birthday')) {
+      return {
+        selected: 'bg-gray-100 text-gray-800 border-gray-300',
+        default: 'bg-gray-100 text-gray-800 border-gray-200 hover:border-gray-300',
+        decoration: 'confetti' // Fizzy circle drop animation
+      };
+    }
+    if (occasionLower.includes('anniversary')) {
+      // Work anniversary - Professional colors
+      if (occasionLower.includes('work')) {
+        return {
+          selected: 'bg-purple-50 text-purple-800 border-purple-300',
+          default: 'bg-purple-50 text-purple-800 border-purple-200 hover:border-purple-300',
+          decoration: 'professional' // Purple circles
+        };
+      }
+      // Romantic anniversary - Romantic colors with hearts
+      return {
+        selected: 'bg-pink-50 text-pink-800 border-pink-300',
+        default: 'bg-pink-50 text-pink-800 border-pink-200 hover:border-pink-300',
+        decoration: 'hearts' // Floating hearts
+      };
+    }
+    
+    // Holiday occasions - correlate with relationships
+    if (occasionLower.includes('new year')) {
+      return {
+        selected: 'bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-white border-amber-500',
+        default: 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300',
+        decoration: 'none' // No sparkles, just gold gradient
+      };
+    }
+    if (occasionLower.includes('valentine')) {
+      return {
+        selected: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-500',
+        default: 'bg-red-50 text-red-700 border-red-200 hover:border-red-300',
+        decoration: 'none' // No decoration, just gradient like St. Patrick's
+      };
+    }
+    if (occasionLower.includes('patrick')) {
+      return {
+        selected: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500',
+        default: 'bg-green-50 text-green-700 border-green-200 hover:border-green-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('easter')) {
+      return {
+        selected: 'bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-300 text-white border-purple-400',
+        default: 'bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('mother')) {
+      return {
+        selected: 'bg-gradient-to-r from-pink-400 to-rose-500 text-white border-pink-400',
+        default: 'bg-pink-50 text-pink-700 border-pink-200 hover:border-pink-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('father')) {
+      return {
+        selected: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500',
+        default: 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('independence')) {
+      return {
+        selected: 'bg-gradient-to-r from-red-500 via-white to-blue-500 text-gray-900 border-red-500',
+        default: 'bg-red-50 text-red-700 border-red-200 hover:border-red-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('halloween')) {
+      return {
+        selected: 'bg-gradient-to-r from-orange-500 to-purple-600 text-white border-orange-500',
+        default: 'bg-orange-50 text-orange-700 border-orange-200 hover:border-orange-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('thanksgiving')) {
+      return {
+        selected: 'bg-gradient-to-r from-amber-600 to-orange-600 text-white border-amber-600',
+        default: 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300',
+        decoration: 'none'
+      };
+    }
+    if (occasionLower.includes('christmas')) {
+      return {
+        selected: 'bg-gradient-to-r from-red-600 to-green-600 text-white border-red-600',
+        default: 'bg-red-50 text-red-700 border-red-200 hover:border-red-300',
+        decoration: 'none'
+      };
+    }
+    
+    // Default - Friend colors
+    return {
+      selected: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-500',
+      default: 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-300',
+      decoration: 'none'
+    };
+  };
+
   // --- Occasion selection handlers ---
   const toggleCustomOccasion = (val: string) => {
     setSelectedCustomOccasions(prev => {
@@ -194,7 +304,20 @@ export default function CreateReminderPage() {
   const isHolidayOccasionSelected = (val: string) => selectedHolidayOccasions.includes(val);
 
   // --- Navigation logic ---
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Validate address before leaving step 1
+    if (currentStep === 1) {
+      if (!addressValidation.result) {
+        await validateAddressFields();
+      }
+      // Check if validation shows undeliverable
+      if (addressValidation.result?.verdict === 'UNDELIVERABLE') {
+        return; // Don't proceed if address is undeliverable
+      }
+      setCurrentStep(2);
+      return;
+    }
+    
     if (currentStep === 3) {
       if (selectedCustomOccasions.length > 0) {
         setCurrentStep(4);
@@ -265,34 +388,9 @@ export default function CreateReminderPage() {
         }
       }
 
-      // Add holiday occasions (we'll need to calculate their dates later)
+      // Add holiday occasions with properly calculated dates
       for (const occasion of selectedHolidayOccasions) {
-        const nextYear = new Date().getFullYear();
-        let occasionDate = new Date();
-        
-        // Set approximate dates for holidays (can be refined later)
-        switch (occasion) {
-          case "New Year's":
-            occasionDate = new Date(nextYear, 0, 1);
-            break;
-          case "Valentine's Day":
-            occasionDate = new Date(nextYear, 1, 14);
-            break;
-          case "St. Patrick's Day":
-            occasionDate = new Date(nextYear, 2, 17);
-            break;
-          case "Independence Day":
-            occasionDate = new Date(nextYear, 6, 4);
-            break;
-          case "Halloween":
-            occasionDate = new Date(nextYear, 9, 31);
-            break;
-          case "Christmas":
-            occasionDate = new Date(nextYear, 11, 25);
-            break;
-          default:
-            occasionDate = new Date(nextYear, 0, 1); // Default to Jan 1
-        }
+        const occasionDate = calculateHolidayDate(occasion);
         
         occasionsData.push({
           occasionType: occasion,
@@ -399,19 +497,25 @@ export default function CreateReminderPage() {
             </button>
           </div>
           
-          {/* Progress Bar */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Step {currentStep} of {totalSteps}</span>
-              <span className="text-sm text-gray-600">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+          {/* Progress Bar - Only show for steps 1-5 */}
+          {currentStep <= totalSteps && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Step {currentStep} of {totalSteps}</span>
+                <span className="text-sm text-gray-600">
+                  {currentStep === totalSteps ? '99' : Math.round((currentStep / totalSteps) * 100)}% Complete
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-gray-900 h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${currentStep === totalSteps ? 99 : (currentStep / totalSteps) * 100}%` 
+                  }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gray-900 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -612,21 +716,27 @@ export default function CreateReminderPage() {
                     Personal Occasions <span className="text-xs text-gray-500">(date required)</span>
                   </Label>
                   <div className="grid grid-cols-1 gap-3">
-                    {customOccasions.map((item) => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => toggleCustomOccasion(item.value)}
-                        className={cn(
-                          "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
-                          isCustomOccasionSelected(item.value)
-                            ? "bg-gray-900 text-white border-gray-900"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
-                        )}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                    {customOccasions.map((item) => {
+                      const colors = getOccasionColors(item.value);
+                      const isSelected = isCustomOccasionSelected(item.value);
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => toggleCustomOccasion(item.value)}
+                          className={cn(
+                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden",
+                            isSelected ? colors.selected : colors.default,
+                            isSelected && colors.decoration === 'confetti' && "occasion-confetti",
+                            isSelected && colors.decoration === 'hearts' && "occasion-hearts",
+                            isSelected && colors.decoration === 'sparkles' && "occasion-sparkles",
+                            isSelected && colors.decoration === 'professional' && "occasion-professional"
+                          )}
+                        >
+                          <span className="relative z-10">{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 
@@ -635,21 +745,27 @@ export default function CreateReminderPage() {
                     Holidays <span className="text-xs text-gray-500">(date is fixed)</span>
                   </Label>
                   <div className="grid grid-cols-2 gap-3">
-                    {holidayOccasions.map((item) => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => toggleHolidayOccasion(item.value)}
-                        className={cn(
-                          "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
-                          isHolidayOccasionSelected(item.value)
-                            ? "bg-gray-900 text-white border-gray-900"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
-                        )}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                    {holidayOccasions.map((item) => {
+                      const colors = getOccasionColors(item.value);
+                      const isSelected = isHolidayOccasionSelected(item.value);
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => toggleHolidayOccasion(item.value)}
+                          className={cn(
+                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden",
+                            isSelected ? colors.selected : colors.default,
+                            isSelected && colors.decoration === 'confetti' && "occasion-confetti",
+                            isSelected && colors.decoration === 'hearts' && "occasion-hearts",
+                            isSelected && colors.decoration === 'sparkles' && "occasion-sparkles",
+                            isSelected && colors.decoration === 'professional' && "occasion-professional"
+                          )}
+                        >
+                          <span className="relative z-10">{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -684,20 +800,35 @@ export default function CreateReminderPage() {
               </div>
               
               <div className="space-y-8">
-                {selectedCustomOccasions.map((oc) => (
-                  <div key={oc} className="bg-gray-50 p-6 rounded-lg">
-                    <h3 className="text-xl font-medium text-gray-900 mb-4">{oc}</h3>
-                    <MonthDayPicker
-                      value={customDates[oc]}
-                      onChange={(date: Date) => {
-                        setCustomDates((prev) => ({
-                          ...prev,
-                          [oc]: date,
-                        }));
-                      }}
-                    />
-                  </div>
-                ))}
+                {selectedCustomOccasions.map((oc) => {
+                  const colors = getOccasionColors(oc);
+                  return (
+                    <div 
+                      key={oc} 
+                      className={cn(
+                        "p-6 rounded-lg border-2 relative overflow-hidden",
+                        colors.selected,
+                        colors.decoration === 'confetti' && "occasion-confetti",
+                        colors.decoration === 'hearts' && "occasion-hearts",
+                        colors.decoration === 'sparkles' && "occasion-sparkles",
+                        colors.decoration === 'professional' && "occasion-professional"
+                      )}
+                    >
+                      <h3 className="text-xl font-medium mb-4 relative z-10">{oc}</h3>
+                      <div className="relative z-10">
+                        <MonthDayPicker
+                          value={customDates[oc]}
+                          onChange={(date: Date) => {
+                            setCustomDates((prev) => ({
+                              ...prev,
+                              [oc]: date,
+                            }));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               
               <div className="flex justify-between pt-8">
@@ -726,23 +857,77 @@ export default function CreateReminderPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
                 <h2 className="text-3xl font-light text-gray-900 mb-4">Review & Add Notes</h2>
-                <p className="text-gray-600">Review the details and add optional notes for personalization.</p>
+                <p className="text-gray-600">Review the details and add optional reminders for future you.</p>
               </div>
 
-              {/* Address Review */}
+              {/* Recipient Review */}
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Recipient Address</h3>
-                <div className="text-gray-700 space-y-1">
-                  <p className="font-medium">{address.street}{address.apartment ? `, ${address.apartment}` : ''}</p>
-                  <p>{address.city}, {address.state} {address.zip}</p>
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Recipient</h3>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="text-sm text-gray-600 hover:text-gray-900 underline"
+                  >
+                    Edit Details
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="text-sm text-gray-600 hover:text-gray-900 underline mt-2"
-                >
-                  Edit Address
-                </button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column: Name & Address */}
+                  <div className="space-y-4">
+                    {/* Name */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Name</p>
+                      <p className="font-medium text-lg">
+                        {firstPerson.first} {firstPerson.last}
+                        {secondPersonEnabled && secondPerson.first && (
+                          <> & {secondPerson.first} {secondPerson.last}</>
+                        )}
+                      </p>
+                    </div>
+                    
+                    {/* Address */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Address</p>
+                      <p className="font-medium">{address.street}{address.apartment ? `, ${address.apartment}` : ''}</p>
+                      <p>{address.city}, {address.state} {address.zip}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Right Column: Relationship & Occasions */}
+                  <div className="space-y-4">
+                    {/* Relationship */}
+                    {relationship && (
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Relationship</p>
+                        <p className="font-medium">{relationship}</p>
+                      </div>
+                    )}
+                    
+                    {/* Occasions */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Occasions</p>
+                      <div className="space-y-2">
+                        {selectedCustomOccasions.map((oc) => (
+                          <div key={oc} className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{oc}</span>
+                            {customDates[oc] && (
+                              <span className="text-xs text-gray-600">
+                                ({customDates[oc]?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {selectedHolidayOccasions.map((oc) => (
+                          <div key={oc} className="text-sm font-medium">
+                            {oc}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Address Validation Messages */}
@@ -829,7 +1014,16 @@ export default function CreateReminderPage() {
 
               <div className="space-y-6">
                 <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-3">General Note</Label>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Label className="text-sm font-medium text-gray-700">General Note</Label>
+                    <div className="group relative">
+                      <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                      <div className="absolute left-0 top-6 hidden group-hover:block z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
+                        We'll send this to you with every card, for every occasion. Use it to remember things like their favorite color, preferences, or things they like/dislike.
+                        <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                      </div>
+                    </div>
+                  </div>
                   <Textarea
                     placeholder="Write a note that applies to all occasions..."
                     {...register("note")}
@@ -838,18 +1032,18 @@ export default function CreateReminderPage() {
                   />
                 </div>
 
-                <div>
-                  <details className="cursor-pointer">
-                    <summary className="text-sm text-gray-600 hover:text-gray-800 underline underline-offset-4 mb-3">
-                      Customize per occasion
+                <div className="border-t border-gray-200 pt-6">
+                  <details className="cursor-pointer bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 hover:border-blue-300 transition-colors">
+                    <summary className="text-sm font-medium text-gray-800 hover:text-gray-900 flex items-center gap-2">
+                      Customize reminders per occasion (optional)
                     </summary>
-                    <div className="space-y-4">
+                    <div className="space-y-4 mt-4">
                       {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => (
                         <div key={oc}>
                           <Label className="block text-sm font-medium text-gray-700 mb-2">{oc} note</Label>
                           <Textarea
                             placeholder={`Optional note for ${oc}`}
-                            className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                            className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
                             rows={2}
                             {...register(`occasionNotes.${oc}` as const)}
                           />

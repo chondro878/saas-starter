@@ -57,10 +57,10 @@ export function MonthDayPicker({ value, onChange, className }: MonthDayPickerPro
               type="button"
               onClick={() => handleMonthChange(index)}
               className={cn(
-                "py-3 px-4 rounded-lg text-sm font-medium transition-colors",
+                "py-3 px-4 rounded-lg text-sm font-medium transition-colors relative z-10",
                 selectedMonth === index
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-gray-800 text-white shadow-md"
+                  : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 hover:border-gray-400"
               )}
             >
               {month}
@@ -79,10 +79,10 @@ export function MonthDayPicker({ value, onChange, className }: MonthDayPickerPro
               type="button"
               onClick={() => handleDayChange(day)}
               className={cn(
-                "py-3 px-2 rounded-lg text-sm font-medium transition-colors",
+                "py-3 px-2 rounded-lg text-sm font-medium transition-colors relative z-10",
                 selectedDay === day
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-gray-800 text-white shadow-md"
+                  : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 hover:border-gray-400"
               )}
             >
               {day}
