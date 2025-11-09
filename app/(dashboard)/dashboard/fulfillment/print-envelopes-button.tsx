@@ -28,7 +28,7 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       
-      const recipientStartX = 2.5; // Center position
+      const recipientStartX = 1.8; // Center-left position
       let recipientY = 1.9; // Vertically centered
       
       doc.text(

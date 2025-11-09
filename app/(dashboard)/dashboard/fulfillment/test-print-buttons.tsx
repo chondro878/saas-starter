@@ -134,7 +134,7 @@ export function TestPrintButtons() {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       
-      const recipientStartX = 2.5;
+      const recipientStartX = 1.8;
       let recipientY = 1.9;
       
       doc.text(
