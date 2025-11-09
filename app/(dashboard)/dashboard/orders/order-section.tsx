@@ -24,6 +24,8 @@ interface OrderSectionProps {
   ctaLink: string;
   badgeColor: string;
   defaultOpen?: boolean;
+  showCount?: boolean;
+  showIcon?: boolean;
 }
 
 export function OrderSection({ 
@@ -33,7 +35,9 @@ export function OrderSection({
   ctaText, 
   ctaLink, 
   badgeColor,
-  defaultOpen = true 
+  defaultOpen = true,
+  showCount = true,
+  showIcon = true
 }: OrderSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -45,14 +49,20 @@ export function OrderSection({
       >
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <span className={`px-3 py-1 rounded text-sm font-medium ${badgeColor}`}>
-            {orders.length}
-          </span>
+          {showCount && (
+            <span className={`px-3 py-1 rounded text-sm font-medium ${badgeColor}`}>
+              {orders.length}
+            </span>
+          )}
         </div>
-        {isOpen ? (
-          <ChevronUp className="w-5 h-5 text-gray-600" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-600" />
+        {showIcon && (
+          <>
+            {isOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </>
         )}
       </button>
 
