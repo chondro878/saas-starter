@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Home, Grid, CreditCard, Package, RefreshCw, HelpCircle, LogOut, Printer, FileText, AlertCircle } from 'lucide-react';
 import { User, Team } from '@/lib/db/schema';
 import useSWR from 'swr';
@@ -50,13 +49,6 @@ export default function DashboardLayout({
       <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* User Profile Section */}
         <div className="p-8 border-b border-gray-200">
-          <Avatar className="w-24 h-24 mb-4">
-            <AvatarFallback className="bg-gray-300 text-gray-600 text-2xl">
-              {user?.firstName && user?.lastName
-                ? `${user.firstName[0]}${user.lastName[0]}`
-                : user?.name?.split(' ').map(n => n[0]).join('') || user?.email?.[0]?.toUpperCase() || '?'}
-            </AvatarFallback>
-          </Avatar>
           <h2 className="text-xl font-normal text-gray-900 mb-1">
             {user?.firstName && user?.lastName
               ? `${user.firstName} ${user.lastName}`
