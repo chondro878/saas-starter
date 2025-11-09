@@ -87,21 +87,23 @@ export default function DashboardHomePage() {
       {/* Subscription Alert */}
       <SubscriptionAlert />
 
-      {/* Ready to add a reminder? */}
-      <section className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl p-12 mb-8 text-center">
-        <h2 className="text-4xl md:text-5xl font-light mb-4 text-gray-900 leading-tight">
-          Ready to add a reminder?
-        </h2>
-        <p className="text-lg text-gray-600 mb-8 font-light leading-relaxed">
-          It takes less than 2 minutes to never miss a moment.
-        </p>
-        <Link 
-          href="/create-reminder" 
-          className="inline-block bg-gray-900 text-white px-10 py-4 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors shadow-lg"
-        >
-          Create Your First Reminder
-        </Link>
-      </section>
+      {/* Ready to add a reminder? - Only show if no recipients */}
+      {!isLoading && !error && (!recipients || recipients.length === 0) && (
+        <section className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl p-12 mb-8 text-center">
+          <h2 className="text-4xl md:text-5xl font-light mb-4 text-gray-900 leading-tight">
+            Ready to add a reminder?
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 font-light leading-relaxed">
+            It takes less than 2 minutes to never miss a moment.
+          </p>
+          <Link 
+            href="/create-reminder" 
+            className="inline-block bg-gray-900 text-white px-10 py-4 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors shadow-lg"
+          >
+            Create Your First Reminder
+          </Link>
+        </section>
+      )}
 
       {/* Holiday Promotion Carousel */}
       <HolidayCarousel />
