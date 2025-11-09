@@ -135,7 +135,7 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
       onClick={handlePrint}
       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 font-medium transition-colors"
     >
-      🖨️ Print {single ? 'Card' : `All Cards (${orders.length})`}
+      Print {single ? 'Card' : `All Cards (${orders.length})`}
     </button>
   );
 }

@@ -46,7 +46,7 @@ export default async function FulfillmentPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">📦 Daily Fulfillment</h1>
+        <h1 className="text-3xl font-bold mb-2">Daily Fulfillment</h1>
         <p className="text-gray-600">{today}</p>
       </div>
 
@@ -90,7 +90,6 @@ export default async function FulfillmentPage() {
 
         {pendingOrders.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-2xl mb-2">🎉</p>
             <p className="text-gray-500 text-lg">No orders to print today!</p>
           </div>
         ) : (
@@ -105,9 +104,8 @@ export default async function FulfillmentPage() {
       {/* Printed But Not Mailed Section */}
       {printedOrders.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span>⚠️</span>
-            <span>Printed - Waiting to Mail ({printedOrders.length})</span>
+          <h2 className="text-xl font-semibold mb-4">
+            Printed - Waiting to Mail ({printedOrders.length})
           </h2>
           <div className="space-y-3">
             {printedOrders.map((order) => (
@@ -160,25 +158,21 @@ function OrderCard({ order }: { order: Order }) {
           </div>
           
           <div className="text-sm text-gray-600 space-y-1">
-            <p className="flex items-center gap-2">
-              <span>📅</span>
-              <span>Occasion: {new Date(order.occasionDate).toLocaleDateString('en-US', { 
+            <p>
+              <span className="font-medium">Occasion:</span> {new Date(order.occasionDate).toLocaleDateString('en-US', { 
                 month: 'long', 
                 day: 'numeric',
                 year: 'numeric'
-              })}</span>
+              })}
             </p>
-            <p className="flex items-start gap-2">
-              <span>📍</span>
-              <span>
-                {order.recipientStreet}{order.recipientApartment ? `, ${order.recipientApartment}` : ''}<br />
-                {order.recipientCity}, {order.recipientState} {order.recipientZip}
-              </span>
+            <p>
+              <span className="font-medium">Address:</span><br />
+              {order.recipientStreet}{order.recipientApartment ? `, ${order.recipientApartment}` : ''}<br />
+              {order.recipientCity}, {order.recipientState} {order.recipientZip}
             </p>
             {order.occasionNotes && (
-              <p className="flex items-start gap-2">
-                <span>📝</span>
-                <span>{order.occasionNotes}</span>
+              <p>
+                <span className="font-medium">Notes:</span> {order.occasionNotes}
               </p>
             )}
           </div>

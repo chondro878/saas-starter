@@ -38,7 +38,7 @@ export function MarkAsSentButton({ orderId, compact = false }: MarkAsSentButtonP
         disabled={isLoading}
         className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? '...' : '✅ Sent'}
+        {isLoading ? '...' : 'Sent'}
       </button>
     );
   }
@@ -49,7 +49,7 @@ export function MarkAsSentButton({ orderId, compact = false }: MarkAsSentButtonP
       disabled={isLoading}
       className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium transition-colors"
     >
-      {isLoading ? 'Marking...' : '✅ Mark as Sent'}
+      {isLoading ? 'Marking...' : 'Mark as Sent'}
     </button>
   );
 }
