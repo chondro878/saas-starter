@@ -37,22 +37,22 @@ export default function PricingPage() {
       {/* Interactive Pricing Component */}
       <InteractivePricing />
 
-      {/* Add-ons Section - Full Bleed Gray */}
-      <section className="w-full bg-gray-50 py-20">
+      {/* Add-ons Section - Full Bleed with Gradient */}
+      <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-20">
         <div className="max-w-7xl mx-auto px-8">
           <h2 className="text-4xl font-light text-center mb-12 text-gray-900">Add-Ons & Extras</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
               <h3 className="text-2xl font-medium mb-2 text-gray-900">Holiday Bulk Pack</h3>
               <p className="text-4xl font-light mb-4 text-gray-900">$39<span className="text-base text-gray-500">/pack</span></p>
               <p className="text-gray-600 leading-relaxed">15 premium holiday cards, stamped and ready to send</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
               <h3 className="text-2xl font-medium mb-2 text-gray-900">Extra Cards</h3>
               <p className="text-4xl font-light mb-4 text-gray-900">$9<span className="text-base text-gray-500">/card</span></p>
               <p className="text-gray-600 leading-relaxed">Need an extra card? Add individual cards anytime</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all">
               <h3 className="text-2xl font-medium mb-2 text-gray-900">Rush Delivery</h3>
               <p className="text-4xl font-light mb-4 text-gray-900">$10<span className="text-base text-gray-500">/card</span></p>
               <p className="text-gray-600 leading-relaxed">Need it faster? Get 2-day priority shipping</p>
@@ -86,18 +86,21 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* CTA Section - Full Bleed Dark */}
-      <section className="w-full bg-gray-900 py-20">
-        <div className="max-w-4xl mx-auto px-8 text-center text-white">
-          <h2 className="text-5xl font-light mb-6">
+      {/* CTA Section - Full Bleed with Gradient */}
+      <section className="w-full relative py-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-pink-100">
+          <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
+        </div>
+        <div className="relative max-w-4xl mx-auto px-8 text-center">
+          <h2 className="text-5xl font-light mb-6 text-gray-900">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed">
             Join thousands who never miss a special moment. Subscribe today.
           </p>
           <Link 
             href="/sign-up" 
-            className="inline-block border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-medium hover:bg-white hover:text-gray-900 transition-colors"
+            className="inline-block border-2 border-gray-900 text-gray-900 px-10 py-4 rounded-lg text-lg font-medium hover:bg-gray-900 hover:text-white transition-colors"
           >
             Get Started
           </Link>
