@@ -60,20 +60,8 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Hero Section - Full Bleed */}
-      <section className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 pt-32 pb-20">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-light mb-6 leading-tight text-gray-900">
-            Choose Your Plan
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-light leading-relaxed">
-            Never forget a birthday, anniversary, or special moment again. 
-            Premium cards delivered to your door, pre-stamped and ready to send.
-          </p>
-        </div>
-      </section>
-
       {/* Interactive Pricing Component */}
+      <div className="pt-20" />
       <InteractivePricing />
 
       {/* Add-ons Section - Full Bleed with Gradient */}
