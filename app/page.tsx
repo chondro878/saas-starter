@@ -7,7 +7,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/browserClient";
 import { HolidayCarousel } from "@/app/(dashboard)/components/holiday-carousel";
 import { AllCardsCarousel } from "@/app/(dashboard)/components/all-cards-carousel";
-import { PricingSummary } from "@/app/(dashboard)/components/pricing-summary";
+import { InteractivePricing } from "@/app/pricing/interactive-pricing";
 import { IOSDownload } from "@/app/(dashboard)/components/ios-download";
 import { Footer } from "@/components/ui/footer";
 
@@ -330,8 +330,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Summary */}
-      <PricingSummary />
+      {/* Pricing Component */}
+      <InteractivePricing />
 
       {/* FAQ Section - Individual Collapsible Questions */}
       <section className="w-full bg-white py-32">
