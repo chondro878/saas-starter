@@ -44,7 +44,7 @@ export function AllCardsCarousel() {
   };
   
   return (
-    <div className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 py-20">
+    <div className="w-full bg-white py-20">
       <div className="max-w-7xl mx-auto px-8">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -103,19 +103,13 @@ export function AllCardsCarousel() {
           </div>
         </div>
         
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        {/* Action Button */}
+        <div className="flex justify-center">
           <Link
             href="/sign-up"
-            className="px-10 py-4 bg-gray-900 text-white rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors shadow-lg"
-          >
-            Get Started
-          </Link>
-          <Link
-            href="/pricing"
             className="px-10 py-4 border-2 border-gray-900 text-gray-900 rounded-lg text-lg font-medium hover:bg-gray-900 hover:text-white transition-colors"
           >
-            View Pricing
+            Get Started
           </Link>
         </div>
       </div>
