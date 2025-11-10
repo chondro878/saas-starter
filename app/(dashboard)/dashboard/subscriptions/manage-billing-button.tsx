@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { manageBillingAction } from '@/lib/payments/actions';
-import { Settings } from 'lucide-react';
+import { Settings, Edit } from 'lucide-react';
 
 interface ManageBillingButtonProps {
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'link';
+  text?: string;
 }
 
-export function ManageBillingButton({ variant = 'primary' }: ManageBillingButtonProps) {
+export function ManageBillingButton({ variant = 'primary', text }: ManageBillingButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
@@ -21,6 +22,19 @@ export function ManageBillingButton({ variant = 'primary' }: ManageBillingButton
     }
   };
 
+  if (variant === 'link') {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={isLoading}
+        className="flex items-center gap-2 text-sm font-medium text-purple-600 hover:text-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <Edit className="w-4 h-4" />
+        {isLoading ? 'Opening...' : (text || 'Manage Billing')}
+      </button>
+    );
+  }
+
   if (variant === 'secondary') {
     return (
       <button
@@ -29,7 +43,7 @@ export function ManageBillingButton({ variant = 'primary' }: ManageBillingButton
         className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <Settings className="w-4 h-4" />
-        {isLoading ? 'Opening...' : 'Manage Billing'}
+        {isLoading ? 'Opening...' : (text || 'Manage Billing')}
       </button>
     );
   }
@@ -38,10 +52,10 @@ export function ManageBillingButton({ variant = 'primary' }: ManageBillingButton
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="inline-flex items-center gap-2 border-2 border-gray-900 text-gray-900 px-6 py-2 rounded-lg font-medium hover:bg-gray-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
     >
-      <Settings className="w-5 h-5" />
-      {isLoading ? 'Opening Portal...' : 'Manage Subscription'}
+      <Settings className="w-4 h-4" />
+      {isLoading ? 'Opening...' : (text || 'Manage subscription')}
     </button>
   );
 }
