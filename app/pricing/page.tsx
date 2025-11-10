@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { Check } from 'lucide-react';
 import { Footer } from '@/components/ui/footer';
-import { CheckoutButton } from './checkout-button';
+import { InteractivePricing } from './interactive-pricing';
 
 // Prices are fresh for one hour max
 export const revalidate = 3600;
@@ -35,64 +34,8 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Pricing Cards - Full Bleed White */}
-      <section className="w-full bg-white py-20">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <PricingCard
-              name="Essentials"
-              tagline="For close family"
-              price={4900}
-              interval="year"
-              features={[
-                '5 cards per year',
-                'Premium card designs',
-                'Pre-stamped & addressed',
-                'Delivered to your door',
-                'Email reminders',
-              ]}
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_ESSENTIALS}
-              recommended={false}
-            />
-            <PricingCard
-              name="Stress Free"
-              tagline="Most Popular"
-              price={9900}
-              interval="year"
-              features={[
-                '12 cards per year',
-                'Premium card designs',
-                'Pre-stamped & addressed',
-                'Delivered to your door',
-                'Email reminders',
-                'Holiday pack options',
-                'Priority support',
-              ]}
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_STRESS_FREE}
-              recommended={true}
-            />
-            <PricingCard
-              name="Concierge"
-              tagline="Full service"
-              price={19900}
-              interval="year"
-              features={[
-                '25 cards per year',
-                'Premium card designs',
-                'Pre-stamped & addressed',
-                'Delivered to your door',
-                'Email reminders',
-                'Holiday packs included',
-                'AI-written messages',
-                'Priority support',
-                'Expedited shipping',
-              ]}
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_CONCIERGE}
-              recommended={false}
-            />
-          </div>
-        </div>
-      </section>
+      {/* Interactive Pricing Component */}
+      <InteractivePricing />
 
       {/* Add-ons Section - Full Bleed Gray */}
       <section className="w-full bg-gray-50 py-20">
@@ -154,7 +97,7 @@ export default function PricingPage() {
           </p>
           <Link 
             href="/sign-up" 
-            className="inline-block bg-white text-gray-900 px-10 py-4 rounded-lg text-lg font-medium hover:bg-gray-100 transition-colors shadow-lg"
+            className="inline-block border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-medium hover:bg-white hover:text-gray-900 transition-colors"
           >
             Get Started
           </Link>
@@ -163,62 +106,5 @@ export default function PricingPage() {
 
       <Footer />
     </>
-  );
-}
-
-function PricingCard({
-  name,
-  tagline,
-  price,
-  interval,
-  features,
-  priceId,
-  recommended,
-}: {
-  name: string;
-  tagline: string;
-  price: number;
-  interval: string;
-  features: string[];
-  priceId?: string;
-  recommended: boolean;
-}) {
-  return (
-    <div className={`relative rounded-xl overflow-hidden transition-all ${
-      recommended 
-        ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-2xl scale-105 border-2 border-purple-400' 
-        : 'bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg'
-    }`}>
-      {recommended && (
-        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 text-xs font-bold uppercase tracking-wide py-2 px-4 text-center">
-          {tagline}
-        </div>
-      )}
-      <div className="p-8">
-        {!recommended && tagline && (
-          <p className="text-sm text-gray-500 uppercase tracking-wide mb-2">{tagline}</p>
-        )}
-        <h2 className="text-2xl font-medium mb-6">{name}</h2>
-        <div className="mb-8">
-          <span className="text-5xl font-light">${price / 100}</span>
-          <span className={`text-base ml-2 ${recommended ? 'text-white/80' : 'text-gray-500'}`}>
-            / {interval}
-          </span>
-        </div>
-        <CheckoutButton priceId={priceId!} recommended={recommended}>
-          Continue to Checkout
-        </CheckoutButton>
-        <ul className="space-y-4">
-          {features.map((feature, index) => (
-            <li key={index} className="flex items-start">
-              <Check className={`h-5 w-5 mr-3 mt-0.5 flex-shrink-0 ${
-                recommended ? 'text-white' : 'text-green-500'
-              }`} />
-              <span className={recommended ? 'text-white/90' : 'text-gray-600'}>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
   );
 }
