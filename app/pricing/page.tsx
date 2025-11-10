@@ -51,8 +51,8 @@ export default function PricingPage() {
             Only {nextHoliday.daysUntil} days until {nextHoliday.name}
           </div>
         )}
-        <div className="bg-gray-900 flex justify-between items-center px-8 py-4">
-          <Link href="/" className="text-2xl font-light text-white">Avoid the Rain</Link>
+        <div className="bg-transparent flex justify-between items-center px-8 py-4">
+          <h1 className="text-2xl font-light text-white">Avoid the Rain</h1>
           <div className="flex gap-6 items-center">
             <Link href="/sign-in" className="text-white text-sm hover:text-white/80 transition-colors">Sign In</Link>
             <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Get Started</Link>
