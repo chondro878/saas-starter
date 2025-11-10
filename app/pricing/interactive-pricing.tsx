@@ -34,8 +34,6 @@ export function InteractivePricing() {
     },
   ];
 
-  const isRecommended = (index: number) => index === 1; // Middle tier is recommended
-
   const handleCheckout = async (priceId: string) => {
     setIsLoading(priceId);
     try {
@@ -59,23 +57,14 @@ export function InteractivePricing() {
             key={tier.priceId}
             onClick={() => handleCheckout(tier.priceId)}
             disabled={isLoading === tier.priceId}
-            className={`p-16 flex flex-col items-center justify-center text-center min-h-[500px] transition-all duration-300 hover:bg-black/5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`text-gray-800 p-16 flex flex-col items-center justify-center text-center min-h-[500px] transition-all duration-300 hover:bg-black/5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               index < tiers.length - 1 ? 'border-r border-gray-400/30' : ''
-            } ${
-              isRecommended(index) ? 'text-yellow-700' : 'text-gray-800'
             }`}
           >
-            {isRecommended(index) && (
-              <div className="mb-4 bg-yellow-500 text-gray-900 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                Recommended
-              </div>
-            )}
             <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
               {tier.name}
             </h3>
-            <div className={`text-8xl font-light mb-12 ${
-              isRecommended(index) ? 'text-yellow-600' : ''
-            }`}>
+            <div className="text-8xl font-light mb-12">
               {isLoading === tier.priceId ? '...' : tier.price}
             </div>
             <p className="text-xl font-light leading-relaxed max-w-xs">

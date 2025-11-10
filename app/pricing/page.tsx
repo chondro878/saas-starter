@@ -1,28 +1,67 @@
+'use client';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Footer } from '@/components/ui/footer';
 import { InteractivePricing } from './interactive-pricing';
-
-// Prices are fresh for one hour max
-export const revalidate = 3600;
+import { getNextHoliday } from '@/lib/occasions';
 
 export default function PricingPage() {
+  // Navbar scroll behavior
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 100) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 200) {
+        setIsNavbarVisible(false);
+      } else {
+        setIsNavbarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  const nextHoliday = useMemo(() => {
+    const holiday = getNextHoliday();
+    if (!holiday) return null;
+    const today = new Date();
+    const timeDiff = holiday.date.getTime() - today.getTime();
+    const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return {
+      ...holiday,
+      name: holiday.label,
+      daysUntil,
+    };
+  }, []);
+
   return (
     <>
-      {/* Sticky Navbar */}
-      <header className="bg-gray-900 text-white sticky top-0 z-40 w-full border-b border-gray-800">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-8 py-5">
-          <Link href="/" className="text-2xl font-light">Avoid the Rain</Link>
-          <Link 
-            href="/sign-in" 
-            className="text-sm text-white/80 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
+      {/* Sticky Header */}
+      <div className={`fixed top-0 z-50 w-full transition-all duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        {nextHoliday && (
+          <div className="text-white text-center py-2 text-sm font-medium bg-gray-900">
+            Only {nextHoliday.daysUntil} days until {nextHoliday.name}
+          </div>
+        )}
+        <div className="bg-gray-900 flex justify-between items-center px-8 py-4">
+          <Link href="/" className="text-2xl font-light text-white">Avoid the Rain</Link>
+          <div className="flex gap-6 items-center">
+            <Link href="/sign-in" className="text-white text-sm hover:text-white/80 transition-colors">Sign In</Link>
+            <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Get Started</Link>
+          </div>
         </div>
-      </header>
+      </div>
 
       {/* Hero Section - Full Bleed */}
-      <section className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 py-20">
+      <section className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 pt-32 pb-20">
         <div className="max-w-6xl mx-auto px-8 text-center">
           <h1 className="text-5xl md:text-6xl font-light mb-6 leading-tight text-gray-900">
             Choose Your Plan
