@@ -7,7 +7,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 // GET single address
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -17,7 +17,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const addressId = parseInt(params.id);
+    const { id } = await params;
+    const addressId = parseInt(id);
 
     const address = await db
       .select()
@@ -39,7 +40,7 @@ export async function GET(
 // UPDATE address
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -49,7 +50,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const addressId = parseInt(params.id);
+    const { id } = await params;
+    const addressId = parseInt(id);
     const body = await request.json();
 
     // Get user from database
@@ -106,7 +108,7 @@ export async function PUT(
 // DELETE address
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -116,7 +118,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const addressId = parseInt(params.id);
+    const { id } = await params;
+    const addressId = parseInt(id);
 
     // Get user from database
     const { users } = await import('@/lib/db/schema');

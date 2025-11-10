@@ -7,7 +7,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 // GET single recipient
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -17,7 +17,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const recipientId = parseInt(params.id);
+    const { id } = await params;
+    const recipientId = parseInt(id);
 
     // Get recipient with occasions
     const recipient = await db
@@ -49,7 +50,7 @@ export async function GET(
 // UPDATE recipient
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -59,7 +60,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const recipientId = parseInt(params.id);
+    const { id } = await params;
+    const recipientId = parseInt(id);
     const body = await request.json();
     const { recipientData, occasionsData } = body;
 
@@ -136,7 +138,7 @@ export async function PUT(
 // DELETE recipient
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -146,7 +148,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const recipientId = parseInt(params.id);
+    const { id } = await params;
+    const recipientId = parseInt(id);
 
     // Verify recipient belongs to user
     const { users } = await import('@/lib/db/schema');
