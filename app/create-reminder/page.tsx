@@ -76,6 +76,9 @@ export default function CreateReminderPage() {
   // ZIP code lookup state
   const [zipLookupLoading, setZipLookupLoading] = useState(false);
 
+  // Notes mode: 'all' for same note to all occasions, 'custom' for per-occasion notes
+  const [notesMode, setNotesMode] = useState<'all' | 'custom' | null>(null);
+
   // --- Form setup with react-hook-form and Zod resolver ---
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
     resolver: zodResolver(reminderFormSchema),
@@ -303,31 +306,36 @@ export default function CreateReminderPage() {
 
   // --- Navigation logic ---
   const handleNext = async () => {
-    // Validate address before leaving step 1
+    // Step 1: Handle address validation flow
     if (currentStep === 1) {
-      // Run validation and get result directly (avoids race condition)
-      const validationResult = await validateAddressFields();
-      
-      // If validation failed (network/API error), show error but don't block
-      // User will see error UI with option to retry or proceed anyway
-      if (!validationResult && addressValidation.error) {
-        return; // Wait for user to retry or proceed anyway
-      }
-      
-      // If validation succeeded
-      if (validationResult) {
-        // If address is undeliverable, block progression (UI will show error)
-        if (validationResult.verdict === 'UNDELIVERABLE') {
-          return;
+      // If not yet validated, run validation first
+      if (!addressValidation.result) {
+        const validationResult = await validateAddressFields();
+        
+        // If validation failed (network/API error), show error but don't block
+        if (!validationResult && addressValidation.error) {
+          return; // Wait for user to retry or proceed anyway
         }
         
-        // If address is correctable, let user decide (UI shows suggestion)
-        if (validationResult.verdict === 'CORRECTABLE') {
-          return; // Wait for user to accept or decline suggestion
+        // If validation succeeded, check verdict
+        if (validationResult) {
+          // If address is undeliverable, block progression
+          if (validationResult.verdict === 'UNDELIVERABLE') {
+            return;
+          }
+          
+          // If address is correctable, let user decide
+          if (validationResult.verdict === 'CORRECTABLE') {
+            return; // Wait for user to accept or decline suggestion
+          }
+          
+          // If valid, button now shows "Next" and user can review before proceeding
+          // Just return here - user will click again to proceed
+          return;
         }
       }
       
-      // Address is valid/deliverable, or validation failed but user chose to proceed anyway
+      // Address has been validated and user clicked "Next" again - proceed to step 2
       setCurrentStep(2);
       return;
     }
@@ -554,6 +562,11 @@ export default function CreateReminderPage() {
   const handleZipChange = async (zip: string) => {
     setValue('address.zip', zip);
     
+    // Reset validation if user changes ZIP after validating
+    if (addressValidation.result) {
+      setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+    }
+    
     // Only lookup if we have a valid 5-digit ZIP
     if (zip.length === 5 && /^\d{5}$/.test(zip)) {
       setZipLookupLoading(true);
@@ -700,21 +713,49 @@ export default function CreateReminderPage() {
                     <Input
                       placeholder="Street Address"
                       {...register("address.street")}
+                      onChange={(e) => {
+                        setValue("address.street", e.target.value);
+                        // Reset validation if user changes address after validating
+                        if (addressValidation.result) {
+                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                        }
+                      }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                     />
                     <Input
                       placeholder="Apt, Suite, etc. (optional)"
                       {...register("address.apartment")}
+                      onChange={(e) => {
+                        setValue("address.apartment", e.target.value);
+                        // Reset validation if user changes address after validating
+                        if (addressValidation.result) {
+                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                        }
+                      }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                     />
                     <div className="grid grid-cols-3 gap-4">
                       <Input
                         placeholder="City"
                         {...register("address.city")}
+                        onChange={(e) => {
+                          setValue("address.city", e.target.value);
+                          // Reset validation if user changes address after validating
+                          if (addressValidation.result) {
+                            setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                          }
+                        }}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                       />
                       <select
                         {...register("address.state")}
+                        onChange={(e) => {
+                          setValue("address.state", e.target.value);
+                          // Reset validation if user changes address after validating
+                          if (addressValidation.result) {
+                            setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none text-gray-900"
                       >
                         <option value="">Select State</option>
@@ -882,11 +923,16 @@ export default function CreateReminderPage() {
                     !address.city ||
                     !address.state ||
                     !address.zip ||
-                    addressValidation.isValidating
+                    addressValidation.isValidating ||
+                    (addressValidation.result?.verdict === 'UNDELIVERABLE')
                   }
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {addressValidation.isValidating ? 'Validating...' : 'Next'}
+                  {addressValidation.isValidating 
+                    ? 'Validating...' 
+                    : addressValidation.result?.verdict === 'VALID'
+                    ? 'Next'
+                    : 'Validate Address'}
                 </Button>
               </div>
             </div>
@@ -1254,37 +1300,78 @@ export default function CreateReminderPage() {
                 </div>
               )}
 
+              {/* Notes Section */}
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Label className="text-sm font-medium text-gray-700">General Note</Label>
-                    <div className="group relative">
-                      <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                      <div className="absolute left-0 top-6 hidden group-hover:block z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
-                        We'll send this to you with every card, for every occasion. Use it to remember things like their favorite color, preferences, or things they like/dislike.
-                        <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Add Notes</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    These notes will help you remember important details when it's time to send the card.
+                  </p>
+                  
+                  {/* Two Button Options */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setNotesMode('custom')}
+                      className={cn(
+                        "p-6 rounded-lg border-2 text-left transition-all",
+                        notesMode === 'custom'
+                          ? "bg-blue-50 border-blue-500 shadow-md"
+                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+                          notesMode === 'custom' ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                        )}>
+                          {notesMode === 'custom' && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 mb-1">Custom notes per occasion</p>
+                          <p className="text-xs text-gray-600">
+                            Write different notes for each occasion (Birthday, Christmas, etc.)
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <Textarea
-                    placeholder="Write a note that applies to all occasions..."
-                    {...register("note")}
-                    className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
-                    rows={4}
-                  />
-                </div>
+                    </button>
 
-                <div className="border-t border-gray-200 pt-6">
-                  <details className="cursor-pointer bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 hover:border-blue-300 transition-colors">
-                    <summary className="text-sm font-medium text-gray-800 hover:text-gray-900 flex items-center gap-2">
-                      Customize reminders per occasion (optional)
-                    </summary>
-                    <div className="space-y-4 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setNotesMode('all')}
+                      className={cn(
+                        "p-6 rounded-lg border-2 text-left transition-all",
+                        notesMode === 'all'
+                          ? "bg-blue-50 border-blue-500 shadow-md"
+                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+                          notesMode === 'all' ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                        )}>
+                          {notesMode === 'all' && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 mb-1">Same note for all occasions</p>
+                          <p className="text-xs text-gray-600">
+                            Write one note that applies to every occasion
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Custom Notes Per Occasion */}
+                  {notesMode === 'custom' && (
+                    <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-700 mb-4">Add custom notes for each occasion:</p>
                       {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => (
                         <div key={oc}>
-                          <Label className="block text-sm font-medium text-gray-700 mb-2">{oc} note</Label>
+                          <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
                           <Textarea
-                            placeholder={`Optional note for ${oc}`}
+                            placeholder={`What should you remember when sending a card for ${oc}?`}
                             className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
                             rows={2}
                             {...register(`occasionNotes.${oc}` as const)}
@@ -1292,7 +1379,30 @@ export default function CreateReminderPage() {
                         </div>
                       ))}
                     </div>
-                  </details>
+                  )}
+
+                  {/* Same Note for All */}
+                  {notesMode === 'all' && (
+                    <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Label className="text-sm font-medium text-gray-700">Note for All Occasions</Label>
+                        <div className="group relative">
+                          <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                          <div className="absolute left-0 top-6 hidden group-hover:block z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
+                            This note will appear with every card you send to this person, regardless of the occasion.
+                            <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <Textarea
+                        placeholder="Write a note that applies to all occasions (e.g., favorite color, preferences, hobbies)..."
+                        {...register("note")}
+                        className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
+                        rows={4}
+                      />
+                    </div>
+                  )}
+
                 </div>
               </div>
 
