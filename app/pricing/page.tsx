@@ -61,7 +61,6 @@ export default function PricingPage() {
       </div>
 
       {/* Interactive Pricing Component */}
-      <div className="pt-20" />
       <InteractivePricing />
 
       {/* Add-ons Section - Full Bleed with Gradient */}
