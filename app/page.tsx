@@ -168,17 +168,15 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="relative w-screen h-screen overflow-hidden">
-        <Image
-          src="/hero.png"
-          alt="Hero background"
-          fill
-          style={{ objectFit: "cover" }}
-          priority
-          quality={90}
-          sizes="100vw"
-          className="z-0"
+        <video
+          src="/HeroBanner.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-start justify-end px-12 pb-32 z-10">
+        <div className="absolute inset-0 flex flex-col items-start justify-end px-12 pb-32 z-10" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <h1 className="text-white text-6xl md:text-7xl font-light mb-6 leading-tight">
             Never again miss <span 
               className={`inline-block transition-opacity duration-500 ${isOccasionFading ? 'opacity-0' : 'opacity-100'}`}
