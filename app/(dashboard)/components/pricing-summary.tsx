@@ -12,7 +12,7 @@ export function PricingSummary() {
       
       <div className="relative grid grid-cols-1 md:grid-cols-3 gap-0">
         {/* Essentials */}
-        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/30">
+        <div className="text-gray-800 p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-gray-400/30">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             JUST A FEW
           </h3>
@@ -25,7 +25,7 @@ export function PricingSummary() {
         </div>
 
         {/* Stress Free */}
-        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/30">
+        <div className="text-gray-800 p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-gray-400/30">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             KEEP IN TOUCH
           </h3>
@@ -38,7 +38,7 @@ export function PricingSummary() {
         </div>
 
         {/* Concierge */}
-        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px]">
+        <div className="text-gray-800 p-16 flex flex-col items-center justify-center text-center min-h-[500px]">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             LET US HELP
           </h3>
