@@ -69,7 +69,7 @@ export function InteractivePricing() {
             key={tier.priceId}
             onClick={() => handleCheckout(tier.priceId)}
             disabled={isLoading === tier.priceId}
-            className={`p-16 flex flex-col items-center justify-center text-center min-h-[500px] transition-all duration-300 hover:bg-black/5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`p-16 flex flex-col items-center justify-center text-center min-h-[500px] transition-all duration-300 hover:shadow-2xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               index < tiers.length - 1 ? 'border-r border-gray-400/30' : ''
             } ${
               isRecommended(index) ? 'text-yellow-700' : 'text-gray-800'
