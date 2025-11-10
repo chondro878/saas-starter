@@ -65,11 +65,16 @@ export default function CreateReminderPage() {
     isValidating: boolean;
     result: any | null;
     showSuggestion: boolean;
+    error: string | null;
   }>({
     isValidating: false,
     result: null,
     showSuggestion: false,
+    error: null,
   });
+
+  // ZIP code lookup state
+  const [zipLookupLoading, setZipLookupLoading] = useState(false);
 
   // --- Form setup with react-hook-form and Zod resolver ---
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
@@ -81,13 +86,6 @@ export default function CreateReminderPage() {
   const [selectedCustomOccasions, setSelectedCustomOccasions] = useState<string[]>([]);
   const [selectedHolidayOccasions, setSelectedHolidayOccasions] = useState<string[]>([]);
   const [customDates, setCustomDates] = useState<{ [occasion: string]: Date | undefined }>({});
-
-  // Validate address when reaching step 5
-  useEffect(() => {
-    if (currentStep === 5 && !addressValidation.result) {
-      validateAddressFields();
-    }
-  }, [currentStep]);
 
   // --- Watch form fields for dynamic updates ---
   const firstPerson = watch("firstPerson") || { first: '', last: '' };
@@ -307,13 +305,29 @@ export default function CreateReminderPage() {
   const handleNext = async () => {
     // Validate address before leaving step 1
     if (currentStep === 1) {
-      if (!addressValidation.result) {
-        await validateAddressFields();
+      // Run validation and get result directly (avoids race condition)
+      const validationResult = await validateAddressFields();
+      
+      // If validation failed (network/API error), show error but don't block
+      // User will see error UI with option to retry or proceed anyway
+      if (!validationResult && addressValidation.error) {
+        return; // Wait for user to retry or proceed anyway
       }
-      // Check if validation shows undeliverable
-      if (addressValidation.result?.verdict === 'UNDELIVERABLE') {
-        return; // Don't proceed if address is undeliverable
+      
+      // If validation succeeded
+      if (validationResult) {
+        // If address is undeliverable, block progression (UI will show error)
+        if (validationResult.verdict === 'UNDELIVERABLE') {
+          return;
+        }
+        
+        // If address is correctable, let user decide (UI shows suggestion)
+        if (validationResult.verdict === 'CORRECTABLE') {
+          return; // Wait for user to accept or decline suggestion
+        }
       }
+      
+      // Address is valid/deliverable, or validation failed but user chose to proceed anyway
       setCurrentStep(2);
       return;
     }
@@ -434,16 +448,20 @@ export default function CreateReminderPage() {
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
 
-  // Address validation function
+  // Address validation function - returns the validation result
   const validateAddressFields = async () => {
     const addressData = watch('address');
     if (!addressData.street || !addressData.city || !addressData.state || !addressData.zip) {
-      return;
+      return null;
     }
 
-    setAddressValidation({ isValidating: true, result: null, showSuggestion: false });
+    setAddressValidation({ isValidating: true, result: null, showSuggestion: false, error: null });
 
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/validate-address', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -454,7 +472,10 @@ export default function CreateReminderPage() {
           state: addressData.state,
           zip: addressData.zip,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const result = await response.json();
@@ -462,11 +483,41 @@ export default function CreateReminderPage() {
           isValidating: false,
           result,
           showSuggestion: result.verdict === 'CORRECTABLE' || result.verdict === 'UNDELIVERABLE',
+          error: null,
         });
+        return result;
+      } else {
+        // Handle non-200 responses
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = response.status === 429 
+          ? 'Too many requests. Please try again in a moment.'
+          : response.status >= 500
+          ? 'Address validation service is temporarily unavailable. You can proceed anyway or try again.'
+          : errorData.error || 'Failed to validate address. You can proceed anyway or try again.';
+        
+        console.error('Address validation error:', { status: response.status, error: errorData });
+        setAddressValidation({
+          isValidating: false,
+          result: null,
+          showSuggestion: false,
+          error: errorMessage,
+        });
+        return null;
       }
     } catch (error) {
+      // Handle network errors and timeouts
+      const errorMessage = error instanceof Error && error.name === 'AbortError'
+        ? 'Address validation is taking too long. You can proceed anyway or try again.'
+        : 'Network error: Unable to validate address. You can proceed anyway or try again.';
+      
       console.error('Address validation failed:', error);
-      setAddressValidation({ isValidating: false, result: null, showSuggestion: false });
+      setAddressValidation({
+        isValidating: false,
+        result: null,
+        showSuggestion: false,
+        error: errorMessage,
+      });
+      return null;
     }
   };
 
@@ -478,7 +529,50 @@ export default function CreateReminderPage() {
       setValue('address.city', suggested.city);
       setValue('address.state', suggested.state);
       setValue('address.zip', suggested.zip);
-      setAddressValidation({ ...addressValidation, showSuggestion: false });
+      setAddressValidation({ ...addressValidation, showSuggestion: false, error: null });
+      // Proceed to next step after applying suggestion
+      setCurrentStep(2);
+    }
+  };
+
+  const keepMyAddress = () => {
+    // User chooses to keep their address despite suggestion
+    setAddressValidation({ ...addressValidation, showSuggestion: false, error: null });
+    // Proceed to next step
+    setCurrentStep(2);
+  };
+
+  const proceedWithoutValidation = () => {
+    // User chooses to proceed despite validation failure
+    console.warn('User proceeding without address validation');
+    setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+    // Proceed to next step
+    setCurrentStep(2);
+  };
+
+  // Auto-fill city and state from ZIP code
+  const handleZipChange = async (zip: string) => {
+    setValue('address.zip', zip);
+    
+    // Only lookup if we have a valid 5-digit ZIP
+    if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+      setZipLookupLoading(true);
+      try {
+        const response = await fetch(`/api/city-state-lookup?zip=${zip}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.city && data.state) {
+            // Auto-fill city and state
+            setValue('address.city', data.city);
+            setValue('address.state', data.state);
+          }
+        }
+      } catch (error) {
+        // Silently fail - user can still enter manually
+        console.log('ZIP lookup failed, user can enter manually');
+      } finally {
+        setZipLookupLoading(false);
+      }
     }
   };
 
@@ -591,9 +685,17 @@ export default function CreateReminderPage() {
                 )}
 
                 <div className="border-t border-gray-100 pt-6">
-                  <Label className="block text-sm font-medium text-gray-700 mb-4">
-                    Recipient's Address (US only)
-                  </Label>
+                  <div className="flex items-center justify-between mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Recipient's Address (US only)
+                    </Label>
+                    {addressValidation.result?.verdict === 'VALID' && (
+                      <div className="flex items-center gap-1 text-xs text-green-600">
+                        <Check className="w-4 h-4" />
+                        <span>Verified</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="space-y-4">
                     <Input
                       placeholder="Street Address"
@@ -622,16 +724,152 @@ export default function CreateReminderPage() {
                           </option>
                         ))}
                       </select>
-                      <Input
-                        placeholder="Zip Code"
-                        {...register("address.zip")}
-                        maxLength={5}
-                        className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="Zip Code"
+                          {...register("address.zip")}
+                          onChange={(e) => handleZipChange(e.target.value)}
+                          maxLength={5}
+                          className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                        />
+                        {zipLookupLoading && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Address Validation Messages */}
+              {addressValidation.isValidating && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg mt-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                  <span>Validating address...</span>
+                </div>
+              )}
+
+              {/* Address Valid Indicator */}
+              {addressValidation.result?.verdict === 'VALID' && !addressValidation.showSuggestion && (
+                <div className="flex items-center gap-2 text-sm text-green-700 p-4 bg-green-50 border border-green-200 rounded-lg mt-6">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Address Verified by USPS</p>
+                    <p className="text-xs text-green-600 mt-0.5">This address is deliverable and properly formatted.</p>
+                  </div>
+                </div>
+              )}
+
+              {addressValidation.showSuggestion && addressValidation.result?.verdict === 'CORRECTABLE' && (
+                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg mt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-base font-medium text-blue-900 mb-3">
+                        We found a suggested address
+                      </p>
+                      <div className="bg-white rounded-lg p-4 mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">Your address:</p>
+                        <p className="text-sm text-gray-700">
+                          {address.street}{address.apartment ? `, ${address.apartment}` : ''}<br />
+                          {address.city}, {address.state} {address.zip}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">Suggested:</p>
+                        <p className="text-sm text-gray-700">
+                          {addressValidation.result.suggestedAddress?.street}
+                          {addressValidation.result.suggestedAddress?.apartment && `, ${addressValidation.result.suggestedAddress.apartment}`}<br />
+                          {addressValidation.result.suggestedAddress?.city}, {addressValidation.result.suggestedAddress?.state} {addressValidation.result.suggestedAddress?.zip}
+                        </p>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          onClick={applySuggestedAddress}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Use Suggested Address
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={keepMyAddress}
+                          className="px-6 py-2"
+                        >
+                          Keep My Address
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {addressValidation.showSuggestion && addressValidation.result?.verdict === 'UNDELIVERABLE' && (
+                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-lg mt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-base font-medium text-red-900 mb-2">
+                        Address Cannot Be Verified
+                      </p>
+                      <p className="text-sm text-red-800 mb-4">
+                        {addressValidation.result.message || 'The address you entered cannot be validated. Please check for typos or formatting issues.'}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                        }}
+                        className="px-6 py-2 border-red-300 text-red-700 hover:bg-red-50"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Edit Address
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Network/API Error - Allow retry or proceed anyway */}
+              {addressValidation.error && (
+                <div className="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg mt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-base font-medium text-yellow-900 mb-2">
+                        Validation Service Error
+                      </p>
+                      <p className="text-sm text-yellow-800 mb-4">
+                        {addressValidation.error}
+                      </p>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            await validateAddressFields();
+                          }}
+                          variant="outline"
+                          className="px-6 py-2 border-yellow-600 text-yellow-700 hover:bg-yellow-100"
+                        >
+                          Try Again
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={proceedWithoutValidation}
+                          className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white"
+                        >
+                          Proceed Anyway
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-end pt-8">
                 <Button
@@ -643,11 +881,12 @@ export default function CreateReminderPage() {
                     !address.street ||
                     !address.city ||
                     !address.state ||
-                    !address.zip
+                    !address.zip ||
+                    addressValidation.isValidating
                   }
-                  className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors"
+                  className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {addressValidation.isValidating ? 'Validating...' : 'Next'}
                 </Button>
               </div>
             </div>
@@ -866,7 +1105,10 @@ export default function CreateReminderPage() {
                   <h3 className="text-lg font-medium text-gray-900">Recipient</h3>
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(1)}
+                    onClick={() => {
+                      setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                      setCurrentStep(1);
+                    }}
                     className="text-sm text-gray-600 hover:text-gray-900 underline"
                   >
                     Edit Details
@@ -973,7 +1215,7 @@ export default function CreateReminderPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => setAddressValidation({ ...addressValidation, showSuggestion: false })}
+                          onClick={() => setAddressValidation({ ...addressValidation, showSuggestion: false, error: null })}
                           className="px-6 py-2"
                         >
                           Keep My Address
@@ -999,7 +1241,7 @@ export default function CreateReminderPage() {
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false });
+                          setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
                           setCurrentStep(1);
                         }}
                         className="px-6 py-2 border-red-300 text-red-700 hover:bg-red-50"
