@@ -53,6 +53,16 @@ export function InteractivePricing() {
         <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
       </div>
       
+      {/* Header Text */}
+      <div className="relative pt-32 pb-12 px-8 text-center">
+        <h1 className="text-5xl md:text-6xl font-light mb-6 text-gray-800 leading-tight">
+          Choose your plan
+        </h1>
+        <p className="text-xl text-gray-700 max-w-3xl mx-auto font-light leading-relaxed">
+          Never forget a birthday, anniversary, or Valentine's Day again.
+        </p>
+      </div>
+      
       <div className="relative grid grid-cols-1 md:grid-cols-3 gap-0">
         {tiers.map((tier, index) => (
           <button
