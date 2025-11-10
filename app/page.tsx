@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/browserClient";
 import { HolidayCarousel } from "@/app/(dashboard)/components/holiday-carousel";
+import { IOSDownload } from "@/app/(dashboard)/components/ios-download";
 import { Footer } from "@/components/ui/footer";
 
 export default function Home() {
@@ -197,152 +198,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Large Split - Image & Content */}
-      <section className="w-full bg-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[600px]">
-            <Image
-              src="/howitworks/1phonelist.jpg"
-              alt="Add recipients"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-          <div className="flex flex-col justify-center px-16 py-20 bg-white">
-            <h2 className="text-5xl font-light text-gray-900 mb-6 leading-tight">
-              Add your people
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
-              Tell us who matters. We'll handle the rest.
-            </p>
-            <Link 
-              href="/sign-up" 
-              className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium text-lg"
-            >
-              Start Now
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Holiday Carousel 1 */}
-      <section className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 py-20">
-        <div className="max-w-7xl mx-auto px-8">
-          <HolidayCarousel 
-            holidayIndex={0}
-            showBuyButton={false}
-            showManageButton={false}
-          />
-        </div>
-      </section>
-
-      {/* Large Split - Content & Image */}
-      <section className="w-full bg-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="flex flex-col justify-center px-16 py-20 bg-white">
-            <h2 className="text-5xl font-light text-gray-900 mb-6 leading-tight">
-              We send the cards
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
-              Premium quality. Perfect timing. Every time.
-            </p>
-            <Link 
-              href="/sign-up" 
-              className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium text-lg"
-            >
-              Get Started
-            </Link>
-          </div>
-          <div className="relative h-[600px]">
-            <Image
-              src="/howitworks/3cardrecived.jpg"
-              alt="Receive cards"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Holiday Carousel 2 */}
-      <section className="w-full bg-gradient-to-br from-amber-100 via-orange-50 to-pink-100 py-20">
-        <div className="max-w-7xl mx-auto px-8">
-          <HolidayCarousel 
-            holidayIndex={1}
-            showBuyButton={false}
-            showManageButton={false}
-          />
-        </div>
-      </section>
-
-      {/* Large Split - Image & Content */}
-      <section className="w-full bg-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[600px]">
-            <Image
-              src="/howitworks/4mailbox.jpg"
-              alt="Send cards"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-          <div className="flex flex-col justify-center px-16 py-20 bg-white">
-            <h2 className="text-5xl font-light text-gray-900 mb-6 leading-tight">
-              You sign & send
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
-              Pre-stamped. Pre-addressed. Zero stress.
-            </p>
-            <Link 
-              href="/sign-up" 
-              className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium text-lg"
-            >
-              Start Now
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Holiday Carousel 3 */}
-      <section className="w-full bg-gradient-to-br from-rose-100 via-pink-50 to-fuchsia-100 py-20">
-        <div className="max-w-7xl mx-auto px-8">
-          <HolidayCarousel 
-            holidayIndex={2}
-            showBuyButton={false}
-            showManageButton={false}
-          />
-        </div>
-      </section>
-
-      {/* Full Bleed Bulk Holiday Cards Section */}
-      <section className="w-full bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[600px]">
-            <Image
-              src="/holidaystack.png"
-              alt="Holiday card stack"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-          <div className="flex flex-col justify-center px-16 py-20">
-            <h2 className="text-5xl font-light mb-6 leading-tight">
-              Need bulk cards?
-            </h2>
-            <p className="text-xl text-gray-300 mb-10 leading-relaxed font-light">
-              Send holiday cards to everyone at once. We'll handle the stamps, addresses, and delivery.
-            </p>
-            <Link 
-              href="/sign-up" 
-              className="bg-white text-gray-900 px-8 py-4 rounded-lg w-fit hover:bg-gray-100 transition-colors font-medium text-lg"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof - Full Bleed */}
+      {/* Social Proof (Quotes) */}
       <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32">
         <div className="max-w-4xl mx-auto px-8 text-center">
           <div className="overflow-hidden relative h-32 transition-all duration-500 ease-in-out">
@@ -365,7 +221,18 @@ export default function Home() {
         `}</style>
       </section>
 
-      {/* Final CTA - Full Bleed */}
+      {/* Browse All Cards Carousel */}
+      <section className="w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 py-20">
+        <div className="max-w-7xl mx-auto px-8">
+          <HolidayCarousel 
+            holidayIndex={0}
+            showBuyButton={false}
+            showManageButton={false}
+          />
+        </div>
+      </section>
+
+      {/* Never Miss a Moment */}
       <section className="w-full bg-white py-32">
         <div className="max-w-4xl mx-auto px-8 text-center">
           <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-900 leading-tight">
@@ -380,6 +247,129 @@ export default function Home() {
           >
             Get Started
           </Link>
+        </div>
+      </section>
+
+      {/* Add Your People */}
+      <section className="w-full bg-white">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative h-[600px]">
+            <Image
+              src="/howitworks/1phonelist.jpg"
+              alt="Add recipients"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-16 py-20 bg-white">
+            <h2 className="text-5xl font-light text-gray-900 mb-6 leading-tight">
+              Add your people
+            </h2>
+            <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
+              Tell us who matters. We'll handle the rest.
+            </p>
+            <Link 
+              href="/sign-up" 
+              className="bg-gray-900 text-white px-8 py-4 rounded-lg w-fit hover:bg-gray-800 transition-colors font-medium text-lg"
+            >
+              Start Now
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Bulk Holiday Cards */}
+      <section className="w-full bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative h-[600px]">
+            <Image
+              src="/holidaystack.png"
+              alt="Holiday card stack"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-16 py-20">
+            <h2 className="text-5xl font-light mb-6 leading-tight">
+              Need bulk cards?
+            </h2>
+            <p className="text-xl text-gray-300 mb-10 leading-relaxed font-light">
+              Send holiday cards to everyone at once. We'll handle the stamps, addresses, and delivery.
+            </p>
+            <Link 
+              href="/sign-up" 
+              className="bg-white text-gray-900 px-8 py-4 rounded-lg w-fit hover:bg-gray-100 transition-colors font-medium text-lg"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Next Holiday Carousel */}
+      <section className="w-full bg-gradient-to-br from-amber-100 via-orange-50 to-pink-100 py-20">
+        <div className="max-w-7xl mx-auto px-8">
+          <HolidayCarousel 
+            holidayIndex={1}
+            showBuyButton={false}
+            showManageButton={false}
+          />
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="w-full bg-white py-32">
+        <div className="max-w-4xl mx-auto px-8">
+          <h2 className="text-5xl font-light text-center mb-16 text-gray-900">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-2xl font-medium mb-3 text-gray-900">
+                How does it work?
+              </h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Simply add your important people and their special occasions. We'll send you beautifully designed cards 
+                15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-medium mb-3 text-gray-900">
+                What occasions can I track?
+              </h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Birthdays, anniversaries, holidays, and any special occasion you don't want to miss. 
+                Add custom occasions and we'll remember them for you.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-medium mb-3 text-gray-900">
+                How much does it cost?
+              </h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Plans start at just $19/year. All cards include premium quality paper, professional printing, 
+                postage stamps, and delivery directly to your door.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-medium mb-3 text-gray-900">
+                Can I customize my cards?
+              </h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Yes! Add personal notes and reminders that we'll print inside each card. 
+                Choose from our curated collection of designs for every occasion.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Download the App */}
+      <section className="w-full bg-gradient-to-br from-gray-50 to-gray-100 py-20">
+        <div className="max-w-4xl mx-auto px-8">
+          <IOSDownload />
         </div>
       </section>
 
