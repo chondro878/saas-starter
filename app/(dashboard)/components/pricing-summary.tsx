@@ -4,10 +4,15 @@ import Link from 'next/link';
 
 export function PricingSummary() {
   return (
-    <section className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+    <section className="w-full relative">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
+        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
+      </div>
+      
+      <div className="relative grid grid-cols-1 md:grid-cols-3 gap-0">
         {/* Essentials */}
-        <div className="bg-gradient-to-br from-blue-400 to-blue-500 text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/20">
+        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/30">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             JUST A FEW
           </h3>
@@ -20,7 +25,7 @@ export function PricingSummary() {
         </div>
 
         {/* Stress Free */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/20">
+        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-white/30">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             KEEP IN TOUCH
           </h3>
@@ -33,7 +38,7 @@ export function PricingSummary() {
         </div>
 
         {/* Concierge */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px]">
+        <div className="text-white p-16 flex flex-col items-center justify-center text-center min-h-[500px]">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
             LET US HELP
           </h3>
