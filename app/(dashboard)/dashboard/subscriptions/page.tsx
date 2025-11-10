@@ -21,65 +21,38 @@ export default async function SubscriptionsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       <div className="max-w-4xl mx-auto py-16 px-8">
-        {/* Current Subscription Section */}
-        <div className="mb-12">
-          <h2 className="text-xs uppercase tracking-wider text-gray-600 font-semibold mb-6">
-            CURRENT SUBSCRIPTION
-          </h2>
-
-          {currentPlan ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-8 border-b border-gray-200">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">{currentPlan.name}</h3>
-                    <p className="text-4xl font-bold text-gray-900">
-                      ${currentPlan.price / 100}
-                      <span className="text-lg font-normal text-gray-500"> per {currentPlan.interval}</span>
-                    </p>
-                  </div>
-                  {hasActiveSubscription && (
-                    <ManageBillingButton />
-                  )}
+        {/* Upgrade Section - Now at Top, Pricing Removed */}
+        {nextTier && hasActiveSubscription && (
+          <div className="mb-12">
+            <div className="bg-white rounded-xl shadow-sm border border-purple-300 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                  <h3 className="text-2xl font-bold text-white">
+                    Upgrade to {STRIPE_PLANS[nextTier].name}
+                  </h3>
                 </div>
-                
-                <p className="text-gray-600">
-                  Your next billing date is {team.subscriptionStatus === 'active' ? 'upcoming' : 'N/A'}.
+                <p className="text-purple-100">
+                  Get more cards and premium features
                 </p>
               </div>
-
-              {!hasActiveSubscription && (
-                <div className="p-8 bg-amber-50 border-t border-amber-200">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-amber-900 mb-1">Subscription Inactive</p>
-                      <p className="text-sm text-amber-700 mb-4">
-                        Choose a plan to get started or reactivate your subscription.
-                      </p>
-                      <a 
-                        href="/pricing" 
-                        className="inline-block bg-amber-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors text-sm"
-                      >
-                        View Plans
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <div className="p-8">
+                <p className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                  Additional Features
+                </p>
+                <ul className="space-y-2 mb-6">
+                  {STRIPE_PLANS[nextTier].features.slice(currentPlan?.features.length || 0).map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <UpgradeButton priceId={STRIPE_PLANS[nextTier].priceId} planName={STRIPE_PLANS[nextTier].name} />
+              </div>
             </div>
-          ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-              <p className="text-gray-500 text-lg mb-6">No active subscription</p>
-              <a 
-                href="/pricing" 
-                className="inline-block bg-gray-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
-              >
-                Choose a Plan
-              </a>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Payment Methods Section */}
         {hasActiveSubscription && (
@@ -126,54 +99,60 @@ export default async function SubscriptionsPage() {
           </div>
         )}
 
-        {/* Upgrade Section */}
-        {nextTier && hasActiveSubscription && (
-          <div className="mb-12">
-            <div className="bg-white rounded-xl shadow-sm border border-purple-300 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                  <h3 className="text-2xl font-bold text-white">
-                    Upgrade to {STRIPE_PLANS[nextTier].name}
-                  </h3>
-                </div>
-                <p className="text-purple-100">
-                  Get more cards and premium features
-                </p>
-              </div>
-              <div className="p-8">
-                <div className="grid md:grid-cols-2 gap-8 mb-6">
+        {/* Current Subscription Section - Now at Bottom, Pricing Removed */}
+        <div className="mb-12">
+          <h2 className="text-xs uppercase tracking-wider text-gray-600 font-semibold mb-6">
+            CURRENT SUBSCRIPTION
+          </h2>
+
+          {currentPlan ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="p-8 border-b border-gray-200">
+                <div className="flex items-start justify-between mb-6">
                   <div>
-                    <p className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                      Additional Features
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">{currentPlan.name}</h3>
+                    <p className="text-gray-600">
+                      Your next billing date is {team.subscriptionStatus === 'active' ? 'upcoming' : 'N/A'}.
                     </p>
-                    <ul className="space-y-2">
-                      {STRIPE_PLANS[nextTier].features.slice(currentPlan?.features.length || 0).map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                          <Check className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                      Pricing
-                    </p>
-                    <p className="text-4xl font-bold text-gray-900 mb-1">
-                      ${STRIPE_PLANS[nextTier].price / 100}
-                      <span className="text-lg font-normal text-gray-500">/{STRIPE_PLANS[nextTier].interval}</span>
-                    </p>
-                    <p className="text-sm text-gray-600 mb-6">
-                      {STRIPE_PLANS[nextTier].cardsPerYear} cards per year
-                    </p>
-                    <UpgradeButton priceId={STRIPE_PLANS[nextTier].priceId} planName={STRIPE_PLANS[nextTier].name} />
-                  </div>
+                  {hasActiveSubscription && (
+                    <ManageBillingButton />
+                  )}
                 </div>
               </div>
+
+              {!hasActiveSubscription && (
+                <div className="p-8 bg-amber-50 border-t border-amber-200">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-amber-900 mb-1">Subscription Inactive</p>
+                      <p className="text-sm text-amber-700 mb-4">
+                        Choose a plan to get started or reactivate your subscription.
+                      </p>
+                      <a 
+                        href="/pricing" 
+                        className="inline-block bg-amber-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors text-sm"
+                      >
+                        View Plans
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+              <p className="text-gray-500 text-lg mb-6">No active subscription</p>
+              <a 
+                href="/pricing" 
+                className="inline-block bg-gray-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              >
+                Choose a Plan
+              </a>
+            </div>
+          )}
+        </div>
 
         {/* Available Plans */}
         {!hasActiveSubscription && (
