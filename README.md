@@ -60,6 +60,20 @@ This will create the following user and team:
 
 You can also create new users through the `/sign-up` route.
 
+### (Optional) Set up address validation
+
+For address validation when creating reminders, you'll need USPS API credentials. See [USPS_ADDRESS_VALIDATION_SETUP.md](./USPS_ADDRESS_VALIDATION_SETUP.md) for detailed setup instructions.
+
+Add to your `.env.local`:
+```bash
+USPS_CONSUMER_KEY=your_consumer_key_here
+USPS_CONSUMER_SECRET=your_consumer_secret_here
+USPS_CUSTOMER_REGISTRATION_ID=your_crid_here
+USPS_MAILER_ID=your_mid_here
+```
+
+**Note**: Requires USPS Business Customer Gateway account. Address validation will work without this (all addresses accepted as valid), but it's **strongly recommended for production** since you're mailing physical cards via USPS.
+
 Finally, run the Next.js development server:
 
 ```bash
@@ -107,6 +121,8 @@ In your Vercel project settings (or during deployment), add all the necessary en
 3. `STRIPE_WEBHOOK_SECRET`: Use the webhook secret from the production webhook you created in step 1.
 4. `POSTGRES_URL`: Set this to your production database URL.
 5. `AUTH_SECRET`: Set this to a random string. `openssl rand -base64 32` will generate one.
+6. `USPS_CONSUMER_KEY`, `USPS_CONSUMER_SECRET`, `USPS_CUSTOMER_REGISTRATION_ID`, `USPS_MAILER_ID`: (Optional but recommended) For address validation. Requires USPS Business Customer Gateway account. See [USPS_ADDRESS_VALIDATION_SETUP.md](./USPS_ADDRESS_VALIDATION_SETUP.md) for setup instructions.
+7. `CRON_SECRET`: Set this to a random string for authenticating cron job requests.
 
 ## Other Templates
 
