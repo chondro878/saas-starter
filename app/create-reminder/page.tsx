@@ -166,6 +166,104 @@ export default function CreateReminderPage() {
     }
   };
 
+  // Get styling for occasion notes textarea (border and background)
+  const getOccasionNotesStyle = (occasion: string) => {
+    const occasionLower = occasion.toLowerCase();
+    
+    if (occasionLower.includes('birthday')) {
+      return {
+        border: 'border-transparent',
+        bg: 'bg-gray-100',
+        gradientBorder: true,
+        gradientColors: 'linear-gradient(to right, #fb923c, #a78bfa, #34d399, #f472b6, #fbbf24)',
+        focusGradientColors: 'linear-gradient(to right, #ea580c, #7c3aed, #059669, #db2777, #d97706)'
+      };
+    }
+    if (occasionLower.includes('work')) {
+      return {
+        border: 'border-transparent',
+        bg: 'bg-purple-50',
+        gradientBorder: true,
+        gradientColors: 'linear-gradient(to right, #a855f7, #7c3aed, #8b5cf6, #9333ea, #a78bfa)',
+        focusGradientColors: 'linear-gradient(to right, #7c3aed, #5b21b6, #6d28d9, #7c3aed, #6d28d9)'
+      };
+    }
+    if (occasionLower.includes('anniversary')) {
+      return {
+        border: 'border-transparent',
+        bg: 'bg-pink-50',
+        gradientBorder: true,
+        gradientColors: 'linear-gradient(to right, #f472b6, #ec4899, #fb7185, #e11d48, #f9a8d4)',
+        focusGradientColors: 'linear-gradient(to right, #db2777, #be123c, #e11d48, #9f1239, #db2777)'
+      };
+    }
+    if (occasionLower.includes('new year')) {
+      return {
+        border: 'border-amber-400 focus:border-amber-700',
+        bg: 'bg-amber-50/50'
+      };
+    }
+    if (occasionLower.includes('valentine')) {
+      return {
+        border: 'border-red-400 focus:border-red-700',
+        bg: 'bg-red-50/50'
+      };
+    }
+    if (occasionLower.includes('patrick')) {
+      return {
+        border: 'border-green-400 focus:border-green-700',
+        bg: 'bg-green-50/50'
+      };
+    }
+    if (occasionLower.includes('easter')) {
+      return {
+        border: 'border-purple-300 focus:border-purple-600',
+        bg: 'bg-purple-50/50'
+      };
+    }
+    if (occasionLower.includes('mother')) {
+      return {
+        border: 'border-pink-300 focus:border-pink-600',
+        bg: 'bg-pink-50/50'
+      };
+    }
+    if (occasionLower.includes('father')) {
+      return {
+        border: 'border-blue-400 focus:border-blue-700',
+        bg: 'bg-blue-50/50'
+      };
+    }
+    if (occasionLower.includes('independence')) {
+      return {
+        border: 'border-red-400 focus:border-red-700',
+        bg: 'bg-red-50/50'
+      };
+    }
+    if (occasionLower.includes('halloween')) {
+      return {
+        border: 'border-orange-400 focus:border-orange-700',
+        bg: 'bg-orange-50/50'
+      };
+    }
+    if (occasionLower.includes('thanksgiving')) {
+      return {
+        border: 'border-amber-500 focus:border-amber-800',
+        bg: 'bg-amber-50/50'
+      };
+    }
+    if (occasionLower.includes('christmas')) {
+      return {
+        border: 'border-red-500 focus:border-red-800',
+        bg: 'bg-gradient-to-br from-red-50/50 to-green-50/50'
+      };
+    }
+    
+    return {
+      border: 'border-blue-300 focus:border-blue-600',
+      bg: 'bg-blue-50/50'
+    };
+  };
+
   // Get colors for occasions based on relationship correlations
   const getOccasionColors = (occasion: string) => {
     const occasionLower = occasion.toLowerCase();
@@ -1367,17 +1465,56 @@ export default function CreateReminderPage() {
                   {notesMode === 'custom' && (
                     <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
                       <p className="text-sm text-gray-700 mb-4">Add custom notes for each occasion:</p>
-                      {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => (
-                        <div key={oc}>
-                          <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
-                          <Textarea
-                            placeholder={`What should you remember when sending a card for ${oc}?`}
-                            className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
-                            rows={2}
-                            {...register(`occasionNotes.${oc}` as const)}
-                          />
-                        </div>
-                      ))}
+                      {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => {
+                        const style = getOccasionNotesStyle(oc);
+                        return (
+                          <div key={oc}>
+                            <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
+                            {style.gradientBorder ? (
+                              <div 
+                                className="p-[2px] rounded-md transition-all duration-200 group"
+                                style={{
+                                  background: style.gradientColors
+                                }}
+                              >
+                                <Textarea
+                                  placeholder={`What should you remember when sending a card for ${oc}?`}
+                                  className={cn(
+                                    "w-full focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:border-transparent border-0 rounded-sm",
+                                    style.bg
+                                  )}
+                                  rows={2}
+                                  {...register(`occasionNotes.${oc}` as const, {
+                                    onBlur: (e) => {
+                                      const wrapper = e.target.closest('.group') as HTMLElement;
+                                      if (wrapper && style.gradientColors) {
+                                        wrapper.style.background = style.gradientColors;
+                                      }
+                                    }
+                                  })}
+                                  onFocus={(e) => {
+                                    const wrapper = e.target.closest('.group') as HTMLElement;
+                                    if (wrapper && style.focusGradientColors) {
+                                      wrapper.style.background = style.focusGradientColors;
+                                    }
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <Textarea
+                                placeholder={`What should you remember when sending a card for ${oc}?`}
+                                className={cn(
+                                  "w-full focus:ring-0 focus:ring-offset-0 focus:outline-none focus-visible:ring-0 border-2 transition-colors",
+                                  style.border,
+                                  style.bg
+                                )}
+                                rows={2}
+                                {...register(`occasionNotes.${oc}` as const)}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -1450,8 +1587,29 @@ export default function CreateReminderPage() {
                   type="button"
                   variant="outline"
                   onClick={() => {
+                    // Reset all form state
                     setCurrentStep(1);
-                    // Reset form
+                    setValue("firstPerson", { first: '', last: '' });
+                    setValue("secondPersonEnabled", false);
+                    setValue("secondPerson", { first: '', last: '' });
+                    setValue("address", { street: '', apartment: '', city: '', state: '', zip: '' });
+                    setValue("relationship", undefined);
+                    setValue("note", '');
+                    setValue("occasionNotes", {});
+                    
+                    // Reset occasion selections
+                    setSelectedCustomOccasions([]);
+                    setSelectedHolidayOccasions([]);
+                    setCustomDates({});
+                    
+                    // Reset address validation state
+                    setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
+                    
+                    // Reset notes mode
+                    setNotesMode(null);
+                    
+                    // Reset error message
+                    setErrorMessage('');
                   }}
                   className="px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
