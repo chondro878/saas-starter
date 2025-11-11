@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -59,6 +59,10 @@ export default function CreateReminderPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Refs for focus management
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const announceRef = useRef<HTMLDivElement>(null);
   
   // Address validation state
   const [addressValidation, setAddressValidation] = useState<{
@@ -554,6 +558,30 @@ export default function CreateReminderPage() {
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
 
+  // Get step title for announcements
+  const getStepTitle = (step: number): string => {
+    switch (step) {
+      case 1: return 'Step 1: Who is this for?';
+      case 2: return 'Step 2: What kind of relationship is this?';
+      case 3: return 'Step 3: What kind of card do you need?';
+      case 4: return 'Step 4: When is it?';
+      case 5: return 'Step 5: Review and add notes';
+      case 6: return 'Success: Reminder created';
+      default: return '';
+    }
+  };
+
+  // Focus management when step changes
+  useEffect(() => {
+    if (stepHeadingRef.current) {
+      stepHeadingRef.current.focus();
+    }
+    // Announce step change to screen readers
+    if (announceRef.current) {
+      announceRef.current.textContent = getStepTitle(currentStep);
+    }
+  }, [currentStep]);
+
   // Address validation function - returns the validation result
   const validateAddressFields = async () => {
     const addressData = watch('address');
@@ -689,6 +717,15 @@ export default function CreateReminderPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Screen reader announcements */}
+      <div 
+        ref={announceRef}
+        role="status" 
+        aria-live="polite" 
+        aria-atomic="true"
+        className="sr-only"
+      />
+      
       {/* Header */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-8 py-6">
@@ -697,6 +734,7 @@ export default function CreateReminderPage() {
             <button 
               onClick={() => router.back()}
               className="text-gray-600 hover:text-gray-900 transition-colors"
+              aria-label="Cancel and return to previous page"
             >
               Cancel
             </button>
@@ -704,14 +742,21 @@ export default function CreateReminderPage() {
           
           {/* Progress Bar - Only show for steps 1-5 */}
           {currentStep <= totalSteps && (
-            <div className="mt-6">
+            <div className="mt-6" role="group" aria-label="Form progress">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Step {currentStep} of {totalSteps}</span>
+                <span className="text-sm text-gray-600" id="progress-label">Step {currentStep} of {totalSteps}</span>
                 <span className="text-sm text-gray-600">
                   {currentStep === totalSteps ? '99' : Math.round((currentStep / totalSteps) * 100)}% Complete
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="w-full bg-gray-200 rounded-full h-2"
+                role="progressbar"
+                aria-labelledby="progress-label"
+                aria-valuenow={currentStep}
+                aria-valuemin={1}
+                aria-valuemax={totalSteps}
+              >
                 <div 
                   className="bg-gray-900 h-2 rounded-full transition-all duration-300"
                   style={{ 
@@ -731,26 +776,45 @@ export default function CreateReminderPage() {
           {currentStep === 1 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">Who is this for?</h2>
+                <h2 
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-3xl font-light text-gray-900 mb-4 outline-none"
+                >
+                  Who is this for?
+                </h2>
                 <p className="text-gray-600">Tell us about the person you want to remember.</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <fieldset className="space-y-6">
+                <legend className="sr-only">Recipient Information</legend>
+                
+                <div className="grid grid-cols-2 gap-4" role="group" aria-label="Recipient name">
                   <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-2">First Name</Label>
+                    <Label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name <span className="text-red-500" aria-label="required">*</span>
+                    </Label>
                     <Input
+                      id="first-name"
                       placeholder="First Name"
                       {...register("firstPerson.first")}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                      aria-required="true"
+                      aria-invalid={!!errors.firstPerson?.first}
+                      aria-describedby={errors.firstPerson?.first ? "first-name-error" : undefined}
                     />
                     {errors.firstPerson?.first && (
-                      <p className="text-sm text-red-500 mt-1">{errors.firstPerson.first.message}</p>
+                      <p id="first-name-error" role="alert" className="text-sm text-red-500 mt-1">
+                        {errors.firstPerson.first.message}
+                      </p>
                     )}
                   </div>
                   <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-2">Last Name</Label>
+                    <Label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name <span className="text-red-500" aria-label="required">*</span>
+                    </Label>
                     <Input
+                      id="last-name"
                       placeholder="Last Name"
                       {...register("firstPerson.last")}
                       onChange={(e) => {
@@ -761,32 +825,49 @@ export default function CreateReminderPage() {
                         }
                       }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                      aria-required="true"
+                      aria-invalid={!!errors.firstPerson?.last}
+                      aria-describedby={errors.firstPerson?.last ? "last-name-error" : undefined}
                     />
+                    {errors.firstPerson?.last && (
+                      <p id="last-name-error" role="alert" className="text-sm text-red-500 mt-1">
+                        {errors.firstPerson.last.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span
+                  <button
+                    type="button"
                     className="text-sm cursor-pointer text-gray-600 hover:text-gray-800 underline underline-offset-4"
                     onClick={() => setValue("secondPersonEnabled", !secondPersonEnabled)}
+                    aria-pressed={secondPersonEnabled}
+                    aria-label={secondPersonEnabled ? "Remove partner information" : "Add partner information for a couple"}
                   >
                     Is this a couple?
-                  </span>
+                  </button>
                 </div>
 
                 {secondPersonEnabled && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4" role="group" aria-label="Partner name">
                     <div>
-                      <Label className="block text-sm font-medium text-gray-700 mb-2">Partner's First Name</Label>
+                      <Label htmlFor="partner-first-name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Partner's First Name
+                      </Label>
                       <Input
+                        id="partner-first-name"
                         placeholder="First Name"
                         {...register("secondPerson.first")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                       />
                     </div>
                     <div>
-                      <Label className="block text-sm font-medium text-gray-700 mb-2">Partner's Last Name</Label>
+                      <Label htmlFor="partner-last-name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Partner's Last Name
+                      </Label>
                       <Input
+                        id="partner-last-name"
                         placeholder="Last Name"
                         {...register("secondPerson.last")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
@@ -794,12 +875,14 @@ export default function CreateReminderPage() {
                     </div>
                   </div>
                 )}
+              </fieldset>
 
-                <div className="border-t border-gray-100 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
-                      Recipient's Address (US only)
-                    </Label>
+              <fieldset className="border-t border-gray-100 pt-6 mt-6">
+                <legend className="block text-sm font-medium text-gray-700 mb-4">
+                  Recipient's Address (US only) <span className="text-red-500" aria-label="required">*</span>
+                </legend>
+                <div className="mb-4">
+                  <div className="flex items-center justify-end">
                     {addressValidation.result?.verdict === 'VALID' && (
                       <div className="flex items-center gap-1 text-xs text-green-600">
                         <Check className="w-4 h-4" />
@@ -808,7 +891,12 @@ export default function CreateReminderPage() {
                     )}
                   </div>
                   <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="street-address" className="sr-only">
+                        Street Address
+                      </Label>
                     <Input
+                        id="street-address"
                       placeholder="Street Address"
                       {...register("address.street")}
                       onChange={(e) => {
@@ -819,8 +907,22 @@ export default function CreateReminderPage() {
                         }
                       }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
-                    />
+                        aria-required="true"
+                        aria-invalid={!!errors.address?.street}
+                        autoComplete="street-address"
+                      />
+                      {errors.address?.street && (
+                        <p id="street-error" role="alert" className="text-sm text-red-500 mt-1">
+                          {errors.address.street.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="apartment" className="sr-only">
+                        Apartment, Suite, etc. (optional)
+                      </Label>
                     <Input
+                        id="apartment"
                       placeholder="Apt, Suite, etc. (optional)"
                       {...register("address.apartment")}
                       onChange={(e) => {
@@ -831,9 +933,16 @@ export default function CreateReminderPage() {
                         }
                       }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                        autoComplete="address-line2"
                     />
+                    </div>
                     <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="city" className="sr-only">
+                          City
+                        </Label>
                       <Input
+                          id="city"
                         placeholder="City"
                         {...register("address.city")}
                         onChange={(e) => {
@@ -844,8 +953,22 @@ export default function CreateReminderPage() {
                           }
                         }}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
-                      />
+                          aria-required="true"
+                          aria-invalid={!!errors.address?.city}
+                          autoComplete="address-level2"
+                        />
+                        {errors.address?.city && (
+                          <p id="city-error" role="alert" className="text-sm text-red-500 mt-1">
+                            {errors.address.city.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="state" className="sr-only">
+                          State
+                        </Label>
                       <select
+                          id="state"
                         {...register("address.state")}
                         onChange={(e) => {
                           setValue("address.state", e.target.value);
@@ -855,6 +978,9 @@ export default function CreateReminderPage() {
                           }
                         }}
                         className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none text-gray-900"
+                          aria-required="true"
+                          aria-invalid={!!errors.address?.state}
+                          autoComplete="address-level1"
                       >
                         <option value="">Select State</option>
                         {US_STATES.map((state) => (
@@ -863,37 +989,67 @@ export default function CreateReminderPage() {
                           </option>
                         ))}
                       </select>
+                        {errors.address?.state && (
+                          <p id="state-error" role="alert" className="text-sm text-red-500 mt-1">
+                            {errors.address.state.message}
+                          </p>
+                        )}
+                      </div>
                       <div className="relative">
+                        <Label htmlFor="zip" className="sr-only">
+                          Zip Code
+                        </Label>
                         <Input
+                          id="zip"
                           placeholder="Zip Code"
                           {...register("address.zip")}
                           onChange={(e) => handleZipChange(e.target.value)}
                           maxLength={5}
                           className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                          aria-required="true"
+                          aria-invalid={!!errors.address?.zip}
+                          autoComplete="postal-code"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                         />
                         {zipLookupLoading && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                           </div>
+                        )}
+                        {errors.address?.zip && (
+                          <p id="zip-error" role="alert" className="text-sm text-red-500 mt-1">
+                            {errors.address.zip.message}
+                          </p>
                         )}
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Address Validation Messages */}
               {addressValidation.isValidating && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg mt-6">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                <div 
+                  className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg mt-6"
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" aria-hidden="true"></div>
                   <span>Validating address...</span>
                 </div>
               )}
 
               {/* Address Valid Indicator */}
               {addressValidation.result?.verdict === 'VALID' && !addressValidation.showSuggestion && (
-                <div className="flex items-center gap-2 text-sm text-green-700 p-4 bg-green-50 border border-green-200 rounded-lg mt-6">
-                  <Check className="w-5 h-5 text-green-600" />
+                <div 
+                  className="flex items-center gap-2 text-sm text-green-700 p-4 bg-green-50 border border-green-200 rounded-lg mt-6"
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  <Check className="w-5 h-5 text-green-600" aria-hidden="true" />
                   <div>
                     <p className="font-medium">Address Verified by USPS</p>
                     <p className="text-xs text-green-600 mt-0.5">This address is deliverable and properly formatted.</p>
@@ -902,9 +1058,14 @@ export default function CreateReminderPage() {
               )}
 
               {addressValidation.showSuggestion && addressValidation.result?.verdict === 'CORRECTABLE' && (
-                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg mt-6">
+                <div 
+                  className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg mt-6"
+                  role="alert"
+                  aria-live="assertive"
+                  aria-atomic="true"
+                >
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="flex-1">
                       <p className="text-base font-medium text-blue-900 mb-3">
                         We found a suggested address
@@ -948,9 +1109,14 @@ export default function CreateReminderPage() {
               )}
 
               {addressValidation.showSuggestion && addressValidation.result?.verdict === 'UNDELIVERABLE' && (
-                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-lg mt-6">
+                <div 
+                  className="p-6 bg-red-50 border-2 border-red-200 rounded-lg mt-6"
+                  role="alert"
+                  aria-live="assertive"
+                  aria-atomic="true"
+                >
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="flex-1">
                       <p className="text-base font-medium text-red-900 mb-2">
                         Address Cannot Be Verified
@@ -976,9 +1142,14 @@ export default function CreateReminderPage() {
 
               {/* Network/API Error - Allow retry or proceed anyway */}
               {addressValidation.error && (
-                <div className="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg mt-6">
+                <div 
+                  className="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg mt-6"
+                  role="alert"
+                  aria-live="assertive"
+                  aria-atomic="true"
+                >
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="flex-1">
                       <p className="text-base font-medium text-yellow-900 mb-2">
                         Validation Service Error
@@ -1040,13 +1211,24 @@ export default function CreateReminderPage() {
           {currentStep === 2 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">What kind of relationship is this?</h2>
+                <h2 
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-3xl font-light text-gray-900 mb-4 outline-none"
+                >
+                  What kind of relationship is this?
+                </h2>
                 <p className="text-gray-600">This helps us personalize the card.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-8">
+              <div 
+                className="grid grid-cols-2 gap-3 mb-8"
+                role="group"
+                aria-label="Select relationship type"
+              >
                 {relationshipOptions.map((option) => {
                   const colors = getRelationshipColors(option);
+                  const isSelected = relationship === option;
                   return (
                     <button
                       key={option}
@@ -1054,12 +1236,15 @@ export default function CreateReminderPage() {
                       onClick={() => setValue("relationship", option)}
                       className={cn(
                         "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
-                        relationship === option 
+                        isSelected 
                           ? colors.selected
                           : `${colors.bg} ${colors.text} border-gray-200 ${colors.hoverBorder}`
                       )}
+                      aria-pressed={isSelected}
+                      aria-label={`${option} relationship${isSelected ? ', selected' : ''}`}
                     >
                       {option}
+                      {isSelected && <span className="sr-only">(selected)</span>}
                     </button>
                   );
                 })}
@@ -1089,16 +1274,26 @@ export default function CreateReminderPage() {
           {currentStep === 3 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">What kind of card do you need?</h2>
+                <h2 
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-3xl font-light text-gray-900 mb-4 outline-none"
+                >
+                  What kind of card do you need?
+                </h2>
                 <p className="text-gray-600">Select the occasions you want to remember.</p>
               </div>
               
               <div className="space-y-8">
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-4">
+                <fieldset>
+                  <legend className="block text-sm font-medium text-gray-700 mb-4">
                     Personal Occasions <span className="text-xs text-gray-500">(date required)</span>
-                  </Label>
-                  <div className="grid grid-cols-1 gap-3">
+                  </legend>
+                  <div 
+                    className="grid grid-cols-1 gap-3"
+                    role="group"
+                    aria-label="Select personal occasions"
+                  >
                     {customOccasions.map((item) => {
                       const colors = getOccasionColors(item.value);
                       const isSelected = isCustomOccasionSelected(item.value);
@@ -1115,19 +1310,26 @@ export default function CreateReminderPage() {
                             isSelected && colors.decoration === 'sparkles' && "occasion-sparkles",
                             isSelected && colors.decoration === 'professional' && "occasion-professional"
                           )}
+                          aria-pressed={isSelected}
+                          aria-label={`${item.label}${isSelected ? ', selected' : ''}`}
                         >
                           <span className="relative z-10">{item.label}</span>
+                          {isSelected && <span className="sr-only">(selected)</span>}
                         </button>
                       );
                     })}
                   </div>
-                </div>
+                </fieldset>
                 
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-4">
+                <fieldset>
+                  <legend className="block text-sm font-medium text-gray-700 mb-4">
                     Holidays <span className="text-xs text-gray-500">(date is fixed)</span>
-                  </Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  </legend>
+                  <div 
+                    className="grid grid-cols-2 gap-3"
+                    role="group"
+                    aria-label="Select holiday occasions"
+                  >
                     {holidayOccasions.map((item) => {
                       const colors = getOccasionColors(item.value);
                       const isSelected = isHolidayOccasionSelected(item.value);
@@ -1144,13 +1346,16 @@ export default function CreateReminderPage() {
                             isSelected && colors.decoration === 'sparkles' && "occasion-sparkles",
                             isSelected && colors.decoration === 'professional' && "occasion-professional"
                           )}
+                          aria-pressed={isSelected}
+                          aria-label={`${item.label}${isSelected ? ', selected' : ''}`}
                         >
                           <span className="relative z-10">{item.label}</span>
+                          {isSelected && <span className="sr-only">(selected)</span>}
                         </button>
                       );
                     })}
                   </div>
-                </div>
+                </fieldset>
               </div>
               
               <div className="flex justify-between pt-8">
@@ -1468,8 +1673,8 @@ export default function CreateReminderPage() {
                       {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => {
                         const style = getOccasionNotesStyle(oc);
                         return (
-                          <div key={oc}>
-                            <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
+                        <div key={oc}>
+                          <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
                             {style.gradientBorder ? (
                               <div 
                                 className="p-[2px] rounded-md transition-all duration-200 group"
@@ -1477,8 +1682,8 @@ export default function CreateReminderPage() {
                                   background: style.gradientColors
                                 }}
                               >
-                                <Textarea
-                                  placeholder={`What should you remember when sending a card for ${oc}?`}
+                          <Textarea
+                            placeholder={`What should you remember when sending a card for ${oc}?`}
                                   className={cn(
                                     "w-full focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:border-transparent border-0 rounded-sm",
                                     style.bg
@@ -1508,11 +1713,11 @@ export default function CreateReminderPage() {
                                   style.border,
                                   style.bg
                                 )}
-                                rows={2}
-                                {...register(`occasionNotes.${oc}` as const)}
-                              />
+                            rows={2}
+                            {...register(`occasionNotes.${oc}` as const)}
+                          />
                             )}
-                          </div>
+                        </div>
                         );
                       })}
                     </div>
