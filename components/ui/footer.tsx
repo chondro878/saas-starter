@@ -40,9 +40,9 @@ export function Footer() {
             <h4 className="text-sm font-medium uppercase tracking-wide mb-4 text-gray-300">Company</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link href="/about" className="text-gray-400 hover:text-white transition-colors text-sm">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -62,19 +62,19 @@ export function Footer() {
             <h4 className="text-sm font-medium uppercase tracking-wide mb-4 text-gray-300">Legal</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors text-sm">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link href="/terms-of-service" className="text-gray-400 hover:text-white transition-colors text-sm">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link href="/refund-policy" className="text-gray-400 hover:text-white transition-colors text-sm">
                   Refund Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -82,7 +82,19 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-sm">© 2025 Avoid the Rain. All rights reserved.</p>
+          <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-500">
+            <p>© 2025 Avoid the Rain. All rights reserved.</p>
+            <span className="hidden md:inline">•</span>
+            <div className="flex items-center gap-3">
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                Privacy
+              </Link>
+              <span>•</span>
+              <Link href="/terms-of-service" className="hover:text-white transition-colors">
+                Terms
+              </Link>
+            </div>
+          </div>
           <div className="flex gap-6">
             <a href="#" className="text-gray-500 hover:text-white transition-colors" aria-label="Twitter">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
