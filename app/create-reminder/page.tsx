@@ -715,67 +715,72 @@ export default function CreateReminderPage() {
     }
   };
 
+  const getProgressBarColor = (step: number, total: number) => {
+    if (step === total) {
+      return 'bg-amber-400';
+    }
+
+    const palette = ['bg-purple-500', 'bg-blue-500', 'bg-teal-500', 'bg-indigo-500'];
+    return palette[(step - 1) % palette.length];
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Screen reader announcements */}
-      <div 
-        ref={announceRef}
-        role="status" 
-        aria-live="polite" 
-        aria-atomic="true"
-        className="sr-only"
-      />
-      
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-light text-gray-900">Create Your Reminder</h1>
-            <button 
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-              aria-label="Cancel and return to previous page"
-            >
-              Cancel
-            </button>
-          </div>
-          
-          {/* Progress Bar - Only show for steps 1-5 */}
-          {currentStep <= totalSteps && (
-            <div className="mt-6" role="group" aria-label="Form progress">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600" id="progress-label">Step {currentStep} of {totalSteps}</span>
-                <span className="text-sm text-gray-600">
-                  {currentStep === totalSteps ? '99' : Math.round((currentStep / totalSteps) * 100)}% Complete
-                </span>
-              </div>
-              <div 
-                className="w-full bg-gray-200 rounded-full h-2"
-                role="progressbar"
-                aria-labelledby="progress-label"
-                aria-valuenow={currentStep}
-                aria-valuemin={1}
-                aria-valuemax={totalSteps}
-              >
-                <div 
-                  className="bg-gray-900 h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${currentStep === totalSteps ? 99 : (currentStep / totalSteps) * 100}%` 
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
+        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-8 py-12">
-        <form onSubmit={handleSubmit(handleFinish)}>
+      <div className="relative min-h-screen flex flex-col">
+        {/* Screen reader announcements */}
+        <div 
+          ref={announceRef}
+          role="status" 
+          aria-live="polite" 
+          aria-atomic="true"
+          className="sr-only"
+        />
+        
+        {/* Header */}
+        <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl">
+          <div className="max-w-4xl mx-auto px-8 py-6">
+            {/* Progress Bar - Only show for steps 1-5 */}
+            {currentStep <= totalSteps && (
+              <div role="group" aria-label="Form progress">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-700" id="progress-label">
+                    Create Reminder: Step {currentStep} of {totalSteps}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {currentStep === totalSteps ? '99' : Math.round((currentStep / totalSteps) * 100)}% Complete
+                  </span>
+                </div>
+                <div 
+                  className="mt-3 w-full bg-white/50 rounded-full h-2"
+                  role="progressbar"
+                  aria-labelledby="progress-label"
+                  aria-valuenow={currentStep}
+                  aria-valuemin={1}
+                  aria-valuemax={totalSteps}
+                >
+                  <div 
+                    className={`${getProgressBarColor(currentStep, totalSteps)} h-2 rounded-full transition-all duration-300`}
+                    style={{ 
+                      width: `${currentStep === totalSteps ? 99 : (currentStep / totalSteps) * 100}%` 
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto px-8 py-12">
+          <form onSubmit={handleSubmit(handleFinish)}>
           {/* Step 1: Who is this for? */}
           {currentStep === 1 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <div className="mb-8">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
+              <div className="space-y-4">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -1181,7 +1186,7 @@ export default function CreateReminderPage() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-8">
+              <div className="flex justify-end pt-4">
                 <Button
                   type="button"
                   onClick={handleNext}
@@ -1209,8 +1214,8 @@ export default function CreateReminderPage() {
 
           {/* Step 2: Relationship */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <div className="mb-8">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
+              <div className="space-y-4">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -1222,7 +1227,7 @@ export default function CreateReminderPage() {
               </div>
 
               <div 
-                className="grid grid-cols-2 gap-3 mb-8"
+                className="grid grid-cols-2 gap-3 auto-rows-fr"
                 role="group"
                 aria-label="Select relationship type"
               >
@@ -1235,7 +1240,7 @@ export default function CreateReminderPage() {
                       type="button"
                       onClick={() => setValue("relationship", option)}
                       className={cn(
-                        "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left",
+                        "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left h-full",
                         isSelected 
                           ? colors.selected
                           : `${colors.bg} ${colors.text} border-gray-200 ${colors.hoverBorder}`
@@ -1250,7 +1255,7 @@ export default function CreateReminderPage() {
                 })}
               </div>
 
-              <div className="flex justify-between pt-6">
+              <div className="flex justify-between pt-4">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1272,8 +1277,8 @@ export default function CreateReminderPage() {
 
           {/* Step 3: Occasions */}
           {currentStep === 3 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <div className="mb-8">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
+              <div className="space-y-4">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -1290,7 +1295,7 @@ export default function CreateReminderPage() {
                     Personal Occasions <span className="text-xs text-gray-500">(date required)</span>
                   </legend>
                   <div 
-                    className="grid grid-cols-1 gap-3"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-fr"
                     role="group"
                     aria-label="Select personal occasions"
                   >
@@ -1303,7 +1308,7 @@ export default function CreateReminderPage() {
                           type="button"
                           onClick={() => toggleCustomOccasion(item.value)}
                           className={cn(
-                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden",
+                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden h-full",
                             isSelected ? colors.selected : colors.default,
                             isSelected && colors.decoration === 'confetti' && "occasion-confetti",
                             isSelected && colors.decoration === 'hearts' && "occasion-hearts",
@@ -1326,7 +1331,7 @@ export default function CreateReminderPage() {
                     Holidays <span className="text-xs text-gray-500">(date is fixed)</span>
                   </legend>
                   <div 
-                    className="grid grid-cols-2 gap-3"
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-fr"
                     role="group"
                     aria-label="Select holiday occasions"
                   >
@@ -1339,7 +1344,7 @@ export default function CreateReminderPage() {
                           type="button"
                           onClick={() => toggleHolidayOccasion(item.value)}
                           className={cn(
-                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden",
+                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden h-full",
                             isSelected ? colors.selected : colors.default,
                             isSelected && colors.decoration === 'confetti' && "occasion-confetti",
                             isSelected && colors.decoration === 'hearts' && "occasion-hearts",
@@ -1358,7 +1363,7 @@ export default function CreateReminderPage() {
                 </fieldset>
               </div>
               
-              <div className="flex justify-between pt-8">
+              <div className="flex justify-between pt-4">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1381,20 +1386,23 @@ export default function CreateReminderPage() {
 
           {/* Step 4: Dates (only if custom occasions selected) */}
           {currentStep === 4 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">When is it?</h2>
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-light text-gray-900">When is it?</h2>
                 <p className="text-gray-600">Pick the month and day for each occasion.</p>
               </div>
               
-              <div className="space-y-8">
+              <div className={cn(
+                "grid grid-cols-1 gap-6 auto-rows-fr",
+                selectedCustomOccasions.length > 1 && "md:grid-cols-2"
+              )}>
                 {selectedCustomOccasions.map((oc) => {
                   const colors = getOccasionColors(oc);
                   return (
                     <div 
                       key={oc} 
                       className={cn(
-                        "p-6 rounded-lg border-2 relative overflow-hidden",
+                        "p-6 rounded-lg border-2 relative overflow-hidden flex flex-col",
                         colors.selected,
                         colors.decoration === 'confetti' && "occasion-confetti",
                         colors.decoration === 'hearts' && "occasion-hearts",
@@ -1403,7 +1411,7 @@ export default function CreateReminderPage() {
                       )}
                     >
                       <h3 className="text-xl font-medium mb-4 relative z-10">{oc}</h3>
-                      <div className="relative z-10">
+                      <div className="relative z-10 flex-1 flex items-center justify-center">
                         <MonthDayPicker
                           value={customDates[oc]}
                           onChange={(date: Date) => {
@@ -1419,7 +1427,7 @@ export default function CreateReminderPage() {
                 })}
               </div>
               
-              <div className="flex justify-between pt-8">
+              <div className="flex justify-between pt-4">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1442,15 +1450,15 @@ export default function CreateReminderPage() {
 
           {/* Step 5: Notes & Review */}
           {currentStep === 5 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <div className="mb-8">
-                <h2 className="text-3xl font-light text-gray-900 mb-4">Review & Add Notes</h2>
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-light text-gray-900">Review & Add Notes</h2>
                 <p className="text-gray-600">Review the details and add optional reminders for future you.</p>
               </div>
 
               {/* Recipient Review */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <div className="flex justify-between items-start mb-4">
+              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                <div className="flex justify-between items-start">
                   <h3 className="text-lg font-medium text-gray-900">Recipient</h3>
                   <button
                     type="button"
@@ -1468,8 +1476,8 @@ export default function CreateReminderPage() {
                   {/* Left Column: Name & Address */}
                   <div className="space-y-4">
                     {/* Name */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Name</p>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
                       <p className="font-medium text-lg">
                         {firstPerson.first} {firstPerson.last}
                         {secondPersonEnabled && secondPerson.first && (
@@ -1479,8 +1487,8 @@ export default function CreateReminderPage() {
                     </div>
                     
                     {/* Address */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Address</p>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Address</p>
                       <p className="font-medium">{address.street}{address.apartment ? `, ${address.apartment}` : ''}</p>
                       <p>{address.city}, {address.state} {address.zip}</p>
                     </div>
@@ -1490,15 +1498,15 @@ export default function CreateReminderPage() {
                   <div className="space-y-4">
                     {/* Relationship */}
                     {relationship && (
-                      <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Relationship</p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Relationship</p>
                         <p className="font-medium">{relationship}</p>
                       </div>
                     )}
                     
                     {/* Occasions */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Occasions</p>
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Occasions</p>
                       <div className="space-y-2">
                         {selectedCustomOccasions.map((oc) => (
                           <div key={oc} className="flex items-center gap-2">
@@ -1523,14 +1531,14 @@ export default function CreateReminderPage() {
 
               {/* Address Validation Messages */}
               {addressValidation.isValidating && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg mb-6">
+                <div className="flex items-center gap-2 text-sm text-gray-600 p-4 bg-gray-50 rounded-lg">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
                   <span>Validating address...</span>
                 </div>
               )}
 
               {addressValidation.showSuggestion && addressValidation.result?.verdict === 'CORRECTABLE' && (
-                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg mb-6">
+                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg space-y-4">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
@@ -1576,7 +1584,7 @@ export default function CreateReminderPage() {
               )}
 
               {addressValidation.showSuggestion && addressValidation.result?.verdict === 'UNDELIVERABLE' && (
-                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-lg mb-6">
+                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-lg space-y-4">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
@@ -1605,14 +1613,14 @@ export default function CreateReminderPage() {
 
               {/* Notes Section */}
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Add Notes</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">Add Notes</h3>
+                  <p className="text-sm text-gray-600">
                     These notes will help you remember important details when it's time to send the card.
                   </p>
                   
                   {/* Two Button Options */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button
                       type="button"
                       onClick={() => setNotesMode('custom')}
@@ -1754,7 +1762,7 @@ export default function CreateReminderPage() {
                 </div>
               )}
 
-              <div className="flex justify-between pt-8">
+              <div className="flex justify-between pt-4">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1777,7 +1785,7 @@ export default function CreateReminderPage() {
 
           {/* Step 6: Success */}
           {currentStep === 6 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-12 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1833,5 +1841,6 @@ export default function CreateReminderPage() {
         </form>
       </div>
     </div>
-  );
+  </div>
+);
 }
