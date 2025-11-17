@@ -1,0 +1,17 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="appleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgb(244, 114, 182);stop-opacity:1" />
+      <stop offset="50%" style="stop-color:rgb(168, 85, 247);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(59, 130, 246);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded rectangle background -->
+  <rect width="180" height="180" rx="40" fill="url(#appleGrad)"/>
+  
+  <!-- Heart shape in white - scaled up -->
+  <path d="M90 148.125l-8.1-7.425C51.75 114.525 33.75 97.575 33.75 75.9375c0-16.6688 13.2937-29.9625 29.4375-29.9625 9.765 0 19.1438 4.8375 25.3125 12.3938C94.6687 50.8125 104.047 45.975 113.812 45.975c16.144 0 29.438 13.2937 29.438 29.9625 0 21.2063-18 38.1563-47.9688 65.475L90 148.125z" fill="white"/>
+</svg>
+

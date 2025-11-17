@@ -16,21 +16,21 @@ export default function HolidayPacksPage() {
       <HolidayCarousel 
         holidayIndex={0}
         showBuyButton={true}
-        showManageButton={false}
+        showCreditButton={true}
       />
       
       {/* Second Holiday Carousel */}
       <HolidayCarousel 
         holidayIndex={1}
         showBuyButton={true}
-        showManageButton={false}
+        showCreditButton={true}
       />
       
       {/* Third Holiday Carousel */}
       <HolidayCarousel 
         holidayIndex={2}
         showBuyButton={true}
-        showManageButton={false}
+        showCreditButton={true}
       />
     </div>
   );

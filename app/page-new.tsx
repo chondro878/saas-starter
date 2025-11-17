@@ -191,7 +191,7 @@ export default function Home() {
                     <Link href="/pricing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                       Pricing
                     </Link>
-                    <Link href="/dashboard/general" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Link href="/dashboard/friendsandfamily" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                       Settings
                     </Link>
                     <button
@@ -282,7 +282,7 @@ export default function Home() {
           <HolidayCarousel 
             holidayIndex={0}
             showBuyButton={true}
-            showManageButton={false}
+            showCreditButton={false}
           />
 
           {/* Testimonials Section */}

@@ -37,7 +37,8 @@ export default function Home() {
 
   // Quote rotator state
   const quotes = [
-    { text: "This legit saved my relationship", source: "Doug B." },
+    { text: "This legits saved my relationship - thank you!", source: "Doug B." },
+    { text: "Avoid the rain has my back when I forget - Love it!", source: "Joeseph F." },
     { text: "Beautifully designed cards with zero effort", source: "anonymous" },
     { text: "No more panic shopping - Unreal!", source: "Emily R." },
     { text: "Such a self confidence booster", source: "Grace T." },
@@ -93,7 +94,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setQuoteIndex((prevIndex) => (prevIndex + 1) % quotes.length);
-    }, 6000);
+    }, 2500);
     return () => clearInterval(interval);
   }, [quotes.length]);
 
@@ -199,7 +200,7 @@ export default function Home() {
             Premium cards delivered to your door, pre-stamped and ready to send.
           </p>
           <Link 
-            href="/sign-up" 
+            href="/create-reminder" 
             className="border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-medium whitespace-nowrap hover:bg-white hover:text-gray-900 transition-colors"
           >
             Get Started
@@ -253,10 +254,10 @@ export default function Home() {
             Start with your first reminder. Free to try.
           </p>
           <Link 
-            href="/sign-up" 
+            href="/create-reminder" 
             className="inline-block border-2 border-gray-800 text-gray-800 px-12 py-5 rounded-lg text-xl font-medium hover:bg-gray-800 hover:text-white transition-colors"
           >
-            Get Started
+            Try it now! 
           </Link>
         </div>
       </section>
@@ -281,7 +282,7 @@ export default function Home() {
               Tell us who matters. We'll handle the rest.
             </p>
             <Link 
-              href="/sign-up" 
+              href="/create-reminder" 
               className="border-2 border-gray-900 text-gray-900 px-8 py-4 rounded-lg w-fit hover:bg-gray-900 hover:text-white transition-colors font-medium text-lg"
             >
               Start Now
@@ -313,7 +314,7 @@ export default function Home() {
               href="/sign-up" 
               className="border-2 border-white text-white px-8 py-4 rounded-lg w-fit hover:bg-white hover:text-gray-900 transition-colors font-medium text-lg"
             >
-              Get Started
+              Give it a try!
             </Link>
           </div>
         </div>
@@ -325,7 +326,7 @@ export default function Home() {
           <HolidayCarousel 
             holidayIndex={1}
             showBuyButton={false}
-            showManageButton={false}
+            showCreditButton={false}
           />
         </div>
       </section>
@@ -359,7 +360,7 @@ export default function Home() {
               {faqOpen[0] && (
                 <div className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Simply add your important people and their special occasions. We'll send you beautifully designed cards 
+                    Simply add your important people and their special occasions. We'll send you beautifully designed cards from independant artist
                     15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.
                   </p>
                 </div>
@@ -373,7 +374,7 @@ export default function Home() {
                 className="w-full flex items-center justify-between py-6 text-left group"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  What occasions can I track?
+                  Do i get to pick the cards?
                 </h3>
                 <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[1] ? 'rotate-180' : ''}`}>
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,8 +385,8 @@ export default function Home() {
               {faqOpen[1] && (
                 <div className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Birthdays, anniversaries, holidays, and any special occasion you don't want to miss. 
-                    Add custom occasions and we'll remember them for you.
+                    No nd thats intentional!
+                    We aim to keep you in touch with the people you care about while removing as much of the mental load as possible.
                   </p>
                 </div>
               )}
@@ -398,7 +399,7 @@ export default function Home() {
                 className="w-full flex items-center justify-between py-6 text-left group"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  How much does it cost?
+                  Will the cards be appropriate?
                 </h3>
                 <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[2] ? 'rotate-180' : ''}`}>
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,8 +410,8 @@ export default function Home() {
               {faqOpen[2] && (
                 <div className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Plans start at just $49/year. All cards include premium quality paper, professional printing, 
-                    postage stamps, and delivery directly to your door.
+                    Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs.
+                    Just smart, subtle, personal and custom to your relationship.
                   </p>
                 </div>
               )}
@@ -423,7 +424,7 @@ export default function Home() {
                 className="w-full flex items-center justify-between py-6 text-left group"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  Can I customize my cards?
+                  What if im bad a writing notes in my cards? 
                 </h3>
                 <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[3] ? 'rotate-180' : ''}`}>
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,8 +435,8 @@ export default function Home() {
               {faqOpen[3] && (
                 <div className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Yes! Add personal notes and reminders that we'll print inside each card. 
-                    Choose from our curated collection of designs for every occasion.
+                    No problem, just sign the card and you're good-to-go.  
+                    We also offer a premium tier where we hand currate a thoughful note based off your relationsip - no AI slop nonsense - ever!
                   </p>
                 </div>
               )}
@@ -460,10 +461,11 @@ export default function Home() {
             {/* Content */}
             <div className="flex-1">
               <h2 className="text-4xl md:text-5xl font-light mb-4 text-white">
-                Download Our iOS App
+                Download our free companion app Nudge
               </h2>
               <p className="text-xl text-gray-300 mb-6 font-light leading-relaxed">
-                Manage your card reminders on the go with our mobile app
+                  Little reminders to be thoughtful to the people close to you. 
+                  Not an app you open - one that opens you!
               </p>
               <a
                 href="https://apps.apple.com"

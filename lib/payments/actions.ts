@@ -1,28 +1,31 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-import { createCheckoutSession, createCustomerPortalSession } from './stripe';
 import { getTeamForUser } from '@/lib/db/queries';
+import { createCheckoutSession, createOneTimeCheckoutSession } from './stripe';
 
 export async function checkoutAction(priceId: string) {
   const team = await getTeamForUser();
-  
-  if (!team) {
-    // User needs to sign in first
-    redirect(`/sign-in?redirect=/pricing&priceId=${priceId}`);
-  }
-
-  // Create Stripe checkout session
   await createCheckoutSession({ team, priceId });
 }
 
 export async function manageBillingAction() {
+  const { createCustomerPortalSession } = await import('./stripe');
   const team = await getTeamForUser();
   
   if (!team) {
-    redirect('/sign-in');
+    throw new Error('Team not found');
   }
-
+  
   const portalSession = await createCustomerPortalSession(team);
-  redirect(portalSession.url);
+  return portalSession.url;
+}
+
+export async function purchaseCardCreditAction() {
+  const { STRIPE_ONE_TIME_PRODUCTS } = await import('./config');
+  const team = await getTeamForUser();
+  
+  await createOneTimeCheckoutSession({ 
+    team, 
+    priceId: STRIPE_ONE_TIME_PRODUCTS.cardCredit.priceId 
+  });
 }

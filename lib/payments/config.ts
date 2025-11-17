@@ -82,3 +82,16 @@ export function getPlanDetails(planKey: PlanKey) {
   return STRIPE_PLANS[planKey];
 }
 
+// One-time purchases
+export const STRIPE_ONE_TIME_PRODUCTS = {
+  cardCredit: {
+    name: 'Single Card Credit',
+    description: 'Add one extra card to your account',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CARD_CREDIT || 'price_card_credit',
+    price: 1500, // $15.00
+    creditsAdded: 1,
+  },
+} as const;
+
+export type OneTimeProductKey = keyof typeof STRIPE_ONE_TIME_PRODUCTS;
+

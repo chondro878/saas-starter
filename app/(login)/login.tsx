@@ -272,7 +272,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   </div>
 
                   <div className="text-center">
-                    <Link href="#" className="text-sm text-indigo-600 hover:text-indigo-500 underline font-medium">
+                    <Link href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500 underline font-medium">
                       Forgot Password?
                     </Link>
                   </div>

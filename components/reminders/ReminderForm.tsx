@@ -419,7 +419,7 @@ export function ReminderForm({
           <>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-gray-200 text-xs flex items-center justify-center font-bold">3</div>
-              <h2 className="text-sm font-semibold">What kind of card do you need?</h2>
+              <h2 className="text-sm font-semibold">What kind of cards do you need?</h2>
             </div>
             <div>
               <Label className="block">Personal Occasions <span className="text-xs text-muted-foreground">(date required)</span></Label>
@@ -602,7 +602,7 @@ export function ReminderForm({
         {step === 3 && (
           <p className="text-muted-foreground">
             Select one or more occasions for the card.<br />
-            <span className="text-xs text-muted-foreground">Personal occasions require a date. Holidays use their fixed date.</span>
+            <span className="text-xs text-muted-foreground">Personal occasions requires a date. Holidays use their fixed date.</span>
           </p>
         )}
         {step === 4 && selectedCustomOccasions.length > 0 && (
@@ -612,7 +612,7 @@ export function ReminderForm({
         )}
         {step === 5 && (
           <>
-            <p className="text-muted-foreground mb-4">Add a personal note to your reminder to make it special.</p>
+            <p className="text-muted-foreground mb-4">Add a personal reminder to your future self, to make it special.</p>
           </>
         )}
       </div>

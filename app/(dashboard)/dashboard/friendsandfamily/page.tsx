@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Search, Plus, Calendar, MapPin, Trash2, X, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RecipientWithOccasions } from '@/lib/db/schema';
@@ -12,7 +13,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { US_STATES } from '@/lib/us-states';
 import { MonthDayPicker } from '@/components/ui/month-day-picker';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  const data = await res.json();
+  
+  if (!res.ok) {
+    throw new Error(data.error || `API error: ${res.status}`);
+  }
+  
+  return data;
+};
 
 const RELATIONSHIP_OPTIONS = ['Friend', 'Family', 'Romantic', 'Professional'];
 
@@ -116,12 +126,14 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
       className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
     >
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">
-          {recipient.firstName} {recipient.lastName}
-        </h3>
-        <span className={`text-sm ${colors.text} ${colors.bg} px-2 py-1 rounded-md inline-block mb-3`}>
-          {recipient.relationship}
-        </span>
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-lg font-medium text-gray-900">
+            {recipient.firstName} {recipient.lastName}
+          </h3>
+          <span className={`text-xs ${colors.text} ${colors.bg} px-2.5 py-1 rounded-full font-medium flex-shrink-0 ml-2`}>
+            {recipient.relationship}
+          </span>
+        </div>
         
         <div className="space-y-1">
           {/* Address */}
@@ -162,7 +174,7 @@ function DeleteModal({ recipient, isOpen, onClose, onConfirm, isDeleting }: Dele
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-2xl font-medium text-gray-900">Delete Recipient</h2>
@@ -213,6 +225,7 @@ interface EditRecipientModalProps {
 }
 
 function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipientModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     firstName: recipient.firstName,
@@ -232,6 +245,11 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
       occasionDate: new Date(occ.occasionDate),
     })) || []
   );
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const [newOccasion, setNewOccasion] = useState({
     type: '',
@@ -342,21 +360,33 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
     setOccasions(occasions.filter((_, i) => i !== index));
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg max-w-4xl w-full p-8 my-8">
-        <div className="flex justify-between items-start mb-6">
-          <h2 className="text-2xl font-medium text-gray-900">Edit Recipient</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+  if (!mounted) return null;
 
-        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+  const modalContent = (
+    <>
+      {/* Overlay to hide everything behind */}
+      <div className="fixed inset-0 bg-white z-[9999]" />
+      
+      {/* Modal content */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 z-[10000] overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+          {/* Header with close button */}
+          <div className="flex items-center justify-between mb-6 pb-4 border-b sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+            <h2 className="text-xl sm:text-2xl font-medium text-gray-900">Edit Recipient</h2>
+            <button 
+              onClick={onClose} 
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
+
+        <div className="space-y-6 pb-24">
           {/* Personal Info */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
@@ -414,8 +444,8 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
                   <Label htmlFor="city">City</Label>
                   <Input
                     id="city"
@@ -613,42 +643,45 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
           </div>
         </div>
 
-        <div className="flex gap-3 justify-between mt-6 pt-6 border-t">
-          <Button
-            variant="outline"
-            onClick={() => {
-              onDelete(recipient);
-              onClose();
-            }}
-            disabled={isSaving}
-            className="px-6 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete Recipient
-          </Button>
-          <div className="flex gap-3">
+        {/* Sticky bottom action bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-20 p-4">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3 sm:justify-between">
             <Button
               variant="outline"
-              onClick={onClose}
+              onClick={() => {
+                onDelete(recipient);
+                onClose();
+              }}
               disabled={isSaving}
-              className="px-6"
+              className="px-6 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full sm:w-auto"
             >
-              Cancel
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Recipient
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || !formData.firstName || !formData.lastName || !formData.street || !formData.city || !formData.state || !formData.zip}
-              className="px-6 bg-gray-900 hover:bg-gray-800 text-white"
-            >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={isSaving}
+                className="px-6 flex-1 sm:flex-initial"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving || !formData.firstName || !formData.lastName || !formData.street || !formData.city || !formData.state || !formData.zip}
+                className="px-6 bg-gray-900 hover:bg-gray-800 text-white flex-1 sm:flex-initial"
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       
       {/* Duplicate Warning Modal */}
       {duplicateWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
           <div className="bg-white rounded-lg max-w-md w-full p-6 m-4">
             <div className="flex items-start gap-3 mb-4">
               <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -678,8 +711,11 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default function FriendsAndFamilyPage() {
@@ -693,14 +729,18 @@ export default function FriendsAndFamilyPage() {
   const [recipientToDelete, setRecipientToDelete] = useState<RecipientWithOccasions | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+
+  // Ensure recipients is an array (handle API errors that return objects)
+  const recipientsList = Array.isArray(recipients) ? recipients : [];
+
   // Get unique relationships and occasions for filters
-  const relationships = Array.from(new Set(recipients?.map(r => r.relationship) || []));
+  const relationships = Array.from(new Set(recipientsList.map(r => r.relationship)));
   const occasions = Array.from(new Set(
-    recipients?.flatMap(r => r.occasions?.map(o => o.occasionType) || []) || []
+    recipientsList.flatMap(r => r.occasions?.map(o => o.occasionType) || [])
   ));
 
   // Filter recipients
-  const filteredRecipients = recipients?.filter(recipient => {
+  const filteredRecipients = recipientsList.filter(recipient => {
     // Search filter
     const matchesSearch = searchQuery === '' || 
       `${recipient.firstName} ${recipient.lastName}`.toLowerCase().includes(searchQuery.toLowerCase());
@@ -742,15 +782,15 @@ export default function FriendsAndFamilyPage() {
   };
 
   return (
-    <div className="flex-1 p-8 lg:p-12">
+    <div className="flex-1 p-4 sm:p-8 lg:p-12">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-5xl font-light text-gray-900">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-gray-900">
           Friends & Family
         </h1>
         <Link
           href="/create-reminder"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full text-base font-medium hover:bg-gray-800 transition-colors whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
           Add Recipient
@@ -758,7 +798,7 @@ export default function FriendsAndFamilyPage() {
       </div>
 
       {/* Recipients Container with Colorful Background */}
-      <div className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl p-8">
+      <div className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl p-4 sm:p-6 lg:p-8">
         {/* Description */}
         <div className="mb-6">
           <p className="text-gray-600">
@@ -781,28 +821,34 @@ export default function FriendsAndFamilyPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex gap-4">
-            <select
-              value={filterRelationship}
-              onChange={(e) => setFilterRelationship(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-            >
-              <option value="all">All Relationships</option>
-              {relationships.map(rel => (
-                <option key={rel} value={rel}>{rel}</option>
-              ))}
-            </select>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="relative flex-1 sm:flex-initial">
+              <select
+                value={filterRelationship}
+                onChange={(e) => setFilterRelationship(e.target.value)}
+                className="appearance-none w-full px-4 py-3 pr-10 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white cursor-pointer text-sm font-medium sm:min-w-[180px]"
+              >
+                <option value="all">All Relationships</option>
+                {relationships.map(rel => (
+                  <option key={rel} value={rel}>{rel}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
 
-            <select
-              value={filterOccasion}
-              onChange={(e) => setFilterOccasion(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-            >
-              <option value="all">All Occasions</option>
-              {occasions.map(occ => (
-                <option key={occ} value={occ}>{occ}</option>
-              ))}
-            </select>
+            <div className="relative flex-1 sm:flex-initial">
+              <select
+                value={filterOccasion}
+                onChange={(e) => setFilterOccasion(e.target.value)}
+                className="appearance-none w-full px-4 py-3 pr-10 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white cursor-pointer text-sm font-medium sm:min-w-[180px]"
+              >
+                <option value="all">All Occasions</option>
+                {occasions.map(occ => (
+                  <option key={occ} value={occ}>{occ}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -825,13 +871,27 @@ export default function FriendsAndFamilyPage() {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <p className="text-red-600">Failed to load recipients. Please try again.</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-red-900 mb-1">Failed to load recipients</p>
+                <p className="text-sm text-red-700 mb-2">
+                  {typeof error === 'object' && error.message ? error.message : 'An unexpected error occurred'}
+                </p>
+                <button
+                  onClick={() => mutate()}
+                  className="text-sm text-red-700 underline hover:text-red-900"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoading && !error && (!recipients || recipients.length === 0) && (
+        {!isLoading && !error && recipientsList.length === 0 && (
           <div className="bg-white rounded-lg p-12 text-center shadow-sm">
             <Plus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">No recipients yet</h3>
@@ -850,7 +910,7 @@ export default function FriendsAndFamilyPage() {
         {!isLoading && !error && filteredRecipients && filteredRecipients.length > 0 && (
           <>
             <p className="text-sm text-gray-600 mb-4">
-              Showing {filteredRecipients.length} of {recipients?.length} recipient{recipients?.length !== 1 ? 's' : ''}
+              Showing {filteredRecipients.length} of {recipientsList.length} recipient{recipientsList.length !== 1 ? 's' : ''}
             </p>
             <div className="grid md:grid-cols-2 gap-6">
               {filteredRecipients.map((recipient) => (

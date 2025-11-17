@@ -119,3 +119,54 @@ export async function getTeamForUser() {
 
   return result?.team || null;
 }
+
+// Card Credits Management
+export async function addCardCredits(teamId: number, credits: number) {
+  const team = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
+  
+  if (team.length === 0) {
+    throw new Error('Team not found');
+  }
+
+  const currentCredits = team[0].cardCredits || 0;
+  
+  await db
+    .update(teams)
+    .set({
+      cardCredits: currentCredits + credits,
+      updatedAt: new Date()
+    })
+    .where(eq(teams.id, teamId));
+}
+
+export async function deductCardCredit(teamId: number) {
+  const team = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
+  
+  if (team.length === 0) {
+    throw new Error('Team not found');
+  }
+
+  const currentCredits = team[0].cardCredits || 0;
+  
+  if (currentCredits < 1) {
+    throw new Error('Insufficient card credits');
+  }
+
+  await db
+    .update(teams)
+    .set({
+      cardCredits: currentCredits - 1,
+      updatedAt: new Date()
+    })
+    .where(eq(teams.id, teamId));
+}
+
+export async function getTeamCardCredits(teamId: number) {
+  const team = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
+  
+  if (team.length === 0) {
+    return 0;
+  }
+
+  return team[0].cardCredits || 0;
+}

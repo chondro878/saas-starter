@@ -239,6 +239,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     setSession(access_token, refresh_token)
   ]);
 
+  // Send welcome email (don't await to avoid blocking the user)
+  const { sendWelcomeEmail } = await import('@/lib/email');
+  sendWelcomeEmail({ user: createdUser }).catch((error) => {
+    console.error('Failed to send welcome email:', error);
+  });
+
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
@@ -481,8 +487,8 @@ export const inviteTeamMember = validatedActionWithUser(
       ActivityType.INVITE_TEAM_MEMBER
     );
 
-    // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
-    // await sendInvitationEmail(email, userWithTeam.team.name, role)
+    // TODO: Send invitation email if needed in the future
+    // For now, invitation system exists but email is not configured
 
     return { success: 'Invitation sent successfully' };
   }

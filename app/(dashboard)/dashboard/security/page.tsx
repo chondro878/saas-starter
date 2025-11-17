@@ -543,15 +543,6 @@ export default function AccountSettingsPage() {
         <ChevronRight className="w-6 h-6 text-gray-900" />
       </button>
 
-      {/* View Order History */}
-      <Link 
-        href="/dashboard/orders"
-        className="w-full bg-gray-100 rounded-lg p-6 mb-6 flex justify-between items-center hover:bg-gray-200 transition-colors"
-      >
-        <span className="text-xl font-normal text-gray-900">View order history</span>
-        <ChevronRight className="w-6 h-6 text-gray-900" />
-      </Link>
-
       {/* Delete Account & Data */}
       <button className="w-full bg-gray-100 rounded-lg p-6 flex justify-between items-center hover:bg-gray-200 transition-colors">
         <span className="text-xl font-normal text-gray-900">Delete account & data</span>

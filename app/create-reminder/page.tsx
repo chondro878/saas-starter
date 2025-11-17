@@ -715,13 +715,24 @@ export default function CreateReminderPage() {
     }
   };
 
-  const getProgressBarColor = (step: number, total: number) => {
+  const progressPalette = ['purple', 'blue', 'teal', 'indigo'] as const;
+  type ProgressColor = typeof progressPalette[number];
+
+  const progressMap: Record<ProgressColor, { text: string; bar: string }> = {
+    purple: { text: 'text-purple-600', bar: 'bg-purple-500' },
+    blue: { text: 'text-blue-600', bar: 'bg-blue-500' },
+    teal: { text: 'text-teal-600', bar: 'bg-teal-500' },
+    indigo: { text: 'text-indigo-600', bar: 'bg-indigo-500' }
+  };
+
+  const getProgressBarColor = (step: number, total: number, asText?: boolean) => {
     if (step === total) {
-      return 'bg-amber-400';
+      return asText ? 'text-amber-500' : 'bg-amber-400';
     }
 
-    const palette = ['bg-purple-500', 'bg-blue-500', 'bg-teal-500', 'bg-indigo-500'];
-    return palette[(step - 1) % palette.length];
+    const color = progressPalette[(step - 1) % progressPalette.length];
+
+    return asText ? progressMap[color].text : progressMap[color].bar;
   };
 
   return (
@@ -740,42 +751,18 @@ export default function CreateReminderPage() {
           className="sr-only"
         />
         
-        {/* Header */}
-        <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl">
-          <div className="max-w-4xl mx-auto px-8 py-6">
-            {/* Progress Bar - Only show for steps 1-5 */}
-            {currentStep <= totalSteps && (
-              <div role="group" aria-label="Form progress">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-gray-700" id="progress-label">
-                    Create Reminder: Step {currentStep} of {totalSteps}
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    {currentStep === totalSteps ? '99' : Math.round((currentStep / totalSteps) * 100)}% Complete
-                  </span>
-                </div>
-                <div 
-                  className="mt-3 w-full bg-white/50 rounded-full h-2"
-                  role="progressbar"
-                  aria-labelledby="progress-label"
-                  aria-valuenow={currentStep}
-                  aria-valuemin={1}
-                  aria-valuemax={totalSteps}
-                >
-                  <div 
-                    className={`${getProgressBarColor(currentStep, totalSteps)} h-2 rounded-full transition-all duration-300`}
-                    style={{ 
-                      width: `${currentStep === totalSteps ? 99 : (currentStep / totalSteps) * 100}%` 
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="absolute top-6 left-8 z-10">
+          <button
+            onClick={() => router.back()}
+            className="text-sm font-semibold text-white hover:text-white/80 transition-colors"
+            aria-label="Cancel and return to previous page"
+          >
+            Cancel
+          </button>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-8 py-12">
+        <div className="max-w-4xl mx-auto px-8 py-12 flex flex-col gap-12">
           <form onSubmit={handleSubmit(handleFinish)}>
           {/* Step 1: Who is this for? */}
           {currentStep === 1 && (
@@ -1839,6 +1826,19 @@ export default function CreateReminderPage() {
             </div>
           )}
         </form>
+
+        {currentStep <= totalSteps && (
+          <div className="absolute bottom-6 right-8" role="group" aria-label="Form progress">
+            <span
+              className={cn(
+                "text-sm font-semibold",
+                getProgressBarColor(currentStep, totalSteps, true)
+              )}
+            >
+              Step {currentStep} of {totalSteps}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   </div>

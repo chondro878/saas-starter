@@ -4,8 +4,10 @@ import { Team } from '@/lib/db/schema';
 import {
   getTeamByStripeCustomerId,
   getUser,
-  updateTeamSubscription
+  updateTeamSubscription,
+  addCardCredits
 } from '@/lib/db/queries';
+import { STRIPE_ONE_TIME_PRODUCTS } from './config';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil'
@@ -38,6 +40,41 @@ export async function createCheckoutSession({
     customer: team.stripeCustomerId || undefined,
     client_reference_id: user.id.toString(),
     allow_promotion_codes: true
+  });
+
+  redirect(session.url!);
+}
+
+export async function createOneTimeCheckoutSession({
+  team,
+  priceId
+}: {
+  team: Team | null;
+  priceId: string;
+}) {
+  const user = await getUser();
+
+  if (!team || !user) {
+    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1
+      }
+    ],
+    mode: 'payment',
+    success_url: `${process.env.BASE_URL}/dashboard/subscriptions?purchase=success`,
+    cancel_url: `${process.env.BASE_URL}/dashboard/subscriptions`,
+    customer: team.stripeCustomerId || undefined,
+    client_reference_id: user.id.toString(),
+    metadata: {
+      teamId: team.id.toString(),
+      productType: 'cardCredit'
+    }
   });
 
   redirect(session.url!);
@@ -127,12 +164,44 @@ export async function handleSubscriptionChange(
 
   if (status === 'active') {
     const plan = subscription.items.data[0]?.plan;
+    const planName = (plan?.product as Stripe.Product).name;
+    
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscriptionId,
       stripeProductId: plan?.product as string,
-      planName: (plan?.product as Stripe.Product).name,
+      planName,
       subscriptionStatus: status
     });
+
+    // Get team owner to send subscription email
+    const { db } = await import('@/lib/db/drizzle');
+    const { users, teamMembers } = await import('@/lib/db/schema');
+    const { eq, and } = await import('drizzle-orm');
+    
+    const teamOwner = await db
+      .select({ user: users })
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.userId, users.id))
+      .where(and(eq(teamMembers.teamId, team.id), eq(teamMembers.role, 'owner')))
+      .limit(1);
+
+    if (teamOwner.length > 0) {
+      // Send subscription started email
+      const { sendSubscriptionStartedEmail } = await import('@/lib/email');
+      const cardLimits: Record<string, number> = {
+        'Essentials': 5,
+        'Stress Free': 12,
+        'Concierge': 25,
+      };
+      
+      sendSubscriptionStartedEmail({
+        user: teamOwner[0].user,
+        planName: planName || 'Essentials',
+        cardLimit: cardLimits[planName || 'Essentials'] || 5,
+      }).catch((error) => {
+        console.error('Failed to send subscription started email:', error);
+      });
+    }
   } else if (status === 'canceled' || status === 'unpaid' || status === 'trialing') {
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
@@ -176,4 +245,69 @@ export async function getStripeProducts() {
         ? product.default_price
         : product.default_price?.id
   }));
+}
+
+export async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session
+) {
+  // Only process one-time payments (card credits)
+  if (session.mode !== 'payment') {
+    return;
+  }
+
+  const teamId = session.metadata?.teamId;
+  const productType = session.metadata?.productType;
+
+  if (!teamId || productType !== 'cardCredit') {
+    console.log('Not a card credit purchase, skipping');
+    return;
+  }
+
+  // Verify payment was successful
+  if (session.payment_status !== 'paid') {
+    console.error('Payment not completed for session:', session.id);
+    return;
+  }
+
+  // Get the price ID from the session to determine how many credits to add
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+  const priceId = lineItems.data[0]?.price?.id;
+
+  // Find matching product and add credits
+  const cardCreditProduct = STRIPE_ONE_TIME_PRODUCTS.cardCredit;
+  
+  if (priceId === cardCreditProduct.priceId) {
+    try {
+      await addCardCredits(parseInt(teamId), cardCreditProduct.creditsAdded);
+      console.log(`Added ${cardCreditProduct.creditsAdded} card credit(s) to team ${teamId}`);
+
+      // Get team owner and send card credit purchased email
+      const { db } = await import('@/lib/db/drizzle');
+      const { users, teamMembers, teams } = await import('@/lib/db/schema');
+      const { eq, and } = await import('drizzle-orm');
+      
+      const teamData = await db
+        .select({ user: users, team: teams })
+        .from(teamMembers)
+        .innerJoin(users, eq(teamMembers.userId, users.id))
+        .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+        .where(and(eq(teamMembers.teamId, parseInt(teamId)), eq(teamMembers.role, 'owner')))
+        .limit(1);
+
+      if (teamData.length > 0) {
+        const { sendCardCreditPurchasedEmail } = await import('@/lib/email');
+        sendCardCreditPurchasedEmail({
+          user: teamData[0].user,
+          creditsAdded: cardCreditProduct.creditsAdded,
+          totalCredits: teamData[0].team.cardCredits || 0,
+        }).catch((error) => {
+          console.error('Failed to send card credit purchased email:', error);
+        });
+      }
+    } catch (error) {
+      console.error('Error adding card credits:', error);
+    }
+  } else {
+    console.error('Unknown price ID:', priceId);
+  }
 }

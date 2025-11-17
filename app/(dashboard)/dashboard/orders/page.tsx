@@ -106,7 +106,7 @@ export default async function OrderHistoryPage() {
         orders={subscriptionOrders}
         emptyMessage="No subscription orders yet"
         ctaText="Add a Recipient"
-        ctaLink="/dashboard/general"
+        ctaLink="/dashboard/friendsandfamily"
         badgeColor="bg-green-100 text-green-800"
         defaultOpen={true}
         showCount={false}

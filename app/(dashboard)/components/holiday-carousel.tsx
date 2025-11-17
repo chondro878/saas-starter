@@ -2,26 +2,38 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { getNextHolidays } from '@/lib/holidays';
+import { purchaseCardCreditAction } from '@/lib/payments/actions';
 
 interface HolidayCarouselProps {
   holidayIndex?: number; // Which holiday to display (0 = next, 1 = second next, etc.)
   showBuyButton?: boolean;
-  showManageButton?: boolean;
+  showCreditButton?: boolean;
 }
 
 export function HolidayCarousel({ 
   holidayIndex = 0, 
   showBuyButton = true,
-  showManageButton = true 
+  showCreditButton = false 
 }: HolidayCarouselProps) {
   const nextHolidays = getNextHolidays(3);
   const holiday = nextHolidays[holidayIndex];
   
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoadingCredit, setIsLoadingCredit] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  const handlePurchaseCredit = async () => {
+    setIsLoadingCredit(true);
+    try {
+      await purchaseCardCreditAction();
+    } catch (error) {
+      console.error('Error purchasing card credit:', error);
+      setIsLoadingCredit(false);
+    }
+  };
   
   if (!holiday) return null;
   
@@ -124,22 +136,21 @@ export function HolidayCarousel({
       </div>
       
       {/* Action Buttons */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center">
         {showBuyButton && (
-          <Link
-            href="/dashboard/holiday-packs"
-            className={`px-8 py-3 ${holiday.color.primary} text-white rounded-full text-base font-medium hover:opacity-90 transition-opacity`}
-          >
-            Buy {holiday.name} Pack
-          </Link>
+          <div className={`px-8 py-3 ${holiday.color.primary} text-white rounded-full text-base font-medium opacity-60 cursor-not-allowed`}>
+            Coming Soon
+          </div>
         )}
-        {showManageButton && (
-          <Link
-            href="/dashboard/general"
-            className="px-8 py-3 border-2 border-gray-900 text-gray-900 rounded-full text-base font-medium hover:bg-gray-900 hover:text-white transition-colors"
+        {showCreditButton && (
+          <button
+            onClick={handlePurchaseCredit}
+            disabled={isLoadingCredit}
+            className="flex items-center gap-2 px-8 py-3 border-2 border-gray-900 text-gray-900 rounded-full text-base font-medium hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Manage Recipients
-          </Link>
+            <Plus className="w-5 h-5" />
+            {isLoadingCredit ? 'Processing...' : 'Add Additional Credit'}
+          </button>
         )}
       </div>
     </div>

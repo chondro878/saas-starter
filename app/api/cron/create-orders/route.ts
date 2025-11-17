@@ -122,6 +122,19 @@ export async function GET(request: NextRequest) {
 
       if (defaultAddress.length === 0) {
         skippedOrders.push(`No default address for user ${item.user.id}`);
+        
+        // Send missing address email
+        const { sendMissingAddressEmail } = await import('@/lib/email');
+        const occasionDate = new Date(item.occasion.occasionDate);
+        sendMissingAddressEmail({
+          user: item.user,
+          recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
+          occasionType: item.occasion.occasionType,
+          occasionDate: occasionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        }).catch((error) => {
+          console.error('[CRON] Failed to send missing address email:', error);
+        });
+        
         continue;
       }
 
@@ -161,6 +174,21 @@ export async function GET(request: NextRequest) {
 
       createdOrders.push(newOrder[0]);
       console.log(`[CRON] Created order ${newOrder[0].id} for ${item.recipient.firstName} ${item.recipient.lastName}`);
+
+      // Send order created email (don't await to avoid blocking cron)
+      const { sendOrderCreatedEmail } = await import('@/lib/email');
+      const occasionDate = new Date(item.occasion.occasionDate);
+      const today = new Date();
+      const daysUntilOccasion = Math.ceil((occasionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      sendOrderCreatedEmail({
+        user: item.user,
+        order: newOrder[0],
+        occasionDate: occasionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        daysUntilOccasion,
+      }).catch((error) => {
+        console.error('[CRON] Failed to send order created email:', error);
+      });
     }
 
     console.log(`[CRON] Created ${createdOrders.length} orders, skipped ${skippedOrders.length}`);
