@@ -151,3 +151,25 @@ const footer = {
   textAlign: 'center' as const,
 };
 
+// Default export for React Email preview with sample data
+export default function SubscriptionStartedEmailPreview() {
+  return (
+    <SubscriptionStartedEmail
+      user={{
+        id: 1,
+        email: 'sarah@example.com',
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        name: 'Sarah Johnson',
+        passwordHash: '',
+        role: 'owner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        phone: null,
+      }}
+      planName="Stress Free"
+      cardLimit={12}
+    />
+  );
+}

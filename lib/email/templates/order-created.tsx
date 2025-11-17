@@ -165,3 +165,42 @@ const footer = {
   textAlign: 'center' as const,
 };
 
+// Default export for React Email preview with sample data
+export default function OrderCreatedEmailPreview() {
+  return (
+    <OrderCreatedEmail
+      user={{
+        id: 1,
+        email: 'sarah@example.com',
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        name: 'Sarah Johnson',
+        passwordHash: '',
+        role: 'owner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        phone: null,
+      }}
+      order={{
+        id: 1,
+        userId: 1,
+        recipientId: 1,
+        recipientFirstName: 'Mom',
+        recipientLastName: 'Johnson',
+        recipientCity: 'San Francisco',
+        recipientState: 'CA',
+        recipientStreet: '123 Main St',
+        recipientZip: '94102',
+        occasionId: 1,
+        occasionType: 'Birthday',
+        occasionNotes: 'Don\'t forget to mention the family reunion!',
+        status: 'created',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }}
+      occasionDate="December 15, 2025"
+      daysUntilOccasion={28}
+    />
+  );
+}

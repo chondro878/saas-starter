@@ -8,10 +8,10 @@ import {
   Button,
   Heading,
 } from '@react-email/components';
-import { WelcomeEmailProps } from '../types';
 
-export function WelcomeEmail({ user }: WelcomeEmailProps) {
-  const firstName = user.firstName || 'there';
+// Named export for use in code
+export function WelcomeEmail({ user = { firstName: 'there', email: 'user@example.com' } } = {}) {
+  const firstName = user?.firstName || 'there';
   
   return (
     <Html>
@@ -44,6 +44,56 @@ export function WelcomeEmail({ user }: WelcomeEmailProps) {
             </Text>
             
             <Button style={button} href={`${process.env.BASE_URL}/create-reminder`}>
+              Add Your First Recipient
+            </Button>
+            
+            <Text style={paragraph}>
+              Questions? Just reply to this email - we're here to help!
+            </Text>
+            
+            <Text style={footer}>
+              The Avoid the Rain Team 💌
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+
+// Default export for React Email preview with sample data
+export default function WelcomeEmailPreview() {
+  return (
+    <Html>
+      <Head />
+      <Body style={main}>
+        <Container style={container}>
+          <Section style={box}>
+            <Heading style={h1}>Welcome to Avoid the Rain! 🎉</Heading>
+            
+            <Text style={paragraph}>
+              Hi Sarah,
+            </Text>
+            
+            <Text style={paragraph}>
+              We're thrilled to have you join us! You've taken the first step toward never missing another special occasion.
+            </Text>
+            
+            <Text style={paragraph}>
+              <strong>What's next?</strong>
+            </Text>
+            
+            <Text style={listItem}>
+              📝 Add your first recipient and their special occasions
+            </Text>
+            <Text style={listItem}>
+              Choose a subscription plan that fits your needs
+            </Text>
+            <Text style={listItem}>
+              We'll handle the rest - beautiful cards delivered right to your door!
+            </Text>
+            
+            <Button style={button} href="https://avoidtherain.com/create-reminder">
               Add Your First Recipient
             </Button>
             

@@ -141,3 +141,26 @@ const footer = {
   textAlign: 'center' as const,
 };
 
+// Default export for React Email preview with sample data
+export default function MissingAddressEmailPreview() {
+  return (
+    <MissingAddressEmail
+      user={{
+        id: 1,
+        email: 'sarah@example.com',
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        name: 'Sarah Johnson',
+        passwordHash: '',
+        role: 'owner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        phone: null,
+      }}
+      recipientName="Mom"
+      occasionType="Birthday"
+      occasionDate="December 15, 2025"
+    />
+  );
+}

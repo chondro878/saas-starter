@@ -132,3 +132,25 @@ const footer = {
   textAlign: 'center' as const,
 };
 
+// Default export for React Email preview with sample data
+export default function CardCreditPurchasedEmailPreview() {
+  return (
+    <CardCreditPurchasedEmail
+      user={{
+        id: 1,
+        email: 'sarah@example.com',
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        name: 'Sarah Johnson',
+        passwordHash: '',
+        role: 'owner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        phone: null,
+      }}
+      creditsAdded={5}
+      totalCredits={8}
+    />
+  );
+}
