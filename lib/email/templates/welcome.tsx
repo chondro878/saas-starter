@@ -10,7 +10,7 @@ import {
 } from '@react-email/components';
 
 // Named export for use in code
-export function WelcomeEmail({ user = { firstName: 'there', email: 'user@example.com' } } = {}) {
+export function WelcomeEmail({ user = { firstName: 'there', email: 'user@example.com' } }: { user?: { firstName: string | null; email: string } } = {}) {
   const firstName = user?.firstName || 'there';
   
   return (
