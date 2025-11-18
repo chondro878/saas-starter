@@ -773,7 +773,7 @@ export default function CreateReminderPage() {
                   tabIndex={-1}
                   className="text-3xl font-light text-gray-900 mb-4 outline-none"
                 >
-                  Who is this for?
+                  Who are you sending cards to?
                 </h2>
                 <p className="text-gray-600">Tell us about the person you want to remember.</p>
               </div>
@@ -1271,7 +1271,7 @@ export default function CreateReminderPage() {
                   tabIndex={-1}
                   className="text-3xl font-light text-gray-900 mb-4 outline-none"
                 >
-                  What kind of card do you need?
+                  What kind of cards do you need?
                 </h2>
                 <p className="text-gray-600">Select the occasions you want to remember.</p>
               </div>
@@ -1439,8 +1439,8 @@ export default function CreateReminderPage() {
           {currentStep === 5 && (
             <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
               <div className="space-y-4">
-                <h2 className="text-3xl font-light text-gray-900">Review & Add Notes</h2>
-                <p className="text-gray-600">Review the details and add optional reminders for future you.</p>
+                <h2 className="text-3xl font-light text-gray-900">Review & Your Personal Reminder</h2>
+                <p className="text-gray-600">Review details and add reminders for your future self.</p>
               </div>
 
               {/* Recipient Review */}
@@ -1603,7 +1603,7 @@ export default function CreateReminderPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-900">Add Notes</h3>
                   <p className="text-sm text-gray-600">
-                    These notes will help you remember important details when it's time to send the card.
+                    These reminders will help you remember important details when it's time to send the card.
                   </p>
                   
                   {/* Two Button Options */}
@@ -1626,9 +1626,9 @@ export default function CreateReminderPage() {
                           {notesMode === 'custom' && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 mb-1">Custom notes per occasion</p>
+                          <p className="font-medium text-gray-900 mb-1">Personal reminder per occasion</p>
                           <p className="text-xs text-gray-600">
-                            Write different notes for each occasion (Birthday, Christmas, etc.)
+                            Write different reminders for each occasion (Birthday, Christmas, etc.)
                           </p>
                         </div>
                       </div>
@@ -1652,9 +1652,9 @@ export default function CreateReminderPage() {
                           {notesMode === 'all' && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 mb-1">Same note for all occasions</p>
+                          <p className="font-medium text-gray-900 mb-1">Same reminder for all occasions</p>
                           <p className="text-xs text-gray-600">
-                            Write one note that applies to every occasion
+                            Write one reminder that applies to every occasion.
                           </p>
                         </div>
                       </div>
@@ -1664,7 +1664,7 @@ export default function CreateReminderPage() {
                   {/* Custom Notes Per Occasion */}
                   {notesMode === 'custom' && (
                     <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-700 mb-4">Add custom notes for each occasion:</p>
+                      <p className="text-sm text-gray-700 mb-4">Add personal reminder for each occasion:</p>
                       {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => {
                         const style = getOccasionNotesStyle(oc);
                         return (
@@ -1722,17 +1722,17 @@ export default function CreateReminderPage() {
                   {notesMode === 'all' && (
                     <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-2 mb-3">
-                        <Label className="text-sm font-medium text-gray-700">Note for All Occasions</Label>
+                        <Label className="text-sm font-medium text-gray-700">Personal reminder for All Occasions</Label>
                         <div className="group relative">
                           <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
                           <div className="absolute left-0 top-6 hidden group-hover:block z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
-                            This note will appear with every card you send to this person, regardless of the occasion.
+                            This reminder will accompany every card we send send to you this person, regardless of the occasion.
                             <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
                           </div>
                         </div>
                       </div>
                       <Textarea
-                        placeholder="Write a note that applies to all occasions (e.g., favorite color, preferences, hobbies)..."
+                        placeholder="Write yourself a reminder that applies to all occasions (e.g., favorite color, preferences, hobbies)..."
                         {...register("note")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
                         rows={4}

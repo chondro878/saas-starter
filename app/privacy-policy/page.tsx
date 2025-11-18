@@ -1,4 +1,19 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'Learn how Avoid the Rain collects, uses, and protects your personal information. We take your privacy seriously and are transparent about our data practices.',
+  openGraph: {
+    title: 'Privacy Policy | Avoid the Rain',
+    description: 'Learn how Avoid the Rain collects, uses, and protects your personal information.',
+    url: 'https://avoidtherain.com/privacy-policy',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 const sections = [
   {

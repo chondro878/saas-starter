@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OG Image Generator - Avoid the Rain</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .info {
+      max-width: 1200px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .info h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .info p {
+      margin: 0;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+
+    .canvas-container {
+      position: relative;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .og-canvas {
+      width: 1200px;
+      height: 630px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #fce7f3 0%, #e9d5ff 50%, #bfdbfe 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px;
+      box-sizing: border-box;
+    }
+
+    .og-canvas h1 {
+      font-size: 72px;
+      font-weight: 300;
+      color: #111827;
+      margin: 0 0 20px 0;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .og-canvas p {
+      font-size: 32px;
+      font-weight: 300;
+      color: #374151;
+      margin: 0 0 40px 0;
+      line-height: 1.4;
+      max-width: 800px;
+    }
+
+    .og-canvas .features {
+      font-size: 24px;
+      color: #6b7280;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    .og-canvas .brand {
+      position: absolute;
+      top: 40px;
+      left: 60px;
+      font-size: 28px;
+      font-weight: 300;
+      color: #111827;
+    }
+
+    .controls {
+      max-width: 1200px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+
+    .controls h2 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .control-group input,
+    .control-group select,
+    .control-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .control-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .color-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .color-option {
+      padding: 10px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .color-option:hover {
+      border-color: #111827;
+    }
+
+    .color-option.active {
+      border-color: #111827;
+      font-weight: 600;
+    }
+
+    .gradient-1 { background: linear-gradient(135deg, #fce7f3, #e9d5ff, #bfdbfe); }
+    .gradient-2 { background: linear-gradient(135deg, #dbeafe, #e0e7ff, #ede9fe); }
+    .gradient-3 { background: linear-gradient(135deg, #fef3c7, #fed7aa, #fecaca); }
+    .gradient-4 { background: linear-gradient(135deg, #e0f2fe, #ddd6fe, #fce7f3); }
+    .gradient-5 { background: linear-gradient(135deg, #f1f5f9, #e2e8f0, #cbd5e1); }
+
+    button {
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #374151;
+    }
+
+    .instructions {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <h1>🎨 OG Image Generator for Avoid the Rain</h1>
+    <p>
+      Design your social share preview below. When done, take a screenshot of just the canvas (1200x630) 
+      or use browser tools to export. Save as <code>/public/og-image.png</code>
+    </p>
+  </div>
+
+  <div class="canvas-container">
+    <div class="og-canvas" id="canvas">
+      <div class="brand" id="brand">Avoid the Rain</div>
+      <h1 id="headline">Never Miss A Special Occasion</h1>
+      <p id="description">Premium greeting cards delivered to your door, pre-stamped and ready to send.</p>
+      <div class="features" id="features">✦  LUXURY CARDS  •  ZERO STRESS  •  NEVER FORGET  ✦</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <h2>Customize Your OG Image</h2>
+    
+    <div class="control-group">
+      <label for="headline-input">Main Headline</label>
+      <input 
+        type="text" 
+        id="headline-input" 
+        value="Never Miss A Special Occasion"
+        oninput="updateCanvas()"
+      >
+    </div>
+
+    <div class="control-group">
+      <label for="description-input">Description</label>
+      <textarea 
+        id="description-input" 
+        oninput="updateCanvas()"
+      >Premium greeting cards delivered to your door, pre-stamped and ready to send.</textarea>
+    </div>
+
+    <div class="control-group">
+      <label for="features-input">Bottom Text / Features</label>
+      <input 
+        type="text" 
+        id="features-input" 
+        value="✦  LUXURY CARDS  •  ZERO STRESS  •  NEVER FORGET  ✦"
+        oninput="updateCanvas()"
+      >
+    </div>
+
+    <div class="control-group">
+      <label>Background Gradient</label>
+      <div class="color-options">
+        <div class="color-option gradient-1 active" onclick="setGradient('linear-gradient(135deg, #fce7f3, #e9d5ff, #bfdbfe)', this)">
+          Pink → Purple → Blue
+        </div>
+        <div class="color-option gradient-2" onclick="setGradient('linear-gradient(135deg, #dbeafe, #e0e7ff, #ede9fe)', this)">
+          Blue → Indigo → Purple
+        </div>
+        <div class="color-option gradient-3" onclick="setGradient('linear-gradient(135deg, #fef3c7, #fed7aa, #fecaca)', this)">
+          Yellow → Orange → Pink
+        </div>
+        <div class="color-option gradient-4" onclick="setGradient('linear-gradient(135deg, #e0f2fe, #ddd6fe, #fce7f3)', this)">
+          Sky → Purple → Pink
+        </div>
+        <div class="color-option gradient-5" onclick="setGradient('linear-gradient(135deg, #f1f5f9, #e2e8f0, #cbd5e1)', this)">
+          Elegant Gray
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="headline-size">Headline Size</label>
+      <input 
+        type="range" 
+        id="headline-size" 
+        min="48" 
+        max="96" 
+        value="72" 
+        oninput="updateHeadlineSize(this.value)"
+      >
+      <span id="size-display">72px</span>
+    </div>
+
+    <button onclick="downloadInstructions()">📥 How to Save This Image</button>
+
+    <div class="instructions">
+      <strong>To save your OG image:</strong><br>
+      <strong>Option 1 (Mac):</strong> Cmd+Shift+4, then drag to screenshot just the canvas<br>
+      <strong>Option 2 (Windows):</strong> Windows+Shift+S, drag to screenshot the canvas<br>
+      <strong>Option 3:</strong> Use browser DevTools → Right-click canvas → "Capture node screenshot"<br>
+      <strong>Then:</strong> Save as <code>og-image.png</code> in your <code>/public/</code> folder
+    </div>
+  </div>
+
+  <script>
+    function updateCanvas() {
+      document.getElementById('headline').textContent = document.getElementById('headline-input').value;
+      document.getElementById('description').textContent = document.getElementById('description-input').value;
+      document.getElementById('features').textContent = document.getElementById('features-input').value;
+    }
+
+    function setGradient(gradient, element) {
+      document.getElementById('canvas').style.background = gradient;
+      
+      // Update active state
+      document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function updateHeadlineSize(size) {
+      document.getElementById('headline').style.fontSize = size + 'px';
+      document.getElementById('size-display').textContent = size + 'px';
+    }
+
+    function downloadInstructions() {
+      alert('Screenshot the canvas above (the 1200x630 box) and save as:\n\n/public/og-image.png\n\nThen update your app/layout.tsx if needed!\n\nTest your image at:\nhttps://www.opengraph.xyz/');
+    }
+
+    // Presets
+    const presets = {
+      'default': {
+        headline: 'Never Miss A Special Occasion',
+        description: 'Premium greeting cards delivered to your door, pre-stamped and ready to send.',
+        features: '✦  LUXURY CARDS  •  ZERO STRESS  •  NEVER FORGET  ✦'
+      },
+      'simple': {
+        headline: 'Never Forget The People Who Matter',
+        description: 'Thoughtful cards delivered on time, every time.',
+        features: 'PRE-STAMPED  •  PRE-ADDRESSED  •  READY TO SEND'
+      },
+      'bold': {
+        headline: 'Stay Connected Without The Stress',
+        description: 'Luxury greeting cards on autopilot',
+        features: 'BIRTHDAYS  •  ANNIVERSARIES  •  HOLIDAYS'
+      }
+    };
+  </script>
+</body>
+</html>
+

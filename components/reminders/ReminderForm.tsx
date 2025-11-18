@@ -275,7 +275,7 @@ export function ReminderForm({
           <>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-gray-200 text-xs flex items-center justify-center font-bold">1</div>
-              <h2 className="text-sm font-semibold">Who is this for?</h2>
+              <h2 className="text-sm font-semibold">Who are you sending cards to?</h2>
             </div>
 
             <div className="flex gap-2">

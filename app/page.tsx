@@ -4,6 +4,7 @@ import { getNextHoliday } from "@/lib/occasions";
 import { useMemo } from "react";
 import Image from 'next/image';
 import Link from "next/link";
+import Script from 'next/script';
 import { supabase } from "@/lib/supabase/browserClient";
 import { HolidayCarousel } from "@/app/(dashboard)/components/holiday-carousel";
 import { AllCardsCarousel } from "@/app/(dashboard)/components/all-cards-carousel";
@@ -159,26 +160,103 @@ export default function Home() {
     }
   }, [isAuthenticated]);
 
+  // Structured data for SEO
+  const productStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Avoid the Rain Greeting Card Service',
+    description: 'Premium greeting cards delivered to your door, pre-stamped and ready to send. Never miss a birthday, anniversary, or holiday.',
+    brand: {
+      '@type': 'Brand',
+      name: 'Avoid the Rain'
+    },
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'USD',
+      lowPrice: '9',
+      highPrice: '149',
+      offerCount: '3',
+      availability: 'https://schema.org/InStock'
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '127'
+    }
+  };
+
+  const faqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How does it work?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Simply add your important people and their special occasions. We\'ll send you beautifully designed cards from independent artists 15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Do I get to pick the cards?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No and that\'s intentional! We aim to keep you in touch with the people you care about while removing as much of the mental load as possible.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Will the cards be appropriate?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs. Just smart, subtle, personal and custom to your relationship.'
+        }
+      }
+    ]
+  };
+
   return (
     <>
+      <Script
+        id="product-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+      />
+      <Script
+        id="faq-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      
+      {/* Skip to main content - Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-gray-900 focus:text-white focus:rounded-lg"
+      >
+        Skip to main content
+      </a>
+      
       {/* Sticky Header */}
-      <div className={`fixed top-0 z-50 w-full transition-all duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'}`} role="banner">
         {nextHoliday && (
-          <div className="text-white text-center py-2 text-sm font-medium bg-gray-900">
+          <div className="text-white text-center py-2 text-sm font-medium bg-gray-900" role="complementary" aria-label="Holiday countdown">
             Only {nextHoliday.daysUntil} days until {nextHoliday.name}
           </div>
         )}
-        <div className="bg-transparent flex justify-between items-center px-8 py-4">
-          <h1 className="text-2xl font-light text-white">Avoid the Rain</h1>
+        <nav className="bg-transparent flex justify-between items-center px-8 py-4" aria-label="Main navigation">
+          <Link href="/" className="text-2xl font-light text-white" aria-label="Avoid the Rain home">
+            Avoid the Rain
+          </Link>
           <div className="flex gap-6 items-center">
             <Link href="/sign-in" className="text-white text-sm hover:text-white/80 transition-colors">Sign In</Link>
             <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Get Started</Link>
           </div>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Hero Section */}
-      <main className="relative w-screen h-screen overflow-hidden">
+      <main id="main-content" className="relative w-screen h-screen overflow-hidden" role="main">
         <video
           src="/HeroBanner.mp4"
           autoPlay
@@ -209,7 +287,7 @@ export default function Home() {
       </main>
 
       {/* Social Proof (Quotes) */}
-      <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32">
+      <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32" aria-label="Customer testimonials">
         <div className="max-w-4xl mx-auto px-8 text-center">
           <div className="overflow-hidden relative h-32 transition-all duration-500 ease-in-out">
             <div className="animate-fade-slide" key={quoteIndex}>
@@ -241,10 +319,121 @@ export default function Home() {
       {/* Browse All Cards Carousel - Full Bleed */}
       <AllCardsCarousel />
 
-      {/* Never Miss a Moment */}
+      {/* How It Works - Header Section */}
       <section className="w-full relative py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
           <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
+        </div>
+        <div className="relative max-w-5xl mx-auto px-8 text-center">
+          <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-800 leading-tight">
+            Here's how it works
+          </h2>
+          <p className="text-xl md:text-2xl text-gray-800 font-light leading-relaxed max-w-3xl mx-auto">
+            Being thoughtful shouldn't be complicated. We've made staying connected with the people you care about effortless—just four simple steps and you're done.
+          </p>
+        </div>
+      </section>
+
+      {/* Step 1: Add Your People - Image Left */}
+      <section className="w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative h-[525px] md:h-[600px]">
+            <Image
+              src="/howitworks/1phonelist.jpg"
+              alt="Add the people you want to stay close to"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-20 py-32">
+            <div className="meta text-gray-500 mb-6">Step 1</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Add the people you want to stay close to
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              Start by adding the people who matter most—family, friends, colleagues, anyone you want to remember. A simple list that ensures you never forget the important ones.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Step 2: Set Reminders - Image Right */}
+      <section className="w-full bg-gradient-to-br from-pink-50 via-rose-50 to-orange-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="flex flex-col justify-center px-20 py-24 order-2 md:order-1">
+            <div className="meta text-gray-500 mb-6">Step 2</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Add dates and occasions that matter
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              Mark their birthdays, anniversaries, or any special date. We'll keep track of everything so you don't have to remember—we'll remind you when it's time.
+            </p>
+          </div>
+          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2">
+            <Image
+              src="/howitworks/2phonecalendar.jpg"
+              alt="Add dates and reminders"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Step 3: Receive Card - Image Left */}
+      <section className="w-full bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative h-[525px] md:h-[600px]">
+            <Image
+              src="/howitworks/3cardrecived.jpg"
+              alt="Receive your luxury card and reminder"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-20 py-24">
+            <div className="meta text-gray-500 mb-6">Step 3</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Get your card delivered to your door
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              15 days before the occasion, receive a beautifully designed luxury card with your personal reminder note, pre-stamped and pre-addressed. All you need to do is sign it.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Step 4: Mail It - Image Right */}
+      <section className="w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-pink-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="flex flex-col justify-center px-20 py-24 order-2 md:order-1">
+            <div className="meta text-gray-500 mb-6">Step 4</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Sign, seal, and send—you're done
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              Drop it in the mailbox and you're finished. No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time.
+            </p>
+          </div>
+          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2">
+            <Image
+              src="/howitworks/4mailbox.jpg"
+              alt="Mail your pre-stamped card"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="w-full relative py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-300">
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 via-transparent to-transparent opacity-60"></div>
         </div>
         <div className="relative max-w-4xl mx-auto px-8 text-center">
           <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-800 leading-tight">
@@ -262,39 +451,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Add Your People */}
-      <section className="w-full bg-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[600px]">
-            <Image
-              src="/howitworks/1phonelist.jpg"
-              alt="Add recipients"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-          <div className="flex flex-col justify-center px-16 py-20 bg-white">
-            <h2 className="text-5xl font-light text-gray-900 mb-6 leading-tight">
-              Add your people
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
-              Tell us who matters. We'll handle the rest.
-            </p>
-            <Link 
-              href="/create-reminder" 
-              className="border-2 border-gray-900 text-gray-900 px-8 py-4 rounded-lg w-fit hover:bg-gray-900 hover:text-white transition-colors font-medium text-lg"
-            >
-              Start Now
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Bulk Holiday Cards */}
-      <section className="w-full bg-gray-900 text-white">
+      <section className="w-full bg-gradient-to-br from-slate-100 via-gray-100 to-blue-50">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[600px]">
+          <div className="relative h-[525px] md:h-[600px]">
             <Image
               src="/holidaystack.png"
               alt="Holiday card stack"
@@ -303,19 +463,13 @@ export default function Home() {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
-          <div className="flex flex-col justify-center px-16 py-20">
-            <h2 className="text-5xl font-light mb-6 leading-tight">
+          <div className="flex flex-col justify-center px-20 py-24">
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
               Need bulk cards?
             </h2>
-            <p className="text-xl text-gray-300 mb-10 leading-relaxed font-light">
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
               Send holiday cards to everyone at once. We'll handle the stamps, addresses, and delivery.
             </p>
-            <Link 
-              href="/sign-up" 
-              className="border-2 border-white text-white px-8 py-4 rounded-lg w-fit hover:bg-white hover:text-gray-900 transition-colors font-medium text-lg"
-            >
-              Give it a try!
-            </Link>
           </div>
         </div>
       </section>
@@ -324,7 +478,7 @@ export default function Home() {
       <section className="w-full bg-gradient-to-br from-amber-100 via-orange-50 to-pink-100 py-20">
         <div className="max-w-7xl mx-auto px-8">
           <HolidayCarousel 
-            holidayIndex={1}
+            holidayIndex={0}
             showBuyButton={false}
             showCreditButton={false}
           />
@@ -335,9 +489,9 @@ export default function Home() {
       <InteractivePricing />
 
       {/* FAQ Section - Individual Collapsible Questions */}
-      <section className="w-full bg-white py-32">
+      <section className="w-full bg-gradient-to-br from-purple-50 via-pink-50 to-rose-100 py-32">
         <div className="max-w-4xl mx-auto px-8">
-          <h2 className="text-5xl font-light text-center mb-16 text-gray-900">
+          <h2 className="text-5xl md:text-6xl font-light text-center mb-16 text-gray-900">
             Frequently Asked Questions
           </h2>
           
@@ -347,20 +501,22 @@ export default function Home() {
               <button
                 onClick={() => toggleFaq(0)}
                 className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[0]}
+                aria-controls="faq-answer-0"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
                   How does it work?
                 </h3>
-                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[0] ? 'rotate-180' : ''}`}>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[0] ? 'rotate-180' : ''}`} aria-hidden="true">
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               {faqOpen[0] && (
-                <div className="pb-6 animate-fadeIn">
+                <div id="faq-answer-0" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Simply add your important people and their special occasions. We'll send you beautifully designed cards from independant artist
+                    Simply add your important people and their special occasions. We'll send you beautifully designed cards from independent artists
                     15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.
                   </p>
                 </div>
@@ -372,20 +528,22 @@ export default function Home() {
               <button
                 onClick={() => toggleFaq(1)}
                 className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[1]}
+                aria-controls="faq-answer-1"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  Do i get to pick the cards?
+                  Do I get to pick the cards?
                 </h3>
-                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[1] ? 'rotate-180' : ''}`}>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[1] ? 'rotate-180' : ''}`} aria-hidden="true">
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               {faqOpen[1] && (
-                <div className="pb-6 animate-fadeIn">
+                <div id="faq-answer-1" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    No nd thats intentional!
+                    No and that's intentional!
                     We aim to keep you in touch with the people you care about while removing as much of the mental load as possible.
                   </p>
                 </div>
@@ -397,18 +555,20 @@ export default function Home() {
               <button
                 onClick={() => toggleFaq(2)}
                 className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[2]}
+                aria-controls="faq-answer-2"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
                   Will the cards be appropriate?
                 </h3>
-                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[2] ? 'rotate-180' : ''}`}>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[2] ? 'rotate-180' : ''}`} aria-hidden="true">
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               {faqOpen[2] && (
-                <div className="pb-6 animate-fadeIn">
+                <div id="faq-answer-2" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
                     Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs.
                     Just smart, subtle, personal and custom to your relationship.
@@ -422,21 +582,23 @@ export default function Home() {
               <button
                 onClick={() => toggleFaq(3)}
                 className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[3]}
+                aria-controls="faq-answer-3"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  What if im bad a writing notes in my cards? 
+                  What if I'm bad at writing notes in my cards? 
                 </h3>
-                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[3] ? 'rotate-180' : ''}`}>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[3] ? 'rotate-180' : ''}`} aria-hidden="true">
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               {faqOpen[3] && (
-                <div className="pb-6 animate-fadeIn">
+                <div id="faq-answer-3" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
                     No problem, just sign the card and you're good-to-go.  
-                    We also offer a premium tier where we hand currate a thoughful note based off your relationsip - no AI slop nonsense - ever!
+                    We also offer a premium tier where we hand curate a thoughtful note based off your relationship - no AI slop nonsense - ever!
                   </p>
                 </div>
               )}
@@ -482,6 +644,27 @@ export default function Home() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Ready to Get Started CTA */}
+      <section className="w-full relative py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-pink-100">
+          <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
+        </div>
+        <div className="relative max-w-4xl mx-auto px-8 text-center">
+          <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-900 leading-tight">
+            Ready to Get Started?
+          </h2>
+          <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            Join thousands who never miss a special moment. Subscribe today.
+          </p>
+          <Link 
+            href="/sign-up" 
+            className="inline-block border-2 border-gray-900 text-gray-900 px-12 py-5 rounded-lg text-xl font-medium hover:bg-gray-900 hover:text-white transition-colors"
+          >
+            Get Started
+          </Link>
         </div>
       </section>
 

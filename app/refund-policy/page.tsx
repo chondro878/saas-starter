@@ -1,4 +1,19 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Refund Policy',
+  description: 'Our refund policy for Avoid the Rain greeting cards. Learn about cancellations, refunds for damaged or lost orders, and how to request help.',
+  openGraph: {
+    title: 'Refund Policy | Avoid the Rain',
+    description: 'Our refund policy for Avoid the Rain greeting cards. Learn about cancellations, refunds for damaged or lost orders.',
+    url: 'https://avoidtherain.com/refund-policy',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 const sections = [
   {

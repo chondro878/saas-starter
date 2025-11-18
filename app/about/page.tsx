@@ -1,6 +1,31 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Us - Meet Julian & Jess',
+  description: 'We\'re Julian and Jess, the founders of Avoid the Rain. We run this small business from Seattle, helping people stay connected through thoughtful, timely greeting cards.',
+  openGraph: {
+    title: 'About Us - Meet Julian & Jess | Avoid the Rain',
+    description: 'We\'re Julian and Jess, the founders of Avoid the Rain. We run this small business from Seattle, helping people stay connected through thoughtful, timely greeting cards.',
+    url: 'https://avoidtherain.com/about',
+    images: [
+      {
+        url: '/US.jpg',
+        width: 1600,
+        height: 1067,
+        alt: 'Julian and Jess, founders of Avoid the Rain',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us - Meet Julian & Jess | Avoid the Rain',
+    description: 'We\'re Julian and Jess, the founders of Avoid the Rain. We run this small business from Seattle.',
+    images: ['/US.jpg'],
+  },
+};
 
 const inspirationSlides = [
   {
