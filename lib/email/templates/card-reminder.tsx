@@ -209,9 +209,37 @@ export default function CardReminderEmailPreview() {
         deletedAt: null,
         phone: null,
       }}
-      recipientName="Mom"
-      occasionType="Birthday"
+      order={{
+        id: 1,
+        userId: 1,
+        teamId: 1,
+        recipientId: 1,
+        recipientFirstName: 'Mom',
+        recipientLastName: 'Johnson',
+        recipientCity: 'San Francisco',
+        recipientState: 'CA',
+        recipientStreet: '123 Main St',
+        recipientApartment: null,
+        recipientZip: '94102',
+        returnName: 'Sarah Johnson',
+        returnStreet: '456 Oak Ave',
+        returnApartment: null,
+        returnCity: 'Seattle',
+        returnState: 'WA',
+        returnZip: '98101',
+        occasionId: 1,
+        occasionType: 'Birthday',
+        occasionDate: new Date('2025-12-15'),
+        occasionNotes: 'Don\'t forget to mention the family reunion!',
+        cardType: 'subscription',
+        status: 'pending',
+        printDate: null,
+        mailDate: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }}
       occasionDate="December 15, 2025"
+      daysUntilOccasion={7}
     />
   );
 }
