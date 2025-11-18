@@ -111,12 +111,23 @@ const signUpSchema = z.object({
   password: z.string().min(8),
   firstName: z.string().min(1).max(50).optional(),
   lastName: z.string().min(1).max(50).optional(),
-  inviteId: z.string().optional()
+  inviteId: z.string().optional(),
+  inviteCode: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const supabase = await createSupabaseServerClient();
-  const { email, password, firstName, lastName, inviteId } = data;
+  const { email, password, firstName, lastName, inviteId, inviteCode } = data;
+
+  // Validate invite code for new signups (unless they have a team inviteId)
+  const VALID_INVITE_CODE = process.env.INVITE_CODE || 'AVOIDPUDDLE#42069!';
+  if (!inviteId && inviteCode !== VALID_INVITE_CODE) {
+    return {
+      error: 'Invalid invite code. Please check and try again.',
+      email,
+      password
+    };
+  }
 
   const existingUser = await db
     .select()

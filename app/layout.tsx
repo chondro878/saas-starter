@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
+import { BetaBanner } from '@/components/ui/beta-banner';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://avoidtherain.com'),
@@ -105,6 +106,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-[100dvh] bg-gray-50 text-gray-700 antialiased">
+        <BetaBanner />
         <Providers>
           {children}
         </Providers>

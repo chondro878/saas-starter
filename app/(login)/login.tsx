@@ -22,8 +22,9 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   );
 
   // Authentication flow state
-  const [authStep, setAuthStep] = useState<'email' | 'signin' | 'signup'>('email');
+  const [authStep, setAuthStep] = useState<'email' | 'inviteCode' | 'signin' | 'signup'>('email');
   const [email, setEmail] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +33,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [inviteCodeError, setInviteCodeError] = useState('');
 
   // Check if email exists
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -51,12 +53,25 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
       if (data.exists) {
         setAuthStep('signin');
       } else {
-        setAuthStep('signup');
+        // For new users, require invite code
+        setAuthStep('inviteCode');
       }
     } catch (error) {
       console.error('Error checking email:', error);
     } finally {
       setIsCheckingEmail(false);
+    }
+  };
+
+  // Validate invite code
+  const handleInviteCodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteCodeError('');
+    
+    if (inviteCode.trim() === 'AVOIDPUDDLE#42069!') {
+      setAuthStep('signup');
+    } else {
+      setInviteCodeError('Invalid invite code. Please check and try again.');
     }
   };
 
@@ -90,6 +105,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     formData.set('email', email);
     formData.set('firstName', firstName);
     formData.set('lastName', lastName);
+    formData.set('inviteCode', inviteCode);
     formAction(formData);
   };
 
@@ -212,6 +228,67 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                     and agree to receive newsletters and marketing updates.
                   </p>
                 </div>
+              </>
+            ) : authStep === 'inviteCode' ? (
+              // Step 1b: Invite Code (for new signups)
+              <>
+                <h2 className="text-3xl font-semibold text-gray-800 mb-2">
+                  Enter your invite code
+                </h2>
+                <p className="text-gray-600 mb-8">This site is currently in private beta</p>
+
+                <form className="space-y-6" onSubmit={handleInviteCodeSubmit}>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <Label htmlFor="invite-email" className="block text-sm font-medium text-gray-700">
+                        Email
+                      </Label>
+                      <button
+                        type="button"
+                        onClick={() => setAuthStep('email')}
+                        className="text-sm text-indigo-600 hover:text-indigo-500 underline"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-700">
+                      {email}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 mb-2">
+                      Invite Code
+                    </Label>
+                    <Input
+                      id="inviteCode"
+                      name="inviteCode"
+                      type="text"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="Enter your invite code"
+                    />
+                  </div>
+
+                  {inviteCodeError && (
+                    <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{inviteCodeError}</div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-full transition-colors shadow-sm"
+                  >
+                    Continue
+                  </Button>
+
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-600">
+                      Don't have an invite code? Contact us to request access.
+                    </p>
+                  </div>
+                </form>
               </>
             ) : authStep === 'signin' ? (
               // Step 2a: Sign In (Password)

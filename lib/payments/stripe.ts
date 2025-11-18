@@ -20,6 +20,12 @@ export async function createCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
+  // Check if payments are enabled
+  const paymentsEnabled = process.env.STRIPE_PAYMENTS_ENABLED === 'true';
+  if (!paymentsEnabled) {
+    throw new Error('Payments are currently disabled. Please try again later.');
+  }
+
   const user = await getUser();
 
   if (!team || !user) {
@@ -52,6 +58,12 @@ export async function createOneTimeCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
+  // Check if payments are enabled
+  const paymentsEnabled = process.env.STRIPE_PAYMENTS_ENABLED === 'true';
+  if (!paymentsEnabled) {
+    throw new Error('Payments are currently disabled. Please try again later.');
+  }
+
   const user = await getUser();
 
   if (!team || !user) {
