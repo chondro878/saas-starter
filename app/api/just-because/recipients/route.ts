@@ -49,8 +49,6 @@ export async function GET(request: NextRequest) {
       id: recipient.id,
       firstName: recipient.firstName,
       lastName: recipient.lastName,
-      partnerFirstName: recipient.partnerFirstName,
-      partnerLastName: recipient.partnerLastName,
       relationship: recipient.relationship,
       occasionId: occasion.id,
       cardVariation: occasion.cardVariation,

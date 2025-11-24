@@ -73,7 +73,13 @@ export default function CreateReminderPage() {
   // Address validation state
   const [addressValidation, setAddressValidation] = useState<{
     isValidating: boolean;
-    result: any | null;
+    result: {
+      isValid: boolean;
+      verdict: 'VALID' | 'UNDELIVERABLE' | 'CORRECTABLE' | 'ERROR';
+      originalAddress?: any;
+      suggestedAddress?: any;
+      message?: string;
+    } | null;
     showSuggestion: boolean;
     error: string | null;
   }>({
@@ -483,22 +489,9 @@ export default function CreateReminderPage() {
           return; // Wait for user to retry or proceed anyway
         }
         
-        // If validation succeeded, check verdict
-        if (validationResult) {
-          // If address is undeliverable, block progression
-          if (validationResult.verdict === 'UNDELIVERABLE') {
-            return;
-          }
-          
-          // If address is correctable, let user decide
-          if (validationResult.verdict === 'CORRECTABLE') {
-            return; // Wait for user to accept or decline suggestion
-          }
-          
-          // If valid, button now shows "Next" and user can review before proceeding
-          // Just return here - user will click again to proceed
-          return;
-        }
+        // Note: validateAddressFields() now always returns VALID and automatically
+        // advances to the next step, so we just return here.
+        return;
       }
       
       // Address has been validated and user clicked "Next" again - proceed to step 2

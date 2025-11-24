@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
+import * as React from 'react';
 import AddressUrgentIssueEmail from './templates/address-urgent-issue';
 import AddressCorrectedEmail from './templates/address-corrected';
 
@@ -23,8 +24,8 @@ export async function sendUrgentAddressIssueEmail(params: {
   try {
     const dashboardLink = `${process.env.BASE_URL || 'http://localhost:3000'}/dashboard/friendsandfamily`;
     
-    const html = render(
-      AddressUrgentIssueEmail({
+    const html = await render(
+      React.createElement(AddressUrgentIssueEmail, {
         userName: params.userName,
         recipientName: params.recipientName,
         occasionType: params.occasionType,
@@ -38,7 +39,7 @@ export async function sendUrgentAddressIssueEmail(params: {
     await resend.emails.send({
       from: process.env.EMAIL_FROM || 'Avoid the Rain <noreply@avoidtherain.com>',
       to: params.userEmail,
-      subject: `⚠️ Action Required: Verify Address for Upcoming Card`,
+      subject: 'Action Required: Verify Address for Upcoming Card',
       html,
     });
 
@@ -69,8 +70,8 @@ export async function sendAddressCorrectedEmail(params: {
   };
 }) {
   try {
-    const html = render(
-      AddressCorrectedEmail({
+    const html = await render(
+      React.createElement(AddressCorrectedEmail, {
         userName: params.userName,
         recipientName: params.recipientName,
         originalAddress: params.originalAddress,
@@ -81,7 +82,7 @@ export async function sendAddressCorrectedEmail(params: {
     await resend.emails.send({
       from: process.env.EMAIL_FROM || 'Avoid the Rain <noreply@avoidtherain.com>',
       to: params.userEmail,
-      subject: `✅ Address Updated for ${params.recipientName}`,
+      subject: `Address Updated for ${params.recipientName}`,
       html,
     });
 

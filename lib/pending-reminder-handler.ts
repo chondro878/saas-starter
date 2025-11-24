@@ -72,7 +72,7 @@ export async function createReminderFromPendingData(
       pendingData.occasions.map(async (occasion) => {
         if (occasion.isJustBecause) {
           // Calculate Just Because date
-          const { selectedDate } = await calculateJustBecauseDate(newRecipient.id);
+          const selectedDate = await calculateJustBecauseDate(newRecipient.id);
           const cardVariation = getCardVariation(pendingData.recipient.relationship);
 
           return {

@@ -65,10 +65,10 @@ async function getExclusionWindows(recipientId: number, currentYear: number): Pr
   }
 
   // Add dynamic holidays (Mother's Day, Father's Day, Easter, Thanksgiving)
-  const mothersDayDate = calculateHolidayDate(currentYear, "Mother's Day");
-  const fathersDayDate = calculateHolidayDate(currentYear, "Father's Day");
-  const easterDate = calculateHolidayDate(currentYear, "Easter");
-  const thanksgivingDate = calculateHolidayDate(currentYear, "Thanksgiving");
+  const mothersDayDate = calculateHolidayDate("Mother's Day");
+  const fathersDayDate = calculateHolidayDate("Father's Day");
+  const easterDate = calculateHolidayDate("Easter");
+  const thanksgivingDate = calculateHolidayDate("Thanksgiving");
 
   if (mothersDayDate) exclusions.push({ date: mothersDayDate, buffer: BUFFER_DAYS });
   if (fathersDayDate) exclusions.push({ date: fathersDayDate, buffer: BUFFER_DAYS });

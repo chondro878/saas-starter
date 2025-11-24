@@ -1,11 +1,13 @@
 import { validateAddress } from './address-validation';
-import { Occasion, Recipient } from './db/schema';
+import { occasions } from './db/schema';
+
+type Occasion = typeof occasions.$inferSelect;
 
 /**
  * Calculate days until an occasion
  * Returns number of days from today to the next occurrence
  */
-export function getDaysUntilOccasion(occasion: typeof Occasion.$inferSelect): number {
+export function getDaysUntilOccasion(occasion: Occasion): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -47,12 +49,12 @@ export async function verifyAddressIfUrgent(
     state: string;
     zip: string;
   },
-  occasions: Array<typeof Occasion.$inferSelect>
+  occasions: Array<Occasion>
 ): Promise<{
   isUrgent: boolean;
   daysUntil: number | null;
   verification: Awaited<ReturnType<typeof validateAddress>> | null;
-  urgentOccasions: Array<typeof Occasion.$inferSelect>;
+  urgentOccasions: Array<Occasion>;
 }> {
   // Find occasions that are within 15 days
   const urgentOccasions = occasions.filter(occasion => {
