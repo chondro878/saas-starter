@@ -327,6 +327,10 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
         occasionDate,
         notes: newOccasion.notes,
         createdAt: new Date(),
+        isJustBecause: false,
+        computedSendDate: null,
+        cardVariation: null,
+        lastSentYear: null,
       },
     ]);
     setNewOccasion({ type: '', date: new Date(), notes: '' });
@@ -350,6 +354,10 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
         occasionDate,
         notes: newOccasion.notes,
         createdAt: new Date(),
+        isJustBecause: false,
+        computedSendDate: null,
+        cardVariation: null,
+        lastSentYear: null,
       },
     ]);
     setNewOccasion({ type: '', date: new Date(), notes: '' });
