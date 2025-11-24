@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { recipients, occasions, orders, users, teamMembers, teams } from '@/lib/db/schema';
+import { recipients, occasions, orders, users, teamMembers, teams, userAddresses } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { deductCardCredit } from '@/lib/db/queries';
@@ -99,13 +99,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's default return address
-    const returnAddr = {
-      street: team.billingStreet || '',
-      apartment: team.billingApartment,
-      city: team.billingCity || '',
-      state: team.billingState || '',
-      zip: team.billingZip || '',
-    };
+    const defaultAddress = await db
+      .select()
+      .from(userAddresses)
+      .where(
+        and(
+          eq(userAddresses.userId, dbUser[0].id),
+          eq(userAddresses.isDefault, 1)
+        )
+      )
+      .limit(1);
+
+    if (defaultAddress.length === 0) {
+      return NextResponse.json(
+        { error: 'No default return address found. Please add a return address in your account settings.' },
+        { status: 400 }
+      );
+    }
+
+    const returnAddr = defaultAddress[0];
 
     // Create an order immediately (using the credit)
     const newOrder = {
