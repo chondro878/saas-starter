@@ -98,15 +98,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get user's default return address
+    const returnAddr = {
+      street: team.billingStreet || '',
+      apartment: team.billingApartment,
+      city: team.billingCity || '',
+      state: team.billingState || '',
+      zip: team.billingZip || '',
+    };
+
     // Create an order immediately (using the credit)
     const newOrder = {
       recipientId: recipient.id,
       occasionId: occasion.id,
-      occasionType: occasion.occasionType,
+      userId: dbUser[0].id,
+      teamId: team.id,
+      cardType: 'subscription' as const,
       occasionDate: occasion.occasionDate,
       status: 'pending' as const,
-      createdAt: new Date(),
-      cardVariation: occasion.cardVariation,
+      
+      // Recipient address
+      recipientFirstName: recipient.firstName,
+      recipientLastName: recipient.lastName,
+      recipientStreet: recipient.street,
+      recipientApartment: recipient.apartment || null,
+      recipientCity: recipient.city,
+      recipientState: recipient.state,
+      recipientZip: recipient.zip,
+      
+      // Return address
+      returnName: `${dbUser[0].firstName || ''} ${dbUser[0].lastName || ''}`.trim() || dbUser[0].email,
+      returnStreet: returnAddr.street,
+      returnApartment: returnAddr.apartment || null,
+      returnCity: returnAddr.city,
+      returnState: returnAddr.state,
+      returnZip: returnAddr.zip,
+      
+      // Occasion details
+      occasionType: occasion.occasionType,
+      occasionNotes: occasion.notes || null,
     };
 
     const [createdOrder] = await db.insert(orders).values(newOrder).returning();
