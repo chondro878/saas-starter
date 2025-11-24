@@ -73,6 +73,14 @@ BASE_URL=https://avoidtherain.com  # or http://localhost:3000 for local
 NODE_ENV=production  # or development for local
 ```
 
+### Admin Access Control
+
+```bash
+# Fulfillment dashboard access (comma-separated email addresses)
+# Only these emails can access /dashboard/fulfillment
+ADMIN_EMAILS=jesipetrey@gmail.com,hello@juliangarcia.com
+```
+
 ---
 
 ## Configuration for Different Environments

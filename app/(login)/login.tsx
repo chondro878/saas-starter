@@ -7,7 +7,7 @@ import { Button } from '@/app/(dashboard)/components/ui/button';
 import { Input } from '@/app/(dashboard)/components/ui/input';
 import { Label } from '@/app/(dashboard)/components/ui/label';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
-import { signIn, signUp } from './actions';
+import { signIn, signUp, resendVerificationEmail } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { supabase } from '@/lib/supabase/browserClient';
 
@@ -22,7 +22,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   );
 
   // Authentication flow state
-  const [authStep, setAuthStep] = useState<'email' | 'inviteCode' | 'signin' | 'signup'>('email');
+  const [authStep, setAuthStep] = useState<'email' | 'inviteCode' | 'signin' | 'signup' | 'emailConfirmation'>('email');
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -34,6 +34,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [inviteCodeError, setInviteCodeError] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   // Check if email exists
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -107,6 +109,35 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     formData.set('lastName', lastName);
     formData.set('inviteCode', inviteCode);
     formAction(formData);
+  };
+
+  // Check if email confirmation is required after sign up
+  if (state?.success && (state as any)?.requiresEmailConfirmation && authStep !== 'emailConfirmation') {
+    setAuthStep('emailConfirmation');
+  }
+
+  // Handle resend verification email
+  const handleResendVerification = async () => {
+    if (!email || resendingEmail) return;
+    
+    setResendingEmail(true);
+    setResendSuccess(false);
+    
+    try {
+      const formData = new FormData();
+      formData.set('email', email);
+      
+      const result = await resendVerificationEmail({ error: '' } as ActionState, formData);
+      
+      if (result && 'success' in result && result.success) {
+        setResendSuccess(true);
+        setTimeout(() => setResendSuccess(false), 5000); // Clear success message after 5 seconds
+      }
+    } catch (error) {
+      console.error('Error resending verification:', error);
+    } finally {
+      setResendingEmail(false);
+    }
   };
 
   return (
@@ -358,6 +389,28 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                     <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{state.error}</div>
                   )}
 
+                  {(state as any)?.emailNotConfirmed && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-yellow-800 text-sm mb-3">
+                        Your email address has not been verified yet. Please check your inbox for the verification link.
+                      </p>
+                      {resendSuccess ? (
+                        <div className="text-green-700 text-sm font-medium">
+                          ✓ Verification email sent! Check your inbox.
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          disabled={resendingEmail}
+                          className="text-sm text-indigo-600 hover:text-indigo-500 underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {resendingEmail ? 'Sending...' : 'Resend verification email'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   <Button
                     type="submit"
                     className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-full transition-colors shadow-sm"
@@ -373,6 +426,55 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                     )}
                   </Button>
                 </form>
+              </>
+            ) : authStep === 'emailConfirmation' ? (
+              // Email Confirmation Screen
+              <>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg 
+                      className="w-8 h-8 text-green-600" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    Check your email
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    We've sent a confirmation link to
+                  </p>
+                  <div className="bg-gray-50 rounded-lg p-3 mb-6">
+                    <p className="text-gray-900 font-medium">{email}</p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+                    <p className="text-sm text-blue-800 mb-2">
+                      <strong>Next steps:</strong>
+                    </p>
+                    <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                      <li>Open the email from Avoid the Rain</li>
+                      <li>Click the confirmation link</li>
+                      <li>You'll be redirected to your dashboard</li>
+                    </ol>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Didn't receive the email? Check your spam folder or{' '}
+                    <button 
+                      onClick={() => setAuthStep('email')}
+                      className="text-indigo-600 hover:text-indigo-500 underline font-medium"
+                    >
+                      try again
+                    </button>
+                  </p>
+                </div>
               </>
             ) : (
               // Step 2b: Sign Up (Name, Password, Confirm Password)

@@ -7,6 +7,7 @@ import { HolidayCarousel } from '../components/holiday-carousel';
 import { IOSDownload } from '../components/ios-download';
 import { SubscriptionAlert } from '../components/subscription-alert';
 import { CardCreditPurchase } from '../components/card-credit-purchase';
+import { JustBecauseCreditApply } from '../components/just-because-credit-apply';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -69,6 +70,9 @@ export default function DashboardHomePage() {
 
       {/* Card Credit Purchase */}
       <CardCreditPurchase />
+
+      {/* Just Because Credit Apply */}
+      <JustBecauseCreditApply />
 
       {/* iOS App Download */}
       <IOSDownload />

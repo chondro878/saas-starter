@@ -1,6 +1,8 @@
 import { db } from '@/lib/db/drizzle';
 import { orders } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
+import { getUser } from '@/lib/db/queries';
 import { PrintLabelsButton } from './print-labels-button';
 import { PrintEnvelopesButton } from './print-envelopes-button';
 import { PrintReminderCardsButton } from './print-cards-button';
@@ -11,6 +13,21 @@ import { SentOrdersSection } from './sent-orders-section';
 import type { Order } from '@/lib/db/schema';
 
 export default async function FulfillmentPage() {
+  // ===== SECURITY CHECK =====
+  // Only allow access to owners or whitelisted admin emails
+  const user = await getUser();
+  
+  // Whitelist of admin emails who can access fulfillment
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
+  const isAuthorized = 
+    user?.role === 'owner' || 
+    adminEmails.includes(user?.email || '');
+  
+  if (!isAuthorized) {
+    redirect('/dashboard');
+  }
+  // ===== END SECURITY CHECK =====
+
   let pendingOrders: Order[] = [];
   let printedOrders: Order[] = [];
   let sentOrders: Order[] = [];

@@ -21,11 +21,12 @@ export async function GET(request: NextRequest) {
     // Get all occasions that match the target date (month & day)
     const targetMonth = targetDate.getMonth() + 1;
     const targetDay = targetDate.getDate();
+    const currentYear = new Date().getFullYear();
 
     console.log(`[CRON] Looking for occasions on ${targetMonth}/${targetDay}`);
 
-    // Find all occasions happening on this date
-    const upcomingOccasions = await db
+    // Find regular occasions happening on this date
+    const regularOccasions = await db
       .select({
         occasion: occasions,
         recipient: recipients,
@@ -38,12 +39,36 @@ export async function GET(request: NextRequest) {
       .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
       .where(
         and(
+          eq(occasions.isJustBecause, false), // Regular occasions only
           sql`EXTRACT(MONTH FROM ${occasions.occasionDate}) = ${targetMonth}`,
           sql`EXTRACT(DAY FROM ${occasions.occasionDate}) = ${targetDay}`
         )
       );
 
-    console.log(`[CRON] Found ${upcomingOccasions.length} upcoming occasions`);
+    // Find Just Because occasions with computed dates matching target
+    const justBecauseOccasions = await db
+      .select({
+        occasion: occasions,
+        recipient: recipients,
+        user: users,
+        teamId: teamMembers.teamId,
+      })
+      .from(occasions)
+      .innerJoin(recipients, eq(occasions.recipientId, recipients.id))
+      .innerJoin(users, eq(recipients.userId, users.id))
+      .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
+      .where(
+        and(
+          eq(occasions.isJustBecause, true),
+          sql`EXTRACT(MONTH FROM ${occasions.computedSendDate}) = ${targetMonth}`,
+          sql`EXTRACT(DAY FROM ${occasions.computedSendDate}) = ${targetDay}`,
+          // Only if not sent this year yet
+          sql`(${occasions.lastSentYear} IS NULL OR ${occasions.lastSentYear} < ${currentYear})`
+        )
+      );
+
+    const upcomingOccasions = [...regularOccasions, ...justBecauseOccasions];
+    console.log(`[CRON] Found ${upcomingOccasions.length} upcoming occasions (${regularOccasions.length} regular, ${justBecauseOccasions.length} Just Because)`);
 
     const createdOrders = [];
     const skippedOrders = [];
@@ -140,6 +165,89 @@ export async function GET(request: NextRequest) {
 
       const returnAddr = defaultAddress[0];
 
+      // Verify recipient address before creating order
+      const { validateAddress } = await import('@/lib/address-validation');
+      const { sendUrgentAddressIssueEmail } = await import('@/lib/email/send-address-emails');
+      
+      const addressVerification = await validateAddress({
+        street: item.recipient.street,
+        apartment: item.recipient.apartment || undefined,
+        city: item.recipient.city,
+        state: item.recipient.state,
+        zip: item.recipient.zip,
+      });
+
+      if (addressVerification.verdict === 'UNDELIVERABLE') {
+        // Address is invalid - flag recipient and skip order creation
+        await db.update(recipients).set({
+          addressStatus: 'invalid',
+          addressNotes: addressVerification.message || 'Address could not be verified by USPS',
+          addressVerifiedAt: new Date(),
+        }).where(eq(recipients.id, item.recipient.id));
+        
+        // Send urgent email to user
+        const occasionDate = new Date(item.occasion.occasionDate);
+        await sendUrgentAddressIssueEmail({
+          userEmail: item.user.email,
+          userName: item.user.firstName || item.user.name || 'there',
+          recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
+          occasionType: item.occasion.occasionType,
+          occasionDate: occasionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          daysUntil: 15, // Since cron runs 15 days before
+          address: {
+            street: item.recipient.street,
+            apartment: item.recipient.apartment,
+            city: item.recipient.city,
+            state: item.recipient.state,
+            zip: item.recipient.zip,
+          },
+        }).catch(err => console.error('[CRON EMAIL ERROR]', err));
+        
+        skippedOrders.push(`Invalid address for recipient ${item.recipient.id} - user notified`);
+        continue;
+        
+      } else if (addressVerification.verdict === 'CORRECTABLE' && addressVerification.suggestedAddress) {
+        // Auto-correct the address
+        const suggested = addressVerification.suggestedAddress;
+        await db.update(recipients).set({
+          street: suggested.street,
+          apartment: suggested.apartment,
+          city: suggested.city,
+          state: suggested.state,
+          zip: suggested.zip,
+          addressStatus: 'corrected',
+          addressNotes: 'Address standardized by USPS',
+          addressVerifiedAt: new Date(),
+        }).where(eq(recipients.id, item.recipient.id));
+        
+        console.log(`[CRON] Auto-corrected address for recipient ${item.recipient.id}`);
+        
+        // Update item.recipient to use corrected address for order creation
+        item.recipient.street = suggested.street;
+        item.recipient.apartment = suggested.apartment || null;
+        item.recipient.city = suggested.city;
+        item.recipient.state = suggested.state;
+        item.recipient.zip = suggested.zip;
+        
+      } else if (addressVerification.verdict === 'VALID') {
+        // Mark as verified
+        await db.update(recipients).set({
+          addressStatus: 'verified',
+          addressVerifiedAt: new Date(),
+        }).where(eq(recipients.id, item.recipient.id));
+        
+        console.log(`[CRON] Address verified for recipient ${item.recipient.id}`);
+      }
+      // If ERROR verdict, proceed anyway and mark as error status
+      else if (addressVerification.verdict === 'ERROR') {
+        await db.update(recipients).set({
+          addressStatus: 'error',
+          addressNotes: addressVerification.message || 'Verification service unavailable',
+        }).where(eq(recipients.id, item.recipient.id));
+        
+        console.log(`[CRON] Address verification error for recipient ${item.recipient.id} - proceeding anyway`);
+      }
+
       // Create the order
       const newOrder = await db.insert(orders).values({
         recipientId: item.recipient.id,
@@ -174,6 +282,16 @@ export async function GET(request: NextRequest) {
 
       createdOrders.push(newOrder[0]);
       console.log(`[CRON] Created order ${newOrder[0].id} for ${item.recipient.firstName} ${item.recipient.lastName}`);
+
+      // If it's a Just Because occasion, update lastSentYear
+      if (item.occasion.isJustBecause) {
+        await db
+          .update(occasions)
+          .set({ lastSentYear: currentYear })
+          .where(eq(occasions.id, item.occasion.id));
+        
+        console.log(`[CRON] Updated Just Because lastSentYear for occasion ${item.occasion.id}`);
+      }
 
       // Send order created email (don't await to avoid blocking cron)
       const { sendOrderCreatedEmail } = await import('@/lib/email');

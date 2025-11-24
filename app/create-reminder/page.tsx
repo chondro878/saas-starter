@@ -22,8 +22,10 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { AlertCircle, Check, X, HelpCircle } from 'lucide-react';
+import { AlertCircle, Check, X, HelpCircle, Info } from 'lucide-react';
 import { calculateHolidayDate } from '@/lib/holiday-calculator';
+import { getCardVariation, getJustBecauseLabel } from '@/lib/just-because-utils';
+import { UnauthenticatedSuccess } from './components/unauthenticated-success';
 
 // --- Schema definition for the reminder form using Zod ---
 const reminderFormSchema = z.object({
@@ -60,6 +62,10 @@ export default function CreateReminderPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   
+  // Unauthenticated success screen state
+  const [showUnauthSuccess, setShowUnauthSuccess] = useState(false);
+  const [savedRecipientName, setSavedRecipientName] = useState('');
+  
   // Refs for focus management
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const announceRef = useRef<HTMLDivElement>(null);
@@ -81,7 +87,7 @@ export default function CreateReminderPage() {
   const [zipLookupLoading, setZipLookupLoading] = useState(false);
 
   // Notes mode: 'all' for same note to all occasions, 'custom' for per-occasion notes
-  const [notesMode, setNotesMode] = useState<'all' | 'custom' | null>(null);
+  const [notesMode, setNotesMode] = useState<'all' | 'custom' | null>('all');
 
   // --- Form setup with react-hook-form and Zod resolver ---
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
@@ -102,11 +108,22 @@ export default function CreateReminderPage() {
   const relationship = watch("relationship");
   const note = watch("note") || '';
 
+  // Helper function to get the display label for an occasion
+  const getOccasionDisplayLabel = (occasion: string) => {
+    if (occasion === "Anniversary") {
+      return relationship === "Romantic" ? "Your Anniversary" : "Their Anniversary";
+    }
+    if (occasion === "JustBecause") {
+      return getJustBecauseLabel(relationship || '');
+    }
+    return occasion;
+  };
+
   // --- Occasion lists ---
   const customOccasions = [
     { value: "Birthday", label: "Birthday" },
-    { value: "Anniversary (romantic)", label: "Anniversary (romantic)" },
-    { value: "Anniversary (work)", label: "Anniversary (work)" },
+    { value: "Anniversary", label: "Anniversary" },
+    { value: "JustBecause", label: "Just Because" },
   ];
 
   const holidayOccasions = [
@@ -183,22 +200,24 @@ export default function CreateReminderPage() {
         focusGradientColors: 'linear-gradient(to right, #ea580c, #7c3aed, #059669, #db2777, #d97706)'
       };
     }
-    if (occasionLower.includes('work')) {
+    if (occasionLower.includes('anniversary')) {
+      // Romantic relationship - Pink gradient
+      if (relationship === 'Romantic') {
+        return {
+          border: 'border-transparent',
+          bg: 'bg-pink-50',
+          gradientBorder: true,
+          gradientColors: 'linear-gradient(to right, #f472b6, #ec4899, #fb7185, #e11d48, #f9a8d4)',
+          focusGradientColors: 'linear-gradient(to right, #db2777, #be123c, #e11d48, #9f1239, #db2777)'
+        };
+      }
+      // All other relationships - Purple gradient
       return {
         border: 'border-transparent',
         bg: 'bg-purple-50',
         gradientBorder: true,
         gradientColors: 'linear-gradient(to right, #a855f7, #7c3aed, #8b5cf6, #9333ea, #a78bfa)',
         focusGradientColors: 'linear-gradient(to right, #7c3aed, #5b21b6, #6d28d9, #7c3aed, #6d28d9)'
-      };
-    }
-    if (occasionLower.includes('anniversary')) {
-      return {
-        border: 'border-transparent',
-        bg: 'bg-pink-50',
-        gradientBorder: true,
-        gradientColors: 'linear-gradient(to right, #f472b6, #ec4899, #fb7185, #e11d48, #f9a8d4)',
-        focusGradientColors: 'linear-gradient(to right, #db2777, #be123c, #e11d48, #9f1239, #db2777)'
       };
     }
     if (occasionLower.includes('new year')) {
@@ -281,20 +300,65 @@ export default function CreateReminderPage() {
       };
     }
     if (occasionLower.includes('anniversary')) {
-      // Work anniversary - Professional colors
-      if (occasionLower.includes('work')) {
+      // Romantic relationship - Pink/hearts styling
+      if (relationship === 'Romantic') {
         return {
-          selected: 'bg-purple-50 text-purple-800 border-purple-300',
-          default: 'bg-purple-50 text-purple-800 border-purple-200 hover:border-purple-300',
-          decoration: 'professional' // Purple circles
+          selected: 'bg-pink-50 text-pink-800 border-pink-300',
+          default: 'bg-pink-50 text-pink-800 border-pink-200 hover:border-pink-300',
+          decoration: 'hearts' // Floating hearts
         };
       }
-      // Romantic anniversary - Romantic colors with hearts
+      // All other relationships - Professional purple dots styling
       return {
-        selected: 'bg-pink-50 text-pink-800 border-pink-300',
-        default: 'bg-pink-50 text-pink-800 border-pink-200 hover:border-pink-300',
-        decoration: 'hearts' // Floating hearts
+        selected: 'bg-purple-50 text-purple-800 border-purple-300',
+        default: 'bg-purple-50 text-purple-800 border-purple-200 hover:border-purple-300',
+        decoration: 'professional' // Purple circles
       };
+    }
+    
+    // Just Because - use relationship-based colors
+    if (occasionLower.includes('justbecause')) {
+      if (!relationship) {
+        return {
+          selected: 'bg-indigo-50 text-indigo-800 border-indigo-300',
+          default: 'bg-indigo-50 text-indigo-800 border-indigo-200 hover:border-indigo-300',
+          decoration: 'sparkles'
+        };
+      }
+      
+      const rel = relationship.toLowerCase();
+      switch (rel) {
+        case 'friend':
+          return {
+            selected: 'bg-blue-50 text-blue-800 border-blue-300',
+            default: 'bg-blue-50 text-blue-800 border-blue-200 hover:border-blue-300',
+            decoration: 'sparkles'
+          };
+        case 'family':
+          return {
+            selected: 'bg-green-50 text-green-800 border-green-300',
+            default: 'bg-green-50 text-green-800 border-green-200 hover:border-green-300',
+            decoration: 'hearts'
+          };
+        case 'romantic':
+          return {
+            selected: 'bg-pink-50 text-pink-800 border-pink-300',
+            default: 'bg-pink-50 text-pink-800 border-pink-200 hover:border-pink-300',
+            decoration: 'hearts'
+          };
+        case 'professional':
+          return {
+            selected: 'bg-purple-50 text-purple-800 border-purple-300',
+            default: 'bg-purple-50 text-purple-800 border-purple-200 hover:border-purple-300',
+            decoration: 'professional'
+          };
+        default:
+          return {
+            selected: 'bg-indigo-50 text-indigo-800 border-indigo-300',
+            default: 'bg-indigo-50 text-indigo-800 border-indigo-200 hover:border-indigo-300',
+            decoration: 'sparkles'
+          };
+      }
     }
     
     // Holiday occasions - correlate with relationships
@@ -443,7 +507,12 @@ export default function CreateReminderPage() {
     }
     
     if (currentStep === 3) {
-      if (selectedCustomOccasions.length > 0) {
+      // Filter out Just Because from occasions needing dates
+      const occasionsNeedingDates = selectedCustomOccasions.filter(
+        oc => oc !== "JustBecause"
+      );
+      
+      if (occasionsNeedingDates.length > 0) {
         setCurrentStep(4);
       } else {
         setCurrentStep(5);
@@ -470,11 +539,7 @@ export default function CreateReminderPage() {
     try {
       // Check if user is authenticated
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setErrorMessage('You must be signed in to create a reminder. Please sign in and try again.');
-        router.push('/sign-in?redirect=/create-reminder');
-        return;
-      }
+      
       // Prepare recipient data
       const recipientData = {
         firstName: data.firstPerson.first,
@@ -486,15 +551,40 @@ export default function CreateReminderPage() {
         state: data.address.state,
         zip: data.address.zip,
         country: 'United States',
-        notes: data.note || '',
+        // Notes are stored per-occasion, not on the recipient
       };
 
       // Prepare occasions data
       const occasionsData = [];
       
+      // Determine which notes to use for each occasion
+      // If notesMode is 'all', use the shared note for all occasions
+      // If notesMode is 'custom', use individual occasionNotes
+      const getOccasionNote = (occasionType: string) => {
+        if (notesMode === 'all') {
+          return data.note || '';
+        } else if (notesMode === 'custom') {
+          return data.occasionNotes?.[occasionType] || '';
+        }
+        return '';
+      };
+
       // Add custom occasions with their dates
       for (const occasion of selectedCustomOccasions) {
-        if (customDates[occasion]) {
+        if (occasion === "JustBecause") {
+          // Special handling for Just Because
+          const cardVariation = getCardVariation(data.relationship || 'Friend');
+          
+          // Just Because will have computed_send_date calculated on the backend
+          occasionsData.push({
+            type: 'JustBecause',
+            date: null, // Will be computed server-side
+            isJustBecause: true,
+            cardVariation: cardVariation,
+            notes: getOccasionNote('JustBecause'),
+          });
+        } else if (customDates[occasion]) {
+          // Regular occasions with user-selected dates
           // Ensure the date is a proper Date object
           const dateValue = customDates[occasion];
           const dateObj = dateValue instanceof Date ? dateValue : new Date(dateValue!);
@@ -505,9 +595,10 @@ export default function CreateReminderPage() {
           }
           
           occasionsData.push({
-            occasionType: occasion,
-            occasionDate: dateObj.toISOString(),
-            notes: data.occasionNotes?.[occasion] || '',
+            type: occasion,
+            date: dateObj.toISOString(),
+            isJustBecause: false,
+            notes: getOccasionNote(occasion),
           });
         }
       }
@@ -517,13 +608,40 @@ export default function CreateReminderPage() {
         const occasionDate = calculateHolidayDate(occasion);
         
         occasionsData.push({
-          occasionType: occasion,
-          occasionDate: occasionDate.toISOString(),
-          notes: data.occasionNotes?.[occasion] || '',
+          type: occasion,
+          date: occasionDate.toISOString(),
+          isJustBecause: false,
+          notes: getOccasionNote(occasion),
         });
       }
 
-      // Save via API
+      // Create full reminder data object
+      const fullReminderData = {
+        recipient: recipientData,
+        occasions: occasionsData,
+        timestamp: new Date().toISOString(),
+      };
+
+      if (!user) {
+        // User is NOT authenticated - save to localStorage and show success screen
+        console.log('[UNAUTH] User not authenticated, saving to localStorage');
+        
+        // Store in localStorage with expiration (24 hours)
+        const storageData = {
+          ...fullReminderData,
+          expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours from now
+        };
+        
+        localStorage.setItem('pendingReminder', JSON.stringify(storageData));
+        
+        // Show success screen
+        setSavedRecipientName(`${recipientData.firstName} ${recipientData.lastName}`);
+        setShowUnauthSuccess(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // User IS authenticated - proceed with normal save
       console.log('Sending recipient data:', { recipientData, occasionsData });
       
       const response = await fetch('/api/recipients', {
@@ -554,6 +672,29 @@ export default function CreateReminderPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Check if all required notes fields are filled
+  const areNotesComplete = () => {
+    if (!notesMode) return false; // Notes mode not selected
+    
+    if (notesMode === 'all') {
+      // For "Same reminder for all", check if the 'note' field has content
+      const noteValue = watch('note');
+      return noteValue && noteValue.trim().length > 0;
+    } else if (notesMode === 'custom') {
+      // For "Personal reminder per occasion", check all occasion notes
+      const allOccasions = [...selectedCustomOccasions, ...selectedHolidayOccasions];
+      const occasionNotes = watch('occasionNotes') || {};
+      
+      // Every occasion must have a note with content
+      return allOccasions.every(occasion => {
+        const noteValue = occasionNotes[occasion];
+        return noteValue && noteValue.trim().length > 0;
+      });
+    }
+    
+    return false;
   };
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
@@ -589,70 +730,25 @@ export default function CreateReminderPage() {
       return null;
     }
 
-    setAddressValidation({ isValidating: true, result: null, showSuggestion: false, error: null });
-
-    try {
-      // Add timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch('/api/validate-address', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          street: addressData.street,
-          apartment: addressData.apartment || '',
-          city: addressData.city,
-          state: addressData.state,
-          zip: addressData.zip,
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const result = await response.json();
-        setAddressValidation({
-          isValidating: false,
-          result,
-          showSuggestion: result.verdict === 'CORRECTABLE' || result.verdict === 'UNDELIVERABLE',
-          error: null,
-        });
-        return result;
-      } else {
-        // Handle non-200 responses
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        const errorMessage = response.status === 429 
-          ? 'Too many requests. Please try again in a moment.'
-          : response.status >= 500
-          ? 'Address validation service is temporarily unavailable. You can proceed anyway or try again.'
-          : errorData.error || 'Failed to validate address. You can proceed anyway or try again.';
-        
-        console.error('Address validation error:', { status: response.status, error: errorData });
-        setAddressValidation({
-          isValidating: false,
-          result: null,
-          showSuggestion: false,
-          error: errorMessage,
-        });
-        return null;
-      }
-    } catch (error) {
-      // Handle network errors and timeouts
-      const errorMessage = error instanceof Error && error.name === 'AbortError'
-        ? 'Address validation is taking too long. You can proceed anyway or try again.'
-        : 'Network error: Unable to validate address. You can proceed anyway or try again.';
-      
-      console.error('Address validation failed:', error);
-      setAddressValidation({
-        isValidating: false,
-        result: null,
-        showSuggestion: false,
-        error: errorMessage,
-      });
-      return null;
-    }
+    // Skip validation entirely - USPS API not configured
+    // Just accept the address and proceed immediately
+    const result = {
+      isValid: true,
+      verdict: 'VALID' as const,
+      originalAddress: addressData,
+    };
+    
+    setAddressValidation({
+      isValidating: false,
+      result,
+      showSuggestion: false,
+      error: null,
+    });
+    
+    // Immediately proceed to next step
+    setCurrentStep(2);
+    
+    return result;
   };
 
   const applySuggestedAddress = () => {
@@ -684,7 +780,8 @@ export default function CreateReminderPage() {
     setCurrentStep(2);
   };
 
-  // Auto-fill city and state from ZIP code
+  // Auto-fill city and state from ZIP code - DISABLED for beta
+  // USPS API not configured, user enters manually
   const handleZipChange = async (zip: string) => {
     setValue('address.zip', zip);
     
@@ -693,26 +790,8 @@ export default function CreateReminderPage() {
       setAddressValidation({ isValidating: false, result: null, showSuggestion: false, error: null });
     }
     
-    // Only lookup if we have a valid 5-digit ZIP
-    if (zip.length === 5 && /^\d{5}$/.test(zip)) {
-      setZipLookupLoading(true);
-      try {
-        const response = await fetch(`/api/city-state-lookup?zip=${zip}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.city && data.state) {
-            // Auto-fill city and state
-            setValue('address.city', data.city);
-            setValue('address.state', data.state);
-          }
-        }
-      } catch (error) {
-        // Silently fail - user can still enter manually
-        console.log('ZIP lookup failed, user can enter manually');
-      } finally {
-        setZipLookupLoading(false);
-      }
-    }
+    // ZIP lookup disabled - user enters city/state manually
+    // Address will be verified before shipping (15 days before occasion)
   };
 
   const progressPalette = ['purple', 'blue', 'teal', 'indigo'] as const;
@@ -737,7 +816,11 @@ export default function CreateReminderPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
+      {showUnauthSuccess ? (
+        <UnauthenticatedSuccess recipientName={savedRecipientName} />
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
         <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
       </div>
 
@@ -762,12 +845,12 @@ export default function CreateReminderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-8 py-12 flex flex-col gap-12">
+        <div className="w-full max-w-2xl mx-auto px-8 py-12 flex flex-col gap-12">
           <form onSubmit={handleSubmit(handleFinish)}>
           {/* Step 1: Who is this for? */}
           {currentStep === 1 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
-              <div className="space-y-4">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8 w-full min-h-[600px] flex flex-col">
+              <div className="space-y-4 flex-shrink-0">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -778,7 +861,7 @@ export default function CreateReminderPage() {
                 <p className="text-gray-600">Tell us about the person you want to remember.</p>
               </div>
 
-              <fieldset className="space-y-6">
+              <fieldset className="space-y-6 flex-grow">
                 <legend className="sr-only">Recipient Information</legend>
                 
                 <div className="grid grid-cols-2 gap-4" role="group" aria-label="Recipient name">
@@ -1033,21 +1116,7 @@ export default function CreateReminderPage() {
                 </div>
               )}
 
-              {/* Address Valid Indicator */}
-              {addressValidation.result?.verdict === 'VALID' && !addressValidation.showSuggestion && (
-                <div 
-                  className="flex items-center gap-2 text-sm text-green-700 p-4 bg-green-50 border border-green-200 rounded-lg mt-6"
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
-                  <Check className="w-5 h-5 text-green-600" aria-hidden="true" />
-                  <div>
-                    <p className="font-medium">Address Verified by USPS</p>
-                    <p className="text-xs text-green-600 mt-0.5">This address is deliverable and properly formatted.</p>
-                  </div>
-                </div>
-              )}
+              {/* Address Valid Indicator - removed, only show errors */}
 
               {addressValidation.showSuggestion && addressValidation.result?.verdict === 'CORRECTABLE' && (
                 <div 
@@ -1173,7 +1242,7 @@ export default function CreateReminderPage() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-4 flex-shrink-0">
                 <Button
                   type="button"
                   onClick={handleNext}
@@ -1201,8 +1270,8 @@ export default function CreateReminderPage() {
 
           {/* Step 2: Relationship */}
           {currentStep === 2 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
-              <div className="space-y-4">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8 w-full min-h-[600px] flex flex-col">
+              <div className="space-y-4 flex-shrink-0">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -1214,7 +1283,7 @@ export default function CreateReminderPage() {
               </div>
 
               <div 
-                className="grid grid-cols-2 gap-3 auto-rows-fr"
+                className="grid grid-cols-2 gap-4 flex-grow content-start"
                 role="group"
                 aria-label="Select relationship type"
               >
@@ -1227,7 +1296,7 @@ export default function CreateReminderPage() {
                       type="button"
                       onClick={() => setValue("relationship", option)}
                       className={cn(
-                        "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left h-full",
+                        "px-6 py-4 rounded-lg border cursor-pointer select-none text-base font-medium transition-colors text-center",
                         isSelected 
                           ? colors.selected
                           : `${colors.bg} ${colors.text} border-gray-200 ${colors.hoverBorder}`
@@ -1242,7 +1311,7 @@ export default function CreateReminderPage() {
                 })}
               </div>
 
-              <div className="flex justify-between pt-4">
+              <div className="flex justify-between pt-4 flex-shrink-0 mt-auto">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1264,8 +1333,8 @@ export default function CreateReminderPage() {
 
           {/* Step 3: Occasions */}
           {currentStep === 3 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
-              <div className="space-y-4">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8 w-full min-h-[600px] flex flex-col">
+              <div className="space-y-4 flex-shrink-0">
                 <h2 
                   ref={stepHeadingRef}
                   tabIndex={-1}
@@ -1276,26 +1345,28 @@ export default function CreateReminderPage() {
                 <p className="text-gray-600">Select the occasions you want to remember.</p>
               </div>
               
-              <div className="space-y-8">
+              <div className="space-y-8 flex-grow overflow-auto">
+                {/* Personal Occasions Section */}
                 <fieldset>
                   <legend className="block text-sm font-medium text-gray-700 mb-4">
                     Personal Occasions <span className="text-xs text-gray-500">(date required)</span>
                   </legend>
                   <div 
-                    className="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-fr"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3"
                     role="group"
                     aria-label="Select personal occasions"
                   >
-                    {customOccasions.map((item) => {
+                    {customOccasions.filter(item => item.value !== "JustBecause").map((item) => {
                       const colors = getOccasionColors(item.value);
                       const isSelected = isCustomOccasionSelected(item.value);
+                      const displayLabel = getOccasionDisplayLabel(item.value);
                       return (
                         <button
                           key={item.value}
                           type="button"
                           onClick={() => toggleCustomOccasion(item.value)}
                           className={cn(
-                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden h-full",
+                            "px-5 py-4 rounded-lg border-2 cursor-pointer select-none text-base font-medium transition-colors text-center relative overflow-hidden",
                             isSelected ? colors.selected : colors.default,
                             isSelected && colors.decoration === 'confetti' && "occasion-confetti",
                             isSelected && colors.decoration === 'hearts' && "occasion-hearts",
@@ -1303,9 +1374,9 @@ export default function CreateReminderPage() {
                             isSelected && colors.decoration === 'professional' && "occasion-professional"
                           )}
                           aria-pressed={isSelected}
-                          aria-label={`${item.label}${isSelected ? ', selected' : ''}`}
+                          aria-label={`${displayLabel}${isSelected ? ', selected' : ''}`}
                         >
-                          <span className="relative z-10">{item.label}</span>
+                          <span className="relative z-10">{displayLabel}</span>
                           {isSelected && <span className="sr-only">(selected)</span>}
                         </button>
                       );
@@ -1313,12 +1384,60 @@ export default function CreateReminderPage() {
                   </div>
                 </fieldset>
                 
+                {/* Just Because Section */}
+                <fieldset>
+                  <legend className="block text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
+                    <span>
+                      Just Because <span className="text-xs text-gray-500">(random date)</span>
+                    </span>
+                    <span className="group/info relative inline-block">
+                      <Info className="w-4 h-4 cursor-help text-gray-500" />
+                      <span className="invisible group-hover/info:visible opacity-0 group-hover/info:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                        We'll pick a random date to send a surprise card, avoiding holidays and other occasions
+                        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
+                      </span>
+                    </span>
+                  </legend>
+                  <div 
+                    className="grid grid-cols-1 gap-3"
+                    role="group"
+                    aria-label="Select just because option"
+                  >
+                    {customOccasions.filter(item => item.value === "JustBecause").map((item) => {
+                      const colors = getOccasionColors(item.value);
+                      const isSelected = isCustomOccasionSelected(item.value);
+                      const displayLabel = getOccasionDisplayLabel(item.value);
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => toggleCustomOccasion(item.value)}
+                          className={cn(
+                            "px-5 py-4 rounded-lg border-2 cursor-pointer select-none text-base font-medium transition-colors text-center relative overflow-hidden",
+                            isSelected ? colors.selected : colors.default,
+                            isSelected && colors.decoration === 'confetti' && "occasion-confetti",
+                            isSelected && colors.decoration === 'hearts' && "occasion-hearts",
+                            isSelected && colors.decoration === 'sparkles' && "occasion-sparkles",
+                            isSelected && colors.decoration === 'professional' && "occasion-professional"
+                          )}
+                          aria-pressed={isSelected}
+                          aria-label={`${displayLabel}${isSelected ? ', selected' : ''}`}
+                        >
+                          <span className="relative z-10">{displayLabel}</span>
+                          {isSelected && <span className="sr-only">(selected)</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+                
+                {/* Holidays Section */}
                 <fieldset>
                   <legend className="block text-sm font-medium text-gray-700 mb-4">
                     Holidays <span className="text-xs text-gray-500">(date is fixed)</span>
                   </legend>
                   <div 
-                    className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-fr"
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3"
                     role="group"
                     aria-label="Select holiday occasions"
                   >
@@ -1331,7 +1450,7 @@ export default function CreateReminderPage() {
                           type="button"
                           onClick={() => toggleHolidayOccasion(item.value)}
                           className={cn(
-                            "px-4 py-3 rounded-lg border cursor-pointer select-none text-sm font-medium transition-colors text-left relative overflow-hidden h-full",
+                            "px-4 py-4 rounded-lg border-2 cursor-pointer select-none text-sm font-medium transition-colors text-center relative overflow-hidden min-h-[60px] flex items-center justify-center",
                             isSelected ? colors.selected : colors.default,
                             isSelected && colors.decoration === 'confetti' && "occasion-confetti",
                             isSelected && colors.decoration === 'hearts' && "occasion-hearts",
@@ -1350,7 +1469,7 @@ export default function CreateReminderPage() {
                 </fieldset>
               </div>
               
-              <div className="flex justify-between pt-4">
+              <div className="flex justify-between pt-4 flex-shrink-0 mt-auto">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1373,48 +1492,54 @@ export default function CreateReminderPage() {
 
           {/* Step 4: Dates (only if custom occasions selected) */}
           {currentStep === 4 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-light text-gray-900">When is it?</h2>
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8 w-full min-h-[600px] flex flex-col">
+              <div className="space-y-4 flex-shrink-0">
+                <h2 
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-3xl font-light text-gray-900 outline-none"
+                >
+                  When is it?
+                </h2>
                 <p className="text-gray-600">Pick the month and day for each occasion.</p>
               </div>
               
-              <div className={cn(
-                "grid grid-cols-1 gap-6 auto-rows-fr",
-                selectedCustomOccasions.length > 1 && "md:grid-cols-2"
-              )}>
-                {selectedCustomOccasions.map((oc) => {
-                  const colors = getOccasionColors(oc);
-                  return (
-                    <div 
-                      key={oc} 
-                      className={cn(
-                        "p-6 rounded-lg border-2 relative overflow-hidden flex flex-col",
-                        colors.selected,
-                        colors.decoration === 'confetti' && "occasion-confetti",
-                        colors.decoration === 'hearts' && "occasion-hearts",
-                        colors.decoration === 'sparkles' && "occasion-sparkles",
-                        colors.decoration === 'professional' && "occasion-professional"
-                      )}
-                    >
-                      <h3 className="text-xl font-medium mb-4 relative z-10">{oc}</h3>
-                      <div className="relative z-10 flex-1 flex items-center justify-center">
-                        <MonthDayPicker
-                          value={customDates[oc]}
-                          onChange={(date: Date) => {
-                            setCustomDates((prev) => ({
-                              ...prev,
-                              [oc]: date,
-                            }));
-                          }}
-                        />
+              <div className="space-y-6 flex-grow overflow-auto">
+                {selectedCustomOccasions
+                  .filter(oc => oc !== "JustBecause") // Exclude Just Because from date selection
+                  .map((oc) => {
+                    const colors = getOccasionColors(oc);
+                    const displayLabel = getOccasionDisplayLabel(oc);
+                    return (
+                      <div 
+                        key={oc} 
+                        className={cn(
+                          "p-6 rounded-xl border-2 relative overflow-hidden",
+                          colors.selected,
+                          colors.decoration === 'confetti' && "occasion-confetti",
+                          colors.decoration === 'hearts' && "occasion-hearts",
+                          colors.decoration === 'sparkles' && "occasion-sparkles",
+                          colors.decoration === 'professional' && "occasion-professional"
+                        )}
+                      >
+                        <h3 className="text-2xl font-medium mb-6 relative z-10">{displayLabel}</h3>
+                        <div className="relative z-10">
+                          <MonthDayPicker
+                            value={customDates[oc]}
+                            onChange={(date: Date) => {
+                              setCustomDates((prev) => ({
+                                ...prev,
+                                [oc]: date,
+                              }));
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
               
-              <div className="flex justify-between pt-4">
+              <div className="flex justify-between pt-4 flex-shrink-0 mt-auto">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1426,7 +1551,7 @@ export default function CreateReminderPage() {
                 <Button
                   type="button"
                   onClick={handleNext}
-                  disabled={selectedCustomOccasions.length > 0 && selectedCustomOccasions.some(oc => !customDates[oc])}
+                  disabled={selectedCustomOccasions.filter(oc => oc !== "JustBecause").some(oc => !customDates[oc])}
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
@@ -1437,14 +1562,20 @@ export default function CreateReminderPage() {
 
           {/* Step 5: Notes & Review */}
           {currentStep === 5 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-light text-gray-900">Review & Your Personal Reminder</h2>
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-8 space-y-8 w-full min-h-[600px] flex flex-col">
+              <div className="space-y-4 flex-shrink-0">
+                <h2 
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-3xl font-light text-gray-900 outline-none"
+                >
+                  Review & Your Personal Reminder
+                </h2>
                 <p className="text-gray-600">Review details and add reminders for your future self.</p>
               </div>
 
               {/* Recipient Review */}
-              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+              <div className="bg-gray-50 rounded-lg p-6 space-y-4 flex-shrink-0">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-medium text-gray-900">Recipient</h3>
                   <button
@@ -1495,16 +1626,24 @@ export default function CreateReminderPage() {
                     <div className="space-y-2">
                       <p className="text-xs text-gray-500 uppercase tracking-wide">Occasions</p>
                       <div className="space-y-2">
-                        {selectedCustomOccasions.map((oc) => (
-                          <div key={oc} className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{oc}</span>
-                            {customDates[oc] && (
-                              <span className="text-xs text-gray-600">
-                                ({customDates[oc]?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                        {selectedCustomOccasions.map((oc) => {
+                          const displayLabel = getOccasionDisplayLabel(oc);
+                          const isJustBecause = oc === "JustBecause";
+                          return (
+                            <div key={oc} className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{displayLabel}</span>
+                              {isJustBecause ? (
+                                <span className="text-xs text-gray-600">
+                                  (🎉 Surprise date!)
+                                </span>
+                              ) : customDates[oc] ? (
+                                <span className="text-xs text-gray-600">
+                                  ({customDates[oc]?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
+                                </span>
+                              ) : null}
+                            </div>
+                          );
+                        })}
                         {selectedHolidayOccasions.map((oc) => (
                           <div key={oc} className="text-sm font-medium">
                             {oc}
@@ -1599,41 +1738,16 @@ export default function CreateReminderPage() {
               )}
 
               {/* Notes Section */}
-              <div className="space-y-6">
+              <div className="space-y-6 flex-grow overflow-auto">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-900">Add Notes</h3>
                   <p className="text-sm text-gray-600">
                     These reminders will help you remember important details when it's time to send the card.
                   </p>
                   
-                  {/* Two Button Options */}
+                  {/* Two Button Options - Same reminder on LEFT, Personal reminder on RIGHT */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setNotesMode('custom')}
-                      className={cn(
-                        "p-6 rounded-lg border-2 text-left transition-all",
-                        notesMode === 'custom'
-                          ? "bg-blue-50 border-blue-500 shadow-md"
-                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={cn(
-                          "w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
-                          notesMode === 'custom' ? "border-blue-500 bg-blue-500" : "border-gray-300"
-                        )}>
-                          {notesMode === 'custom' && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 mb-1">Personal reminder per occasion</p>
-                          <p className="text-xs text-gray-600">
-                            Write different reminders for each occasion (Birthday, Christmas, etc.)
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-
+                    {/* LEFT: Same reminder for all occasions */}
                     <button
                       type="button"
                       onClick={() => setNotesMode('all')}
@@ -1659,58 +1773,123 @@ export default function CreateReminderPage() {
                         </div>
                       </div>
                     </button>
+
+                    {/* RIGHT: Personal reminder per occasion */}
+                    <button
+                      type="button"
+                      onClick={() => setNotesMode('custom')}
+                      className={cn(
+                        "p-6 rounded-lg border-2 text-left transition-all",
+                        notesMode === 'custom'
+                          ? "bg-blue-50 border-blue-500 shadow-md"
+                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+                          notesMode === 'custom' ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                        )}>
+                          {notesMode === 'custom' && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 mb-1">Personal reminder per occasion</p>
+                          <p className="text-xs text-gray-600">
+                            Write different reminders for each occasion (Birthday, Christmas, etc.)
+                          </p>
+                        </div>
+                      </div>
+                    </button>
                   </div>
 
                   {/* Custom Notes Per Occasion */}
                   {notesMode === 'custom' && (
                     <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-700 mb-4">Add personal reminder for each occasion:</p>
+                      <p className="text-sm text-gray-700 mb-4">Add personal reminder for each occasion (required):</p>
                       {[...selectedCustomOccasions, ...selectedHolidayOccasions].map((oc) => {
                         const style = getOccasionNotesStyle(oc);
+                        const displayLabel = getOccasionDisplayLabel(oc);
+                        const fieldName = `occasionNotes.${oc}` as const;
+                        const currentValue = watch(fieldName);
+                        const error = errors.occasionNotes?.[oc];
+                        
                         return (
                         <div key={oc}>
-                          <Label className="block text-sm font-medium text-gray-700 mb-2">{oc}</Label>
+                          <Label className="block text-sm font-medium text-gray-700 mb-2">{displayLabel} *</Label>
                             {style.gradientBorder ? (
-                              <div 
-                                className="p-[2px] rounded-md transition-all duration-200 group"
-                                style={{
-                                  background: style.gradientColors
-                                }}
-                              >
-                          <Textarea
-                            placeholder={`What should you remember when sending a card for ${oc}?`}
+                              <div>
+                                <div 
+                                  className="p-[2px] rounded-md transition-all duration-200 group"
+                                  style={{
+                                    background: style.gradientColors
+                                  }}
+                                >
+                                  <Textarea
+                                    placeholder={`What should you remember when sending a card for ${displayLabel}?`}
+                                    className={cn(
+                                      "w-full focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:border-transparent border-0 rounded-sm",
+                                      style.bg
+                                    )}
+                                    rows={2}
+                                    maxLength={150}
+                                    {...register(fieldName, {
+                                      required: `Please add a reminder for ${displayLabel}`,
+                                      maxLength: {
+                                        value: 150,
+                                        message: "Reminder must be 150 characters or less"
+                                      },
+                                      onBlur: (e) => {
+                                        const wrapper = e.target.closest('.group') as HTMLElement;
+                                        if (wrapper && style.gradientColors) {
+                                          wrapper.style.background = style.gradientColors;
+                                        }
+                                      }
+                                    })}
+                                    onFocus={(e) => {
+                                      const wrapper = e.target.closest('.group') as HTMLElement;
+                                      if (wrapper && style.focusGradientColors) {
+                                        wrapper.style.background = style.focusGradientColors;
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div className="flex justify-between items-center mt-1">
+                                  <span className="text-xs text-gray-500">
+                                    {currentValue?.length || 0}/150 characters
+                                  </span>
+                                  {error && (
+                                    <span className="text-xs text-red-600">{error.message}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <Textarea
+                                  placeholder={`What should you remember when sending a card for ${displayLabel}?`}
                                   className={cn(
-                                    "w-full focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:border-transparent border-0 rounded-sm",
+                                    "w-full focus:ring-0 focus:ring-offset-0 focus:outline-none focus-visible:ring-0 border-2 transition-colors",
+                                    style.border,
                                     style.bg
                                   )}
                                   rows={2}
-                                  {...register(`occasionNotes.${oc}` as const, {
-                                    onBlur: (e) => {
-                                      const wrapper = e.target.closest('.group') as HTMLElement;
-                                      if (wrapper && style.gradientColors) {
-                                        wrapper.style.background = style.gradientColors;
-                                      }
+                                  maxLength={150}
+                                  {...register(fieldName, {
+                                    required: `Please add a reminder for ${displayLabel}`,
+                                    maxLength: {
+                                      value: 150,
+                                      message: "Reminder must be 150 characters or less"
                                     }
                                   })}
-                                  onFocus={(e) => {
-                                    const wrapper = e.target.closest('.group') as HTMLElement;
-                                    if (wrapper && style.focusGradientColors) {
-                                      wrapper.style.background = style.focusGradientColors;
-                                    }
-                                  }}
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                  <span className="text-xs text-gray-500">
+                                    {currentValue?.length || 0}/150 characters
+                                  </span>
+                                  {error && (
+                                    <span className="text-xs text-red-600">{error.message}</span>
+                                  )}
+                                </div>
                               </div>
-                            ) : (
-                              <Textarea
-                                placeholder={`What should you remember when sending a card for ${oc}?`}
-                                className={cn(
-                                  "w-full focus:ring-0 focus:ring-offset-0 focus:outline-none focus-visible:ring-0 border-2 transition-colors",
-                                  style.border,
-                                  style.bg
-                                )}
-                            rows={2}
-                            {...register(`occasionNotes.${oc}` as const)}
-                          />
                             )}
                         </div>
                         );
@@ -1722,7 +1901,7 @@ export default function CreateReminderPage() {
                   {notesMode === 'all' && (
                     <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-2 mb-3">
-                        <Label className="text-sm font-medium text-gray-700">Personal reminder for All Occasions</Label>
+                        <Label className="text-sm font-medium text-gray-700">Personal reminder for All Occasions *</Label>
                         <div className="group relative">
                           <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
                           <div className="absolute left-0 top-6 hidden group-hover:block z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
@@ -1733,10 +1912,25 @@ export default function CreateReminderPage() {
                       </div>
                       <Textarea
                         placeholder="Write yourself a reminder that applies to all occasions (e.g., favorite color, preferences, hobbies)..."
-                        {...register("note")}
+                        {...register("note", {
+                          required: "Please add a reminder for this recipient",
+                          maxLength: {
+                            value: 150,
+                            message: "Reminder must be 150 characters or less"
+                          }
+                        })}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0 bg-white"
                         rows={4}
+                        maxLength={150}
                       />
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs text-gray-500">
+                          {watch("note")?.length || 0}/150 characters
+                        </span>
+                        {errors.note && (
+                          <span className="text-xs text-red-600">{errors.note.message}</span>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -1744,12 +1938,12 @@ export default function CreateReminderPage() {
               </div>
 
               {errorMessage && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6 flex-shrink-0">
                   <p className="text-red-600 text-sm">{errorMessage}</p>
                 </div>
               )}
 
-              <div className="flex justify-between pt-4">
+              <div className="flex justify-between pt-4 flex-shrink-0 mt-auto">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -1761,7 +1955,12 @@ export default function CreateReminderPage() {
                 </Button>
                 <Button 
                   type="submit"
-                  disabled={isLoading || addressValidation.isValidating || (addressValidation.result?.verdict === 'UNDELIVERABLE')}
+                  disabled={
+                    isLoading || 
+                    addressValidation.isValidating || 
+                    (addressValidation.result?.verdict === 'UNDELIVERABLE') ||
+                    !areNotesComplete()
+                  }
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
                   {isLoading ? 'Creating...' : addressValidation.isValidating ? 'Validating...' : 'Create Reminder'}
@@ -1772,8 +1971,8 @@ export default function CreateReminderPage() {
 
           {/* Step 6: Success */}
           {currentStep === 6 && (
-            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-12 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-12 text-center w-full min-h-[600px] flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 flex-shrink-0">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -1841,6 +2040,8 @@ export default function CreateReminderPage() {
         )}
       </div>
     </div>
-  </div>
-);
+      </>
+    )}
+    </div>
+  );
 }

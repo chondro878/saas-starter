@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -147,6 +148,9 @@ export const recipients = pgTable('recipients', {
   state: varchar('state', { length: 50 }).notNull(),
   zip: varchar('zip', { length: 20 }).notNull(),
   country: varchar('country', { length: 100 }).notNull().default('United States'),
+  addressStatus: varchar('address_status', { length: 20 }).notNull().default('pending'),
+  addressNotes: text('address_notes'),
+  addressVerifiedAt: timestamp('address_verified_at'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -162,6 +166,12 @@ export const occasions = pgTable('occasions', {
   occasionDate: timestamp('occasion_date').notNull(), // The actual date
   notes: text('notes'), // Special notes for this occasion
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  
+  // Just Because fields
+  isJustBecause: boolean('is_just_because').notNull().default(false),
+  computedSendDate: timestamp('computed_send_date'), // Hidden random date for Just Because
+  cardVariation: varchar('card_variation', { length: 50 }), // thinking_of_you, romantic, recognition
+  lastSentYear: integer('last_sent_year'), // Track annual recurrence
 });
 
 // User addresses table - for return addresses and shipping

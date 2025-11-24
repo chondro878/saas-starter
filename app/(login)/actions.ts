@@ -60,7 +60,28 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     password
   });
 
-  if (supabaseSignInRes.error || !supabaseSignInRes.data.session) {
+  if (supabaseSignInRes.error) {
+    // Check if it's an email confirmation error
+    const errorMsg = supabaseSignInRes.error.message.toLowerCase();
+    if (errorMsg.includes('email not confirmed') || errorMsg.includes('email confirmation')) {
+      console.log('[SIGN IN] Email not verified for:', email);
+      return {
+        error: 'Please verify your email address before signing in. Check your inbox for the verification link.',
+        emailNotConfirmed: true,
+        email,
+        password
+      };
+    }
+    
+    // Generic error for other cases
+    return {
+      error: 'Invalid email or password. Please try again.',
+      email,
+      password
+    };
+  }
+
+  if (!supabaseSignInRes.data.session) {
     return {
       error: 'Invalid email or password. Please try again.',
       email,
@@ -136,11 +157,44 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     .limit(1);
 
   if (existingUser.length > 0) {
-    return {
-      error: 'Failed to create user. Please try again.',
-      email,
-      password
-    };
+    // Check if the existing account is unverified in Supabase
+    // This allows users to "reclaim" their email if they mistyped it or someone else used it
+    const { data: supabaseUsers, error: listError } = await supabase.auth.admin.listUsers();
+    
+    if (!listError && supabaseUsers) {
+      const supabaseUser = supabaseUsers.users.find(u => u.email === email);
+      
+      if (supabaseUser && !supabaseUser.email_confirmed_at) {
+        // Account exists but is unverified - allow reclaim
+        console.log(`[SIGN UP] Reclaiming unverified account: ${email}`);
+        
+        // Delete old Supabase auth account
+        const { error: deleteAuthError } = await supabase.auth.admin.deleteUser(supabaseUser.id);
+        if (deleteAuthError) {
+          console.error('[SIGN UP] Error deleting old Supabase account:', deleteAuthError);
+        }
+        
+        // Delete old database records (cascade will handle related data)
+        await db.delete(users).where(eq(users.email, email));
+        
+        console.log(`[SIGN UP] ✅ Deleted unverified account, allowing new sign-up for: ${email}`);
+        // Continue with new sign-up below
+      } else {
+        // Account is verified or error occurred - don't allow sign-up
+        return {
+          error: 'An account with this email already exists. Please sign in instead.',
+          email,
+          password
+        };
+      }
+    } else {
+      // Couldn't check Supabase status - err on side of caution
+      return {
+        error: 'Failed to create user. Please try again.',
+        email,
+        password
+      };
+    }
   }
 
   const passwordHash = await hashPassword(password);
@@ -230,10 +284,17 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const supabaseSignUpRes = await supabase.auth.signUp({
     email,
-    password
+    password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+      }
+    }
   });
 
-  if (supabaseSignUpRes.error || !supabaseSignUpRes.data.session) {
+  if (supabaseSignUpRes.error) {
     console.error('Supabase Auth error:', supabaseSignUpRes.error?.message);
     return {
       error: 'Failed to sign up with Supabase Auth.',
@@ -242,7 +303,31 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
-  const { access_token, refresh_token } = supabaseSignUpRes.data.session;
+  // Check if email confirmation is required
+  const { session, user: supabaseUser } = supabaseSignUpRes.data;
+
+  if (supabaseUser && !session) {
+    // Email confirmation is enabled and user needs to verify
+    // Don't create the session yet, show them a "check your email" message
+    console.log('[SIGN UP] Email confirmation required for:', email);
+    return {
+      success: true,
+      message: 'Please check your email to confirm your account.',
+      email,
+      requiresEmailConfirmation: true
+    };
+  }
+
+  if (!session) {
+    console.error('No session created after sign up');
+    return {
+      error: 'Failed to create session.',
+      email,
+      password
+    };
+  }
+
+  const { access_token, refresh_token } = session;
 
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
@@ -257,6 +342,14 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   });
 
   const redirectTo = formData.get('redirect') as string | null;
+  
+  // Check if user came from create-reminder flow (has pending reminder data)
+  // This is indicated by the 'from=create-reminder' query param
+  // Redirect them to the attach-reminder page to process their saved data
+  if (redirectTo && redirectTo.includes('create-reminder')) {
+    redirect('/onboarding/attach-reminder');
+  }
+  
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
     return createCheckoutSession({ team: createdTeam, priceId });
@@ -273,6 +366,43 @@ export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
 }
+
+const resendVerificationSchema = z.object({
+  email: z.string().email()
+});
+
+export const resendVerificationEmail = validatedAction(
+  resendVerificationSchema,
+  async (data) => {
+    const supabase = await createSupabaseServerClient();
+    const { email } = data;
+
+    console.log('[RESEND] Attempting to resend verification email to:', email);
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+      }
+    });
+
+    if (error) {
+      console.error('[RESEND] Error:', error.message);
+      return {
+        error: 'Failed to resend verification email. Please try again later.',
+        email
+      };
+    }
+
+    console.log('[RESEND] ✅ Verification email resent to:', email);
+    return {
+      success: true,
+      message: 'Verification email sent! Please check your inbox.',
+      email
+    };
+  }
+);
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),

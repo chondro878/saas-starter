@@ -334,16 +334,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Step 1: Add Your People - Image Left */}
+      {/* Step 1: Add Your People - Video Left */}
       <section className="w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[525px] md:h-[600px]">
-            <Image
-              src="/howitworks/1phonelist.jpg"
-              alt="Add the people you want to stay close to"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 50vw"
+          <div className="relative h-[525px] md:h-[600px] overflow-hidden bg-gray-900 flex items-center justify-center">
+            <video
+              src="/Step1.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-contain"
             />
           </div>
           <div className="flex flex-col justify-center px-20 py-32">
@@ -358,7 +359,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Step 2: Set Reminders - Image Right */}
+      {/* Step 2: Set Reminders - Video Right */}
       <section className="w-full bg-gradient-to-br from-pink-50 via-rose-50 to-orange-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
           <div className="flex flex-col justify-center px-20 py-24 order-2 md:order-1">
@@ -370,13 +371,14 @@ export default function Home() {
               Mark their birthdays, anniversaries, or any special date. We'll keep track of everything so you don't have to remember—we'll remind you when it's time.
             </p>
           </div>
-          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2">
-            <Image
-              src="/howitworks/2phonecalendar.jpg"
-              alt="Add dates and reminders"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 50vw"
+          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2 overflow-hidden bg-gray-900 flex items-center justify-center">
+            <video
+              src="/Step1.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
