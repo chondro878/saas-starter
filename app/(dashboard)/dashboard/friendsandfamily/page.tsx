@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { US_STATES } from '@/lib/us-states';
 import { MonthDayPicker } from '@/components/ui/month-day-picker';
 import { CardAllocation } from '@/lib/card-allocation';
+import { CardLimitWarning } from '@/components/ui/card-limit-warning';
+import { useRouter } from 'next/navigation';
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -223,8 +225,11 @@ interface EditRecipientModalProps {
 }
 
 function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipientModalProps) {
+  const router = useRouter();
+  const { data: allocation, mutate: mutateAllocation } = useSWR<CardAllocation>('/api/card-allocation', fetcher);
   const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccessWithWarning, setShowSuccessWithWarning] = useState(false);
   const [formData, setFormData] = useState({
     firstName: recipient.firstName,
     lastName: recipient.lastName,
@@ -289,7 +294,16 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
         throw new Error('Failed to update recipient');
       }
 
-      onSave();
+      // Refresh card allocation
+      await mutateAllocation();
+      
+      // Check if we should show warning
+      const updatedAllocation = await mutateAllocation();
+      if (updatedAllocation && updatedAllocation.isOverLimit) {
+        setShowSuccessWithWarning(true);
+      } else {
+        onSave();
+      }
     } catch (error) {
       console.error('Error updating recipient:', error);
       alert('Failed to update recipient. Please try again.');
@@ -367,6 +381,57 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
   };
 
   if (!mounted) return null;
+
+  // Show success screen with card limit warning
+  if (showSuccessWithWarning && allocation) {
+    const successContent = (
+      <>
+        <div className="fixed inset-0 bg-white z-[9999]" />
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 z-[10000] overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 min-h-screen flex items-center justify-center">
+            <div className="w-full max-w-2xl">
+              <div className="bg-white/70 backdrop-blur-xl border border-white/60 shadow-2xl rounded-2xl p-12 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-3xl font-light text-gray-900 mb-4">Recipient Updated!</h2>
+                <p className="text-gray-600 mb-8">
+                  Your changes have been saved successfully.
+                </p>
+
+                {allocation.isOverLimit && (
+                  <div className="mb-8">
+                    <CardLimitWarning 
+                      allocation={allocation}
+                      showDismiss={true}
+                      onDismiss={() => {
+                        onSave();
+                        router.push('/dashboard');
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-4 justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onSave}
+                    className="px-6"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+    return createPortal(successContent, document.body);
+  }
 
   const modalContent = (
     <>
