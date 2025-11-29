@@ -208,7 +208,7 @@ export function HolidayCarousel({
             className="flex items-center gap-2 px-8 py-3 border-2 border-gray-900 text-gray-900 rounded-full text-base font-medium hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-5 h-5" />
-            {isLoadingCredit ? 'Processing...' : 'Add Additional Credit'}
+            {isLoadingCredit ? 'Processing...' : 'Additional Cards'}
           </button>
         )}
       </div>

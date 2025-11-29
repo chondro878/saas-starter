@@ -1373,9 +1373,7 @@ export default function CreateReminderPage() {
                 >
                   {addressValidation.isValidating 
                     ? 'Validating...' 
-                    : addressValidation.result?.verdict === 'VALID'
-                    ? 'Next'
-                    : 'Validate Address'}
+                    : 'Next'}
                 </Button>
               </div>
             </div>
