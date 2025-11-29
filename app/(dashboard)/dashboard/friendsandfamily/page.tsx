@@ -49,6 +49,132 @@ const HOLIDAY_OCCASIONS = [
 
 const OCCASION_TYPES = [...CUSTOM_OCCASIONS, ...HOLIDAY_OCCASIONS];
 
+// Get color scheme for occasion type
+const getOccasionColors = (occasionType: string) => {
+  const type = occasionType.toLowerCase();
+  
+  // Custom occasions
+  if (type.includes('birthday')) {
+    return {
+      bg: 'bg-pink-50',
+      border: 'border-pink-200',
+      text: 'text-pink-900',
+      badge: 'bg-pink-100 text-pink-700',
+      accent: 'bg-pink-500'
+    };
+  }
+  if (type.includes('anniversary') && type.includes('romantic')) {
+    return {
+      bg: 'bg-rose-50',
+      border: 'border-rose-200',
+      text: 'text-rose-900',
+      badge: 'bg-rose-100 text-rose-700',
+      accent: 'bg-rose-500'
+    };
+  }
+  if (type.includes('anniversary') && type.includes('work')) {
+    return {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-900',
+      badge: 'bg-blue-100 text-blue-700',
+      accent: 'bg-blue-500'
+    };
+  }
+  
+  // Holidays
+  if (type.includes("easter")) {
+    return {
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-900',
+      badge: 'bg-green-100 text-green-700',
+      accent: 'bg-green-500'
+    };
+  }
+  if (type.includes("valentine")) {
+    return {
+      bg: 'bg-pink-50',
+      border: 'border-pink-200',
+      text: 'text-pink-900',
+      badge: 'bg-pink-100 text-pink-700',
+      accent: 'bg-pink-500'
+    };
+  }
+  if (type.includes("christmas")) {
+    return {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-900',
+      badge: 'bg-red-100 text-red-700',
+      accent: 'bg-red-500'
+    };
+  }
+  if (type.includes("thanksgiving")) {
+    return {
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      text: 'text-orange-900',
+      badge: 'bg-orange-100 text-orange-700',
+      accent: 'bg-orange-500'
+    };
+  }
+  if (type.includes("halloween")) {
+    return {
+      bg: 'bg-purple-50',
+      border: 'border-purple-200',
+      text: 'text-purple-900',
+      badge: 'bg-purple-100 text-purple-700',
+      accent: 'bg-purple-500'
+    };
+  }
+  if (type.includes("new year")) {
+    return {
+      bg: 'bg-indigo-50',
+      border: 'border-indigo-200',
+      text: 'text-indigo-900',
+      badge: 'bg-indigo-100 text-indigo-700',
+      accent: 'bg-indigo-500'
+    };
+  }
+  if (type.includes("mother")) {
+    return {
+      bg: 'bg-pink-50',
+      border: 'border-pink-200',
+      text: 'text-pink-900',
+      badge: 'bg-pink-100 text-pink-700',
+      accent: 'bg-pink-500'
+    };
+  }
+  if (type.includes("father")) {
+    return {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-900',
+      badge: 'bg-blue-100 text-blue-700',
+      accent: 'bg-blue-500'
+    };
+  }
+  if (type.includes("independence")) {
+    return {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-900',
+      badge: 'bg-red-100 text-red-700',
+      accent: 'bg-red-500'
+    };
+  }
+  
+  // Default
+  return {
+    bg: 'bg-gray-50',
+    border: 'border-gray-200',
+    text: 'text-gray-900',
+    badge: 'bg-gray-100 text-gray-700',
+    accent: 'bg-gray-500'
+  };
+};
+
 // Calculate fixed holiday dates for current year
 const getHolidayDate = (holiday: string): Date => {
   const year = new Date().getFullYear();
@@ -664,33 +790,40 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
               {occasions.map((occ, index) => {
                 const isHoliday = HOLIDAY_OCCASIONS.includes(occ.occasionType);
                 const isExpanded = expandedOccasions[index];
+                const colors = getOccasionColors(occ.occasionType);
                 
                 return (
-                  <div key={index} className="border border-gray-200 rounded-lg">
+                  <div key={index} className={`border-2 ${colors.border} ${colors.bg} rounded-lg overflow-hidden transition-all`}>
                     {/* Occasion Header - Always Visible */}
                     <div className="flex items-center justify-between p-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-gray-900">{occ.occasionType}</p>
-                          {isHoliday && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                              Fixed Date
-                            </span>
-                          )}
+                        <div className="flex items-center gap-3">
+                          {/* Color accent bar */}
+                          <div className={`w-1 h-12 ${colors.accent} rounded-full`} />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className={`font-semibold ${colors.text}`}>{occ.occasionType}</p>
+                              {isHoliday && (
+                                <span className={`text-xs ${colors.badge} px-2 py-0.5 rounded-full font-medium`}>
+                                  Fixed Date
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm ${colors.text} opacity-75 mt-1`}>
+                              {new Date(occ.occasionDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {new Date(occ.occasionDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                        </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setExpandedOccasions({ ...expandedOccasions, [index]: !isExpanded })}
-                          className="p-2 hover:bg-gray-100 rounded transition-colors"
+                          className={`p-2 ${colors.text} opacity-60 hover:opacity-100 rounded transition-colors`}
                         >
                           {isExpanded ? (
-                            <ChevronUp className="w-4 h-4 text-gray-600" />
+                            <ChevronUp className="w-4 h-4" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-gray-600" />
+                            <ChevronDown className="w-4 h-4" />
                           )}
                         </button>
                         <button
@@ -704,7 +837,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                     
                     {/* Expanded Content */}
                     {isExpanded && (
-                      <div className="px-4 pb-4 border-t border-gray-200 pt-4 space-y-3">
+                      <div className={`px-4 pb-4 border-t ${colors.border} pt-4 space-y-3`}>
                         {/* If custom occasion, allow date editing */}
                         {!isHoliday && (
                           <div>
@@ -757,49 +890,76 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                   ))}
                 </select>
 
-                {newOccasion.type && (
-                  <>
-                    {/* Show date picker only for custom occasions */}
-                    {CUSTOM_OCCASIONS.includes(newOccasion.type) ? (
+                {newOccasion.type && (() => {
+                  const previewColors = getOccasionColors(newOccasion.type);
+                  const isHoliday = HOLIDAY_OCCASIONS.includes(newOccasion.type);
+                  
+                  return (
+                    <>
+                      {/* Preview of how the occasion will look */}
+                      <div className={`border-2 ${previewColors.border} ${previewColors.bg} rounded-lg p-3 transition-all`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-1 h-10 ${previewColors.accent} rounded-full`} />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className={`text-sm font-semibold ${previewColors.text}`}>{newOccasion.type}</p>
+                              {isHoliday && (
+                                <span className={`text-xs ${previewColors.badge} px-2 py-0.5 rounded-full font-medium`}>
+                                  Fixed Date
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-xs ${previewColors.text} opacity-75 mt-1`}>
+                              {CUSTOM_OCCASIONS.includes(newOccasion.type)
+                                ? newOccasion.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+                                : getHolidayDate(newOccasion.type).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Show date picker only for custom occasions */}
+                      {CUSTOM_OCCASIONS.includes(newOccasion.type) ? (
+                        <div>
+                          <Label className="text-sm mb-2">Select Date</Label>
+                          <MonthDayPicker
+                            value={newOccasion.date}
+                            onChange={(date) => setNewOccasion({ ...newOccasion, date })}
+                          />
+                        </div>
+                      ) : (
+                        <div className={`p-3 ${previewColors.bg} ${previewColors.border} border rounded-md`}>
+                          <p className={`text-sm ${previewColors.text}`}>
+                            {newOccasion.type} is on{' '}
+                            {getHolidayDate(newOccasion.type).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Notes field for new occasion */}
                       <div>
-                        <Label className="text-sm mb-2">Select Date</Label>
-                        <MonthDayPicker
-                          value={newOccasion.date}
-                          onChange={(date) => setNewOccasion({ ...newOccasion, date })}
+                        <Label className="text-sm mb-1">Notes (optional)</Label>
+                        <Textarea
+                          value={newOccasion.notes}
+                          onChange={(e) => setNewOccasion({ ...newOccasion, notes: e.target.value })}
+                          rows={2}
+                          className="text-sm"
+                          placeholder="Add notes for this occasion..."
                         />
                       </div>
-                    ) : (
-                      <div className="p-3 bg-blue-50 rounded-md">
-                        <p className="text-sm text-blue-700">
-                          {newOccasion.type} is on{' '}
-                          {getHolidayDate(newOccasion.type).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Notes field for new occasion */}
-                    <div>
-                      <Label className="text-sm mb-1">Notes (optional)</Label>
-                      <Textarea
-                        value={newOccasion.notes}
-                        onChange={(e) => setNewOccasion({ ...newOccasion, notes: e.target.value })}
-                        rows={2}
-                        className="text-sm"
-                        placeholder="Add notes for this occasion..."
-                      />
-                    </div>
-                    
-                    <Button
-                      type="button"
-                      onClick={addOccasion}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Occasion
-                    </Button>
-                  </>
-                )}
+                      
+                      <Button
+                        type="button"
+                        onClick={addOccasion}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Occasion
+                      </Button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
