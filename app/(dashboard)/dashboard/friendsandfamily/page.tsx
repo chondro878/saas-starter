@@ -221,10 +221,11 @@ interface EditRecipientModalProps {
   recipient: RecipientWithOccasions;
   onClose: () => void;
   onSave: () => void;
+  onRefresh: () => void; // Refresh list without closing modal
   onDelete: (recipient: RecipientWithOccasions) => void;
 }
 
-function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipientModalProps) {
+function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }: EditRecipientModalProps) {
   const router = useRouter();
   const { data: allocation, mutate: mutateAllocation } = useSWR<CardAllocation>('/api/card-allocation', fetcher);
   const [mounted, setMounted] = useState(false);
@@ -297,13 +298,15 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
       }
 
       // Refresh card allocation and recipients list
-      await mutateAllocation();
-      onSave(); // Always refresh the list so the new occasion appears
+      const updatedAllocation = await mutateAllocation();
+      onRefresh(); // Always refresh the list so the new occasion appears
       
       // Check if we should show warning
-      const updatedAllocation = await mutateAllocation();
       if (updatedAllocation && updatedAllocation.isOverLimit) {
         setShowSuccessWithWarning(true);
+        // Modal stays open to show warning, but list is already refreshed
+      } else {
+        onSave(); // Close modal and finalize
       }
     } catch (error) {
       console.error('Error updating recipient:', error);
@@ -1044,6 +1047,10 @@ export default function FriendsAndFamilyPage() {
             await mutate();
             mutateAllocation(); // Refresh card allocation
             setRecipientToEdit(null);
+          }}
+          onRefresh={async () => {
+            await mutate(); // Refresh recipients list without closing modal
+            mutateAllocation(); // Refresh card allocation
           }}
           onDelete={setRecipientToDelete}
         />
