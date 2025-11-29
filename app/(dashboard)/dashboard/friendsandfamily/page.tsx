@@ -249,16 +249,6 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
     })) || []
   );
 
-  // Sync occasions state when recipient changes
-  useEffect(() => {
-    setOccasions(
-      recipient.occasions?.map(occ => ({
-        ...occ,
-        occasionDate: new Date(occ.occasionDate),
-      })) || []
-    );
-  }, [recipient]);
-
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -354,16 +344,12 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
       cardVariation: null,
       lastSentYear: null,
     };
-
-    console.log('[EditRecipientModal] Adding occasion to state:', newOcc);
-    console.log('[EditRecipientModal] Current occasions before add:', occasions);
     
     setOccasions([
       ...occasions,
       newOcc,
     ]);
     
-    console.log('[EditRecipientModal] Occasions after add:', [...occasions, newOcc]);
     setNewOccasion({ type: '', date: new Date(), notes: '' });
     setDuplicateWarning(null);
   };
