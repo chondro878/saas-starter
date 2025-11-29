@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { recipients, occasions } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 // GET single recipient
@@ -152,7 +152,7 @@ export async function DELETE(
     const recipientId = parseInt(id);
 
     // Verify recipient belongs to user
-    const { users } = await import('@/lib/db/schema');
+    const { users, orders } = await import('@/lib/db/schema');
     const dbUser = await db
       .select()
       .from(users)
@@ -178,7 +178,21 @@ export async function DELETE(
       return NextResponse.json({ error: 'Recipient not found or unauthorized' }, { status: 404 });
     }
 
-    // Delete occasions first (foreign key constraint)
+    // Get all occasions for this recipient
+    const recipientOccasions = await db
+      .select()
+      .from(occasions)
+      .where(eq(occasions.recipientId, recipientId));
+
+    const occasionIds = recipientOccasions.map(o => o.id);
+
+    // Delete orders that reference these occasions first (cascade delete)
+    if (occasionIds.length > 0) {
+      const { orders } = await import('@/lib/db/schema');
+      await db.delete(orders).where(inArray(orders.occasionId, occasionIds));
+    }
+
+    // Delete occasions (now safe since orders are deleted)
     await db.delete(occasions).where(eq(occasions.recipientId, recipientId));
 
     // Delete recipient
