@@ -15,6 +15,9 @@ import { MonthDayPicker } from '@/components/ui/month-day-picker';
 import { CardAllocation } from '@/lib/card-allocation';
 import { CardLimitWarning } from '@/components/ui/card-limit-warning';
 import { useRouter } from 'next/navigation';
+import { PersonalInformationSection } from './components/PersonalInformationSection';
+import { AddressSection } from './components/AddressSection';
+import { OccasionsSection } from './components/OccasionsSection';
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -431,40 +434,13 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
     return () => setMounted(false);
   }, []);
 
-  const [newOccasion, setNewOccasion] = useState({
-    type: '',
-    date: new Date(),
-    notes: '',
-  });
-
-  const [editingNotes, setEditingNotes] = useState<{ [key: number]: boolean }>({});
-  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
-  const [expandedOccasions, setExpandedOccasions] = useState<{ [key: number]: boolean }>({});
+  // Duplicate warnings are now handled by OccasionsSection component
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // If user has selected an occasion type but hasn't clicked "Add Occasion", add it automatically
-      let occasionsToSave = [...occasions];
-      if (newOccasion.type && !occasions.some(occ => occ.occasionType === newOccasion.type)) {
-        console.log('[EditRecipientModal] Auto-adding occasion that was selected but not added:', newOccasion);
-        const occasionDate = HOLIDAY_OCCASIONS.includes(newOccasion.type)
-          ? getHolidayDate(newOccasion.type)
-          : newOccasion.date;
-        
-        occasionsToSave.push({
-          id: -Date.now(),
-          recipientId: recipient.id,
-          occasionType: newOccasion.type,
-          occasionDate,
-          notes: newOccasion.notes,
-          createdAt: new Date(),
-          isJustBecause: false,
-          computedSendDate: null,
-          cardVariation: null,
-          lastSentYear: null,
-        });
-      }
+      // Occasions are now managed by the OccasionsSection component
+      const occasionsToSave = [...occasions];
       
       console.log('[EditRecipientModal] Saving with occasions:', occasionsToSave);
       console.log('[EditRecipientModal] Occasions count:', occasionsToSave.length);
@@ -562,88 +538,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
     }
   };
 
-  const addOccasion = () => {
-    console.log('[EditRecipientModal] addOccasion called, newOccasion:', newOccasion);
-    console.log('[EditRecipientModal] Current occasions before add:', occasions);
-    
-    if (!newOccasion.type) {
-      console.log('[EditRecipientModal] No occasion type selected, returning');
-      return;
-    }
-
-    // Check for duplicates
-    const isDuplicate = occasions.some(
-      (occ) => occ.occasionType.toLowerCase() === newOccasion.type.toLowerCase()
-    );
-
-    if (isDuplicate) {
-      console.log('[EditRecipientModal] Duplicate occasion detected');
-      setDuplicateWarning(`You already have a ${newOccasion.type} occasion for this recipient. Are you sure you want to add another?`);
-      return;
-    }
-
-    // For holidays, use the fixed date
-    const occasionDate = HOLIDAY_OCCASIONS.includes(newOccasion.type)
-      ? getHolidayDate(newOccasion.type)
-      : newOccasion.date;
-
-    const newOcc = {
-      id: -Date.now(), // Temporary ID
-      recipientId: recipient.id,
-      occasionType: newOccasion.type,
-      occasionDate,
-      notes: newOccasion.notes,
-      createdAt: new Date(),
-      isJustBecause: false,
-      computedSendDate: null,
-      cardVariation: null,
-      lastSentYear: null,
-    };
-    
-    console.log('[EditRecipientModal] Adding new occasion:', newOcc);
-    const updatedOccasions = [
-      ...occasions,
-      newOcc,
-    ];
-    console.log('[EditRecipientModal] Updated occasions array:', updatedOccasions);
-    
-    setOccasions(updatedOccasions);
-    
-    setNewOccasion({ type: '', date: new Date(), notes: '' });
-    setDuplicateWarning(null);
-    console.log('[EditRecipientModal] Occasion added, state updated');
-  };
-
-  const confirmAddDuplicateOccasion = () => {
-    if (!newOccasion.type) return;
-
-    // For holidays, use the fixed date
-    const occasionDate = HOLIDAY_OCCASIONS.includes(newOccasion.type)
-      ? getHolidayDate(newOccasion.type)
-      : newOccasion.date;
-
-    setOccasions([
-      ...occasions,
-      {
-        id: -Date.now(), // Temporary ID
-        recipientId: recipient.id,
-        occasionType: newOccasion.type,
-        occasionDate,
-        notes: newOccasion.notes,
-        createdAt: new Date(),
-        isJustBecause: false,
-        computedSendDate: null,
-        cardVariation: null,
-        lastSentYear: null,
-      },
-    ]);
-    setNewOccasion({ type: '', date: new Date(), notes: '' });
-    setDuplicateWarning(null);
-  };
-
-  const removeOccasion = (index: number) => {
-    setOccasions(occasions.filter((_, i) => i !== index));
-  };
+  // Occasion management is now handled by OccasionsSection component
 
   if (!mounted) return null;
 
@@ -719,397 +614,29 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
           </div>
 
         <div className="space-y-6 pb-24">
-          {/* Personal Info */}
-          <div>
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="mt-1"
-                  maxLength={50}
-                  pattern="[a-zA-Z\s'-]+"
-                  onKeyPress={(e) => {
-                    if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="mt-1"
-                  maxLength={50}
-                  pattern="[a-zA-Z\s'-]+"
-                  onKeyPress={(e) => {
-                    if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
-            </div>
+          {/* Personal Information Section */}
+          <PersonalInformationSection 
+            formData={formData}
+            setFormData={setFormData}
+          />
 
-            {formData.isCouple && (
-              <div className="mt-4 grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="secondFirstName">Partner's First Name</Label>
-                  <Input
-                    id="secondFirstName"
-                    value={formData.secondFirstName}
-                    onChange={(e) => setFormData({ ...formData, secondFirstName: e.target.value })}
-                    className="mt-1"
-                    maxLength={50}
-                    pattern="[a-zA-Z\s'-]+"
-                    onKeyPress={(e) => {
-                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="secondLastName">Partner's Last Name</Label>
-                  <Input
-                    id="secondLastName"
-                    value={formData.secondLastName}
-                    onChange={(e) => setFormData({ ...formData, secondLastName: e.target.value })}
-                    className="mt-1"
-                    maxLength={50}
-                    pattern="[a-zA-Z\s'-]+"
-                    onKeyPress={(e) => {
-                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+          {/* Address Section */}
+          <AddressSection 
+            formData={formData}
+            setFormData={setFormData}
+          />
 
-            {/* Couple checkbox and relationship below partner's last name */}
-            <div className="mt-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isCouple"
-                  checked={formData.isCouple}
-                  onChange={(e) => {
-                    const isCouple = e.target.checked;
-                    setFormData({ 
-                      ...formData, 
-                      isCouple,
-                      // Clear second person fields if unchecking couple
-                      ...(isCouple ? {} : { secondFirstName: '', secondLastName: '' }),
-                      // Clear Romantic relationship if checking couple
-                      ...(isCouple && formData.relationship === 'Romantic' ? { relationship: 'Friend' } : {})
-                    });
-                  }}
-                  className="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500"
-                />
-                <Label htmlFor="isCouple" className="cursor-pointer">Is this a couple?</Label>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="relationship">Relationship</Label>
-              <select
-                id="relationship"
-                value={formData.relationship}
-                onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
-                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none"
-              >
-                {RELATIONSHIP_OPTIONS.filter(rel => {
-                  // Exclude Romantic when couple is checked
-                  if (formData.isCouple && rel === 'Romantic') {
-                    return false;
-                  }
-                  return true;
-                }).map((rel) => (
-                  <option key={rel} value={rel}>{rel}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Address */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Address</h3>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="street">Street Address</Label>
-                <Input
-                  id="street"
-                  value={formData.street}
-                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                  className="mt-1"
-                  maxLength={100}
-                  pattern="[a-zA-Z0-9\s.,#'-]+"
-                />
-              </div>
-              <div>
-                <Label htmlFor="apartment">Apartment, suite, etc. (optional)</Label>
-                <Input
-                  id="apartment"
-                  value={formData.apartment}
-                  onChange={(e) => setFormData({ ...formData, apartment: e.target.value })}
-                  className="mt-1"
-                  maxLength={50}
-                  pattern="[a-zA-Z0-9\s.,#'-]+"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="mt-1"
-                    maxLength={50}
-                    pattern="[a-zA-Z\s'-]+"
-                    onKeyPress={(e) => {
-                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <select
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none"
-                  >
-                    <option value="">Select State</option>
-                    {US_STATES.map((state) => (
-                      <option key={state.code} value={state.code}>{state.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="zip">ZIP Code</Label>
-                  <Input
-                    id="zip"
-                    value={formData.zip}
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/[^\d-]/g, ''); // Only allow digits and hyphens
-                      // Format: allow 5 digits or 5+4 format
-                      if (value.length > 5 && !value.includes('-')) {
-                        value = value.slice(0, 5) + '-' + value.slice(5, 9);
-                      }
-                      if (value.length > 10) value = value.slice(0, 10);
-                      setFormData({ ...formData, zip: value });
-                    }}
-                    className="mt-1"
-                    maxLength={10}
-                    inputMode="numeric"
-                    pattern="\d{5}(-\d{4})?"
-                    placeholder="123"
-                    onKeyPress={(e) => {
-                      if (!/^[\d-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Occasions */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Occasions ({occasions.length})</h3>
-            <div className="space-y-3 mb-4">
-              {occasions.map((occ, index) => {
-                const isHoliday = HOLIDAY_OCCASIONS.includes(occ.occasionType);
-                const isExpanded = expandedOccasions[index];
-                const colors = getOccasionColors(occ.occasionType, formData.relationship);
-                
-                return (
-                  <div key={index} className={`border-2 ${colors.border} ${colors.bg} rounded-lg overflow-hidden transition-all`}>
-                    {/* Occasion Header - Always Visible */}
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          {/* Color accent bar */}
-                          <div className={`w-1 h-12 ${colors.accent} rounded-full`} />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className={`font-semibold ${colors.text}`}>{occ.occasionType}</p>
-                              {isHoliday && (
-                                <span className={`text-xs ${colors.badge} px-2 py-0.5 rounded-full font-medium`}>
-                                  Fixed Date
-                                </span>
-                              )}
-                            </div>
-                            <p className={`text-sm ${colors.text} opacity-75 mt-1`}>
-                              {new Date(occ.occasionDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setExpandedOccasions({ ...expandedOccasions, [index]: !isExpanded })}
-                          className={`p-2 ${colors.text} opacity-60 hover:opacity-100 rounded transition-colors`}
-                        >
-                          {isExpanded ? (
-                            <ChevronUp className="w-4 h-4" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => removeOccasion(index)}
-                          className="text-red-600 hover:text-red-700 p-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Expanded Content */}
-                    {isExpanded && (
-                      <div className={`px-4 pb-4 border-t ${colors.border} pt-4 space-y-3`}>
-                        {/* If custom occasion, allow date editing */}
-                        {!isHoliday && (
-                          <div>
-                            <Label className="text-sm mb-2">Edit Date</Label>
-                            <MonthDayPicker
-                              value={new Date(occ.occasionDate)}
-                              onChange={(date) => {
-                                const updated = [...occasions];
-                                updated[index].occasionDate = date;
-                                setOccasions(updated);
-                              }}
-                            />
-                          </div>
-                        )}
-                        
-                        {/* Notes section */}
-                        <div>
-                          <Label className="text-sm mb-2">Notes for this occasion</Label>
-                          <Textarea
-                            value={occ.notes || ''}
-                            onChange={(e) => {
-                              const updated = [...occasions];
-                              updated[index].notes = e.target.value;
-                              setOccasions(updated);
-                            }}
-                            rows={2}
-                            className="text-sm"
-                            placeholder="Add notes for this occasion..."
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Add New Occasion */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Add Occasion</h4>
-              <div className="space-y-3">
-                <select
-                  value={newOccasion.type}
-                  onChange={(e) => setNewOccasion({ ...newOccasion, type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none"
-                >
-                  <option value="">Select occasion type</option>
-                  {OCCASION_TYPES.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-
-                {newOccasion.type && (() => {
-                  const previewColors = getOccasionColors(newOccasion.type, formData.relationship);
-                  const isHoliday = HOLIDAY_OCCASIONS.includes(newOccasion.type);
-                  
-                  return (
-                    <>
-                      {/* Preview of how the occasion will look */}
-                      <div className={`border-2 ${previewColors.border} ${previewColors.bg} rounded-lg p-3 transition-all`}>
-                        <div className="flex items-center gap-3">
-                          <div className={`w-1 h-10 ${previewColors.accent} rounded-full`} />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className={`text-sm font-semibold ${previewColors.text}`}>{newOccasion.type}</p>
-                              {isHoliday && (
-                                <span className={`text-xs ${previewColors.badge} px-2 py-0.5 rounded-full font-medium`}>
-                                  Fixed Date
-                                </span>
-                              )}
-                            </div>
-                            <p className={`text-xs ${previewColors.text} opacity-75 mt-1`}>
-                              {CUSTOM_OCCASIONS.includes(newOccasion.type)
-                                ? newOccasion.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-                                : getHolidayDate(newOccasion.type).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Show date picker only for custom occasions */}
-                      {CUSTOM_OCCASIONS.includes(newOccasion.type) ? (
-                        <div>
-                          <Label className="text-sm mb-2">Select Date</Label>
-                          <MonthDayPicker
-                            value={newOccasion.date}
-                            onChange={(date) => setNewOccasion({ ...newOccasion, date })}
-                          />
-                        </div>
-                      ) : (
-                        <div className={`p-3 ${previewColors.bg} ${previewColors.border} border rounded-md`}>
-                          <p className={`text-sm ${previewColors.text}`}>
-                            {newOccasion.type} is on{' '}
-                            {getHolidayDate(newOccasion.type).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {/* Notes field for new occasion */}
-                      <div>
-                        <Label className="text-sm mb-1">Notes (optional)</Label>
-                        <Textarea
-                          value={newOccasion.notes}
-                          onChange={(e) => setNewOccasion({ ...newOccasion, notes: e.target.value })}
-                          rows={2}
-                          className="text-sm"
-                          placeholder="Add notes for this occasion..."
-                        />
-                      </div>
-                      
-                      <Button
-                        type="button"
-                        onClick={addOccasion}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Occasion
-                      </Button>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
+          {/* Occasions Section */}
+          <OccasionsSection
+            occasions={occasions}
+            setOccasions={setOccasions}
+            relationship={formData.relationship}
+          />
 
           {/* Notes */}
-          <div>
-            <Label htmlFor="notes">Notes</Label>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Notes</h3>
+            <Label htmlFor="notes" className="sr-only">Additional Notes</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -1156,39 +683,6 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
           </div>
         </div>
       </div>
-      
-      {/* Duplicate Warning Modal */}
-      {duplicateWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 m-4">
-            <div className="flex items-start gap-3 mb-4">
-              <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Duplicate Occasion</h3>
-                <p className="text-sm text-gray-600">{duplicateWarning}</p>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDuplicateWarning(null);
-                  setNewOccasion({ type: '', date: new Date(), notes: '' });
-                }}
-                className="px-4"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={confirmAddDuplicateOccasion}
-                className="px-4 bg-amber-500 hover:bg-amber-600 text-white"
-              >
-                Add Anyway
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
       </div>
     </>
   );
