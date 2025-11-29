@@ -296,15 +296,14 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
         throw new Error('Failed to update recipient');
       }
 
-      // Refresh card allocation
+      // Refresh card allocation and recipients list
       await mutateAllocation();
+      onSave(); // Always refresh the list so the new occasion appears
       
       // Check if we should show warning
       const updatedAllocation = await mutateAllocation();
       if (updatedAllocation && updatedAllocation.isOverLimit) {
         setShowSuccessWithWarning(true);
-      } else {
-        onSave();
       }
     } catch (error) {
       console.error('Error updating recipient:', error);
