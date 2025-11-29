@@ -249,6 +249,24 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
       occasionDate: new Date(occ.occasionDate),
     })) || []
   );
+  
+  // Track the recipient ID to detect when we switch to a different recipient
+  const [lastRecipientId, setLastRecipientId] = useState(recipient.id);
+
+  // Only sync occasions when switching to a DIFFERENT recipient (not on refresh of same recipient)
+  useEffect(() => {
+    if (recipient.id !== lastRecipientId) {
+      // Different recipient - reset occasions
+      setOccasions(
+        recipient.occasions?.map(occ => ({
+          ...occ,
+          occasionDate: new Date(occ.occasionDate),
+        })) || []
+      );
+      setLastRecipientId(recipient.id);
+    }
+    // If same recipient ID, keep current occasions state (preserves user changes)
+  }, [recipient.id, lastRecipientId]);
 
   useEffect(() => {
     setMounted(true);
@@ -269,6 +287,35 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
     setIsSaving(true);
     try {
       console.log('[EditRecipientModal] Saving with occasions:', occasions);
+      console.log('[EditRecipientModal] Occasions count:', occasions.length);
+      console.log('[EditRecipientModal] Occasions details:', occasions.map(occ => ({
+        type: occ.occasionType,
+        date: occ.occasionDate,
+        dateString: occ.occasionDate?.toISOString(),
+        notes: occ.notes
+      })));
+      
+      const occasionsPayload = occasions.map(occ => {
+        const dateValue = occ.occasionDate;
+        const dateObj = dateValue instanceof Date ? dateValue : new Date(dateValue);
+        
+        if (isNaN(dateObj.getTime())) {
+          console.error('[EditRecipientModal] Invalid date for occasion:', occ);
+          throw new Error(`Invalid date for occasion: ${occ.occasionType}`);
+        }
+        
+        return {
+          occasionType: occ.occasionType,
+          occasionDate: dateObj.toISOString(),
+          notes: occ.notes || '',
+        };
+      });
+      
+      console.log('[EditRecipientModal] Payload being sent:', {
+        recipientId: recipient.id,
+        occasionsCount: occasionsPayload.length,
+        occasions: occasionsPayload
+      });
       
       const response = await fetch(`/api/recipients/${recipient.id}`, {
         method: 'PUT',
@@ -285,27 +332,33 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
             zip: formData.zip,
             notes: formData.notes,
           },
-          occasionsData: occasions.map(occ => ({
-            occasionType: occ.occasionType,
-            occasionDate: occ.occasionDate.toISOString(),
-            notes: occ.notes || '',
-          })),
+          occasionsData: occasionsPayload,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update recipient');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[EditRecipientModal] API error response:', errorData);
+        throw new Error(errorData.error || 'Failed to update recipient');
       }
 
+      const result = await response.json();
+      console.log('[EditRecipientModal] Save successful, API response:', result);
+
       // Refresh card allocation and recipients list
+      console.log('[EditRecipientModal] Refreshing allocation and list...');
       const updatedAllocation = await mutateAllocation();
+      console.log('[EditRecipientModal] Updated allocation:', updatedAllocation);
       onRefresh(); // Always refresh the list so the new occasion appears
+      console.log('[EditRecipientModal] List refreshed');
       
       // Check if we should show warning
       if (updatedAllocation && updatedAllocation.isOverLimit) {
+        console.log('[EditRecipientModal] Over limit, showing warning screen');
         setShowSuccessWithWarning(true);
         // Modal stays open to show warning, but list is already refreshed
       } else {
+        console.log('[EditRecipientModal] Under limit, closing modal');
         onSave(); // Close modal and finalize
       }
     } catch (error) {
@@ -1049,7 +1102,14 @@ export default function FriendsAndFamilyPage() {
             setRecipientToEdit(null);
           }}
           onRefresh={async () => {
-            await mutate(); // Refresh recipients list without closing modal
+            // Refresh recipients list and update recipientToEdit with fresh data
+            const updatedRecipients = await mutate();
+            if (recipientToEdit && updatedRecipients) {
+              const updatedRecipient = updatedRecipients.find((r: RecipientWithOccasions) => r.id === recipientToEdit.id);
+              if (updatedRecipient) {
+                setRecipientToEdit(updatedRecipient);
+              }
+            }
             mutateAllocation(); // Refresh card allocation
           }}
           onDelete={setRecipientToDelete}
