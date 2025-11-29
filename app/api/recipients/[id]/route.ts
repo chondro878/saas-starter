@@ -120,6 +120,10 @@ export async function PUT(
             occasionDate: dateObj,
             notes: occasion.notes || '',
             recipientId: recipientId,
+            isJustBecause: false,
+            computedSendDate: null,
+            cardVariation: null,
+            lastSentYear: null,
           };
         });
 
