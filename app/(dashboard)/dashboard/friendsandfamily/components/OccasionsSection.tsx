@@ -316,7 +316,7 @@ export function OccasionsSection({ occasions, setOccasions, relationship, onDupl
                   
                   {/* Notes section */}
                   <div>
-                    <Label className="text-sm mb-2">Notes for this occasion</Label>
+                    <Label className="text-sm mb-2">Reminders for this occasion</Label>
                     <Textarea
                       value={occ.notes || ''}
                       onChange={(e) => {
@@ -326,7 +326,7 @@ export function OccasionsSection({ occasions, setOccasions, relationship, onDupl
                       }}
                       rows={2}
                       className="text-sm"
-                      placeholder="Add notes for this occasion..."
+                      placeholder="Add reminders for this occasion..."
                     />
                   </div>
                 </div>
@@ -399,13 +399,13 @@ export function OccasionsSection({ occasions, setOccasions, relationship, onDupl
                 
                 {/* Notes field for new occasion */}
                 <div>
-                  <Label className="text-sm mb-1">Notes (optional)</Label>
+                  <Label className="text-sm mb-1">Reminders (optional)</Label>
                   <Textarea
                     value={newOccasion.notes}
                     onChange={(e) => setNewOccasion({ ...newOccasion, notes: e.target.value })}
                     rows={2}
                     className="text-sm"
-                    placeholder="Add notes for this occasion..."
+                    placeholder="Add reminders for this occasion..."
                   />
                 </div>
                 

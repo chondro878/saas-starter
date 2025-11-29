@@ -766,7 +766,7 @@ export default function CreateReminderPage() {
       case 2: return 'Step 2: What kind of relationship is this?';
       case 3: return 'Step 3: What kind of card do you need?';
       case 4: return 'Step 4: When is it?';
-      case 5: return 'Step 5: Review and add notes';
+      case 5: return 'Step 5: Review and add reminders';
       case 6: return 'Success: Reminder created';
       default: return '';
     }
@@ -1986,7 +1986,7 @@ export default function CreateReminderPage() {
               {/* Notes Section */}
               <div className="space-y-6 flex-grow overflow-auto">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Add Notes</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Add Reminders</h3>
                   <p className="text-sm text-gray-600">
                     These reminders will help you remember important details when it's time to send the card.
                   </p>

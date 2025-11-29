@@ -83,10 +83,11 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback${redirect ? `?redirect=${redirect}` : ''}`,
+          redirectTo: `${baseUrl}/auth/callback${redirect ? `?redirect=${redirect}` : ''}`,
         },
       });
       

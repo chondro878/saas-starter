@@ -635,15 +635,15 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
 
           {/* Notes */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Notes</h3>
-            <Label htmlFor="notes" className="sr-only">Additional Notes</Label>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Reminders</h3>
+            <Label htmlFor="notes" className="sr-only">Additional Reminders</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
               className="mt-1"
-              placeholder="Add any additional notes..."
+              placeholder="Add any additional reminders..."
             />
           </div>
         </div>
