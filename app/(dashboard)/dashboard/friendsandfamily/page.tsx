@@ -256,7 +256,9 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
       <div>
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-lg font-medium text-gray-900">
-            {recipient.firstName} {recipient.lastName}
+            {recipient.isCouple && recipient.secondFirstName
+              ? `${recipient.firstName} & ${recipient.secondFirstName}`
+              : `${recipient.firstName} ${recipient.lastName}`}
           </h3>
           <span className={`text-xs ${colors.text} ${colors.bg} px-2.5 py-1 rounded-full font-medium flex-shrink-0 ml-2`}>
             {recipient.relationship}
@@ -362,6 +364,9 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
   const [formData, setFormData] = useState({
     firstName: recipient.firstName,
     lastName: recipient.lastName,
+    secondFirstName: recipient.secondFirstName || '',
+    secondLastName: recipient.secondLastName || '',
+    isCouple: recipient.isCouple || false,
     relationship: recipient.relationship,
     street: recipient.street,
     apartment: recipient.apartment || '',
@@ -477,6 +482,11 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
         occasions: occasionsPayload
       });
       
+      // Determine if couple is complete (both first and last names filled)
+      const isCoupleComplete = formData.isCouple && 
+        formData.firstName.trim() && formData.lastName.trim() && 
+        formData.secondFirstName.trim() && formData.secondLastName.trim();
+
       const response = await fetch(`/api/recipients/${recipient.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -484,6 +494,9 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
           recipientData: {
             firstName: formData.firstName,
             lastName: formData.lastName,
+            secondFirstName: isCoupleComplete ? formData.secondFirstName : null,
+            secondLastName: isCoupleComplete ? formData.secondLastName : null,
+            isCouple: isCoupleComplete,
             relationship: formData.relationship,
             street: formData.street,
             apartment: formData.apartment,
@@ -737,6 +750,64 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                 ))}
               </select>
             </div>
+
+            <div className="mt-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isCouple"
+                  checked={formData.isCouple}
+                  onChange={(e) => {
+                    const isCouple = e.target.checked;
+                    setFormData({ 
+                      ...formData, 
+                      isCouple,
+                      // Clear second person fields if unchecking couple
+                      ...(isCouple ? {} : { secondFirstName: '', secondLastName: '' })
+                    });
+                  }}
+                  className="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500"
+                />
+                <Label htmlFor="isCouple" className="cursor-pointer">Is this a couple?</Label>
+              </div>
+            </div>
+
+            {formData.isCouple && (
+              <div className="mt-4 grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="secondFirstName">Partner's First Name</Label>
+                  <Input
+                    id="secondFirstName"
+                    value={formData.secondFirstName}
+                    onChange={(e) => setFormData({ ...formData, secondFirstName: e.target.value })}
+                    className="mt-1"
+                    maxLength={50}
+                    pattern="[a-zA-Z\s'-]+"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="secondLastName">Partner's Last Name</Label>
+                  <Input
+                    id="secondLastName"
+                    value={formData.secondLastName}
+                    onChange={(e) => setFormData({ ...formData, secondLastName: e.target.value })}
+                    className="mt-1"
+                    maxLength={50}
+                    pattern="[a-zA-Z\s'-]+"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Address */}

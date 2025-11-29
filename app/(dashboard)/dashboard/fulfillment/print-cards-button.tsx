@@ -31,7 +31,10 @@ export function PrintReminderCardsButton({ orders, single = false }: PrintRemind
         doc.addPage();
       }
 
-      const recipientName = `${order.recipientFirstName} ${order.recipientLastName}`;
+      // Format name: if lastName is empty, it's a couple (name already formatted in firstName)
+      const recipientName = order.recipientLastName
+        ? `${order.recipientFirstName} ${order.recipientLastName}`
+        : order.recipientFirstName;
       const occasionDate = new Date(order.occasionDate).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric'

@@ -41,8 +41,11 @@ export function PrintLabelsButton({ orders, single = false }: PrintLabelsButtonP
       doc.setFont('helvetica', 'normal');
       
       let currentY = y + 0.25;
+      const recipientName = order.recipientLastName
+        ? `${order.recipientFirstName} ${order.recipientLastName}`
+        : order.recipientFirstName;
       doc.text(
-        `${order.recipientFirstName} ${order.recipientLastName}`,
+        recipientName,
         x + 0.1,
         currentY
       );

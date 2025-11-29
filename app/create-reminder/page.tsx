@@ -161,12 +161,23 @@ export default function CreateReminderPage() {
     return occasion;
   };
 
+  // Check if couple is complete (both first and last names filled)
+  const isCoupleComplete = secondPersonEnabled && 
+    firstPerson.first.trim() && firstPerson.last.trim() && 
+    secondPerson.first.trim() && secondPerson.last.trim();
+
   // --- Occasion lists ---
   const customOccasions = [
     { value: "Birthday", label: "Birthday" },
     { value: "Anniversary", label: "Anniversary" },
     { value: "JustBecause", label: "Just Because" },
-  ];
+  ].filter(item => {
+    // Remove Birthday when couple is complete
+    if (isCoupleComplete && item.value === "Birthday") {
+      return false;
+    }
+    return true;
+  });
 
   const holidayOccasions = [
     { value: "New Year's", label: "New Year's", dateLabel: "Jan 1" },
@@ -180,7 +191,13 @@ export default function CreateReminderPage() {
     { value: "Christmas", label: "Christmas", dateLabel: "Dec 25" },
   ];
 
-  const relationshipOptions = ['Friend', 'Family', 'Romantic', 'Professional'];
+  const relationshipOptions = ['Friend', 'Family', 'Romantic', 'Professional'].filter(option => {
+    // Remove Romantic when couple is complete
+    if (isCoupleComplete && option === 'Romantic') {
+      return false;
+    }
+    return true;
+  });
 
   // Get colors based on relationship
   const getRelationshipColors = (relationship: string) => {
@@ -568,10 +585,18 @@ export default function CreateReminderPage() {
       // Check if user is authenticated
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Check if this is a couple (both first and last names filled)
+      const isCouple = data.secondPersonEnabled && 
+        data.firstPerson.first.trim() && data.firstPerson.last.trim() && 
+        data.secondPerson.first?.trim() && data.secondPerson.last?.trim();
+
       // Prepare recipient data
       const recipientData = {
         firstName: data.firstPerson.first,
         lastName: data.firstPerson.last,
+        secondFirstName: isCouple ? data.secondPerson.first : null,
+        secondLastName: isCouple ? data.secondPerson.last : null,
+        isCouple: isCouple,
         relationship: data.relationship || 'Friend',
         street: data.address.street,
         apartment: data.address.apartment || '',

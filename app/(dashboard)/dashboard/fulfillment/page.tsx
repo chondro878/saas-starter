@@ -126,7 +126,9 @@ export default async function FulfillmentPage() {
               <div key={order.id} className="flex items-center justify-between bg-white p-4 rounded shadow-sm">
                 <div>
                   <p className="font-medium">
-                    {order.recipientFirstName} {order.recipientLastName}
+                    {order.recipientLastName
+                      ? `${order.recipientFirstName} ${order.recipientLastName}`
+                      : order.recipientFirstName}
                   </p>
                   <p className="text-sm text-gray-600">
                     {order.occasionType} - {new Date(order.occasionDate).toLocaleDateString()}
@@ -164,7 +166,9 @@ function OrderCard({ order }: { order: Order }) {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="font-semibold text-lg">
-              {order.recipientFirstName} {order.recipientLastName}
+              {order.recipientLastName
+                ? `${order.recipientFirstName} ${order.recipientLastName}`
+                : order.recipientFirstName}
             </h3>
             <span className={`px-2 py-1 ${cardTypeBadge.bg} ${cardTypeBadge.text} text-xs font-medium rounded`}>
               {order.occasionType}

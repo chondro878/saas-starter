@@ -141,6 +141,9 @@ export const recipients = pgTable('recipients', {
     .references(() => users.id),
   firstName: varchar('first_name', { length: 100 }).notNull(),
   lastName: varchar('last_name', { length: 100 }).notNull(),
+  secondFirstName: varchar('second_first_name', { length: 100 }), // For couples
+  secondLastName: varchar('second_last_name', { length: 100 }), // For couples
+  isCouple: boolean('is_couple').notNull().default(false), // True if this is a couple
   relationship: varchar('relationship', { length: 50 }).notNull(), // Romantic, Family, Friend, etc.
   street: varchar('street', { length: 255 }).notNull(),
   apartment: varchar('apartment', { length: 100 }),

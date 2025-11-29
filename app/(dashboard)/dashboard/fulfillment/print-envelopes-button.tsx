@@ -30,9 +30,12 @@ export function PrintEnvelopesButton({ orders, single = false }: PrintEnvelopesB
       
       const recipientStartX = 2.1; // Centered position
       let recipientY = 1.9; // Vertically centered
+      const recipientName = order.recipientLastName
+        ? `${order.recipientFirstName} ${order.recipientLastName}`
+        : order.recipientFirstName;
       
       doc.text(
-        `${order.recipientFirstName} ${order.recipientLastName}`,
+        recipientName,
         recipientStartX,
         recipientY
       );

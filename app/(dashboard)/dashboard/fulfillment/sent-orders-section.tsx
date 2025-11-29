@@ -37,7 +37,9 @@ export function SentOrdersSection({ sentOrders }: SentOrdersSectionProps) {
   const filteredOrders = sentOrders.filter((order) => {
     // Text search
     const query = searchQuery.toLowerCase();
-    const fullName = `${order.recipientFirstName} ${order.recipientLastName}`.toLowerCase();
+    const fullName = (order.recipientLastName
+      ? `${order.recipientFirstName} ${order.recipientLastName}`
+      : order.recipientFirstName).toLowerCase();
     const occasionType = order.occasionType.toLowerCase();
     const city = order.recipientCity.toLowerCase();
     const state = order.recipientState.toLowerCase();
@@ -248,7 +250,9 @@ export function SentOrdersSection({ sentOrders }: SentOrdersSectionProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-medium">
-                    {order.recipientFirstName} {order.recipientLastName}
+                    {order.recipientLastName
+                      ? `${order.recipientFirstName} ${order.recipientLastName}`
+                      : order.recipientFirstName}
                   </p>
                   <span className="text-sm text-gray-500">•</span>
                   <span className="text-sm font-medium text-gray-700">

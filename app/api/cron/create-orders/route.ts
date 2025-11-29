@@ -151,9 +151,12 @@ export async function GET(request: NextRequest) {
         // Send missing address email
         const { sendMissingAddressEmail } = await import('@/lib/email');
         const occasionDate = new Date(item.occasion.occasionDate);
+        const recipientNameForEmail = item.recipient.isCouple && item.recipient.secondFirstName
+          ? `${item.recipient.firstName} & ${item.recipient.secondFirstName}`
+          : `${item.recipient.firstName} ${item.recipient.lastName}`;
         sendMissingAddressEmail({
           user: item.user,
-          recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
+          recipientName: recipientNameForEmail,
           occasionType: item.occasion.occasionType,
           occasionDate: occasionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         }).catch((error) => {
@@ -187,10 +190,13 @@ export async function GET(request: NextRequest) {
         
         // Send urgent email to user
         const occasionDate = new Date(item.occasion.occasionDate);
+        const recipientNameForEmail = item.recipient.isCouple && item.recipient.secondFirstName
+          ? `${item.recipient.firstName} & ${item.recipient.secondFirstName}`
+          : `${item.recipient.firstName} ${item.recipient.lastName}`;
         await sendUrgentAddressIssueEmail({
           userEmail: item.user.email,
           userName: item.user.firstName || item.user.name || 'there',
-          recipientName: `${item.recipient.firstName} ${item.recipient.lastName}`,
+          recipientName: recipientNameForEmail,
           occasionType: item.occasion.occasionType,
           occasionDate: occasionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
           daysUntil: 15, // Since cron runs 15 days before
@@ -248,6 +254,14 @@ export async function GET(request: NextRequest) {
         console.log(`[CRON] Address verification error for recipient ${item.recipient.id} - proceeding anyway`);
       }
 
+      // Format recipient name for couples
+      const recipientDisplayName = item.recipient.isCouple && item.recipient.secondFirstName
+        ? `${item.recipient.firstName} & ${item.recipient.secondFirstName}`
+        : item.recipient.firstName;
+      const recipientLastName = item.recipient.isCouple && item.recipient.secondFirstName
+        ? '' // Leave empty for couples (name is already formatted in firstName)
+        : item.recipient.lastName;
+
       // Create the order
       const newOrder = await db.insert(orders).values({
         recipientId: item.recipient.id,
@@ -259,8 +273,8 @@ export async function GET(request: NextRequest) {
         status: 'pending',
         
         // Recipient address
-        recipientFirstName: item.recipient.firstName,
-        recipientLastName: item.recipient.lastName,
+        recipientFirstName: recipientDisplayName,
+        recipientLastName: recipientLastName,
         recipientStreet: item.recipient.street,
         recipientApartment: item.recipient.apartment || null,
         recipientCity: item.recipient.city,
