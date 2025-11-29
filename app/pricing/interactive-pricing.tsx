@@ -21,7 +21,7 @@ export function InteractivePricing() {
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ESSENTIALS!,
     },
     {
-      name: 'KEEP IN TOUCH',
+      name: 'STRESS FREE',
       price: '$99',
       description: '12 cards/year - stay connected without the mental load',
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STRESS_FREE!,

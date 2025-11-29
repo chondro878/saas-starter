@@ -7,7 +7,9 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
-            <h3 className="text-2xl font-light mb-4">Avoid the Rain</h3>
+            <Link href="/">
+              <h3 className="text-2xl font-light mb-4 hover:opacity-80 transition-opacity cursor-pointer">Avoid the Rain</h3>
+            </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               Never miss a special moment. Premium cards delivered to your door.
             </p>

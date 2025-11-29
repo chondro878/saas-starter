@@ -27,7 +27,13 @@ export function AllCardsCarousel() {
   
   const scrollToIndex = (index: number, smooth = true) => {
     if (carouselRef.current) {
-      const cardWidth = carouselRef.current.offsetWidth / 3;
+      // On mobile, show 1 card at a time; on desktop, show 3
+      const isMobile = window.innerWidth < 768;
+      // Get the actual scrollable width (accounting for padding)
+      const containerWidth = carouselRef.current.offsetWidth;
+      const cardWidth = isMobile 
+        ? containerWidth * 0.85 + 16 // 85% width + gap (gap-4 = 16px)
+        : (containerWidth / 3) - (containerWidth * 0.02); // Account for gap on desktop
       const scrollAmount = index * cardWidth;
       carouselRef.current.scrollTo({
         left: scrollAmount,
@@ -86,30 +92,30 @@ export function AllCardsCarousel() {
           {/* Navigation Arrows - Always visible for infinite scroll */}
           <button
             onClick={handlePrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="absolute left-2 md:left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 md:p-3 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
             aria-label="Previous cards"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-900" aria-hidden="true" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-900" aria-hidden="true" />
           </button>
           
           <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="absolute right-2 md:right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 md:p-3 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
             aria-label="Next cards"
           >
-            <ChevronRight className="w-6 h-6 text-gray-900" aria-hidden="true" />
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-900" aria-hidden="true" />
           </button>
           
-          {/* Cards Container */}
+          {/* Cards Container - Add padding on mobile to show previews */}
           <div
             ref={carouselRef}
-            className="overflow-hidden"
+            className="overflow-hidden px-[7.5%] md:px-0"
           >
-            <div className="flex gap-6">
+            <div className="flex gap-4 md:gap-6">
               {infiniteCards.map((image, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-[calc(33.333%-1rem)]"
+                  className="flex-shrink-0 w-[85%] md:w-[calc(33.333%-1rem)]"
                 >
                   <button
                     onClick={() => setSelectedImage(image)}

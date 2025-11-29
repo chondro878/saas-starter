@@ -27,7 +27,7 @@ export function PricingSummary() {
         {/* Stress Free */}
         <div className="text-gray-800 p-16 flex flex-col items-center justify-center text-center min-h-[500px] border-r border-gray-400/30">
           <h3 className="text-sm font-medium tracking-widest uppercase mb-12">
-            KEEP IN TOUCH
+            STRESS FREE
           </h3>
           <div className="text-8xl font-light mb-12">
             $99

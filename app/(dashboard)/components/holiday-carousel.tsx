@@ -55,7 +55,12 @@ export function HolidayCarousel({
   
   const scrollToIndex = (index: number, smooth = true) => {
     if (carouselRef.current) {
-      const cardWidth = carouselRef.current.offsetWidth / 3;
+      // On mobile, show 1 card at a time; on desktop, show 3
+      const isMobile = window.innerWidth < 768;
+      const containerWidth = carouselRef.current.offsetWidth;
+      const cardWidth = isMobile 
+        ? containerWidth * 0.85 + 16 // 85% width + gap (gap-4 = 16px)
+        : (containerWidth / 3) - (containerWidth * 0.02); // Account for gap on desktop
       const scrollAmount = index * cardWidth;
       carouselRef.current.scrollTo({
         left: scrollAmount,
@@ -100,15 +105,15 @@ export function HolidayCarousel({
     <div className={`${holiday.color.secondary} rounded-2xl p-8 mb-8`}>
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className={`text-3xl font-normal ${holiday.color.text}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+          <h2 className={`text-2xl sm:text-3xl font-normal ${holiday.color.text}`}>
             {holiday.name}
           </h2>
-          <span className={`${holiday.color.primary} text-white px-4 py-2 rounded-full text-sm font-medium`}>
+          <span className={`${holiday.color.primary} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap inline-block`}>
             {holiday.daysUntil} days until {holiday.name}
           </span>
         </div>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm sm:text-base">
           Send beautiful cards to your loved ones this {holiday.name}
         </p>
       </div>
@@ -118,30 +123,30 @@ export function HolidayCarousel({
         {/* Navigation Arrows - Always visible for infinite scroll */}
         <button
           onClick={handlePrevious}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+          className="absolute left-2 md:left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 md:p-2 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
           aria-label="Previous cards"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-900" aria-hidden="true" />
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-900" aria-hidden="true" />
         </button>
         
         <button
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+          className="absolute right-2 md:right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 md:p-2 shadow-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
           aria-label="Next cards"
         >
-          <ChevronRight className="w-6 h-6 text-gray-900" aria-hidden="true" />
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-900" aria-hidden="true" />
         </button>
         
-        {/* Cards Container */}
+        {/* Cards Container - Add padding on mobile to show previews */}
         <div
           ref={carouselRef}
-          className="overflow-hidden"
+          className="overflow-hidden px-[7.5%] md:px-0"
         >
           <div className="flex gap-4">
             {infiniteCards.map((image, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[calc(33.333%-0.67rem)]"
+                className="flex-shrink-0 w-[85%] md:w-[calc(33.333%-0.67rem)]"
               >
                 <button
                   onClick={() => setSelectedImage(image)}

@@ -289,12 +289,12 @@ export default function Home() {
       {/* Social Proof (Quotes) */}
       <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32" aria-label="Customer testimonials">
         <div className="max-w-4xl mx-auto px-8 text-center">
-          <div className="overflow-hidden relative h-32 transition-all duration-500 ease-in-out">
+          <div className="overflow-hidden relative min-h-[200px] md:min-h-[128px] transition-all duration-500 ease-in-out">
             <div className="animate-fade-slide" key={quoteIndex}>
-              <blockquote className="text-3xl md:text-4xl italic font-light text-gray-900 leading-relaxed">
+              <blockquote className="text-2xl sm:text-3xl md:text-4xl italic font-light text-gray-900 leading-relaxed px-2">
                 "{quotes[quoteIndex].text}"
               </blockquote>
-              <p className="mt-6 text-lg text-gray-600">— {quotes[quoteIndex].source}</p>
+              <p className="mt-6 text-base sm:text-lg text-gray-600 break-words px-2">— {quotes[quoteIndex].source}</p>
             </div>
           </div>
         </div>
@@ -338,7 +338,16 @@ export default function Home() {
       {/* Step 1: Add Your People - Video Left */}
       <section className="w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px]">
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-32 order-1">
+            <div className="meta text-gray-500 mb-6">Step 1</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Add the people you want to stay close with 
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              Start by adding the people who matter most - family, friends, colleagues, anyone you want to remember!
+            </p>
+          </div>
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2">
             <video
               src="/Step1.mp4"
               autoPlay
@@ -348,31 +357,22 @@ export default function Home() {
               className="w-full h-auto"
             />
           </div>
-          <div className="flex flex-col justify-center px-20 py-32">
-            <div className="meta text-gray-500 mb-6">Step 1</div>
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Add the people you want to stay close to
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Start by adding the people who matter most - family, friends, colleagues, anyone you want to remember!
-            </p>
-          </div>
         </div>
       </section>
 
       {/* Step 2: Set Reminders - Video Right */}
       <section className="w-full bg-gradient-to-br from-pink-50 via-rose-50 to-orange-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="flex flex-col justify-center px-20 py-24 order-2 md:order-1">
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1 md:order-1">
             <div className="meta text-gray-500 mb-6">Step 2</div>
             <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
               Add dates and occasions that matter
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Mark their birthdays, anniversaries, or any special date. We'll keep track of everything so you don't have to remember.
+              Mark their birthdays, anniversaries, or holidays you would like to celebrate. We'll keep track of everything so you don't have to remember.
             </p>
           </div>
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-2">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2 md:order-2">
             <video
               src="/Step2.mp4"
               autoPlay
@@ -385,10 +385,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Step 3: Receive Card - Video Left */}
+      {/* Step 3: Receive Card - Video Right */}
       <section className="w-full bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px]">
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1">
+            <div className="meta text-gray-500 mb-6">Step 3</div>
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Get their card delivered to your door
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              15 days before the occasion, receive a beautifully designed luxury card, your reminder note, pre-stamped and pre-addressed.
+            </p>
+          </div>
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2">
             <video
               src="/Step3.mp4"
               autoPlay
@@ -398,31 +407,22 @@ export default function Home() {
               className="w-full h-auto"
             />
           </div>
-          <div className="flex flex-col justify-center px-20 py-24">
-            <div className="meta text-gray-500 mb-6">Step 3</div>
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Get their card delivered to your door
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              15 days before the occasion, receive a beautifully designed luxury card with your personal reminder note, pre-stamped and pre-addressed. All you need to do is sign it!
-            </p>
-          </div>
         </div>
       </section>
 
       {/* Step 4: Mail It - Image Right */}
       <section className="w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-pink-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="flex flex-col justify-center px-20 py-24 order-2 md:order-1">
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1 md:order-1">
             <div className="meta text-gray-500 mb-6">Step 4</div>
             <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Sign, seal, and send—you're done
+              Sign, seal, and send—you're done!
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Drop it in the mailbox and you're finished. No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
+              Use your reminder note to curate a message, seal, and drop it in the mailbox and you're done! No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
             </p>
           </div>
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-2">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2 md:order-2">
             <video
               src="/Step4.mp4"
               autoPlay
@@ -445,7 +445,7 @@ export default function Home() {
             Never miss a moment
           </h2>
           <p className="text-xl text-gray-800 mb-12 font-light leading-relaxed">
-            Try creating first reminder - free! 
+            See how it works for yourself - no obligation! 
           </p>
           <Link 
             href="/create-reminder" 
@@ -473,7 +473,7 @@ export default function Home() {
               Need bulk cards?
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Send holiday cards to everyone at once. We'll handle the stamps, addresses, and delivery.
+              Send holiday cards to everyone at once. We'll send you a kit of cards, reminder notes, and evelopes. Holidays - Stress Free!
             </p>
           </div>
         </div>
@@ -576,7 +576,7 @@ export default function Home() {
                 <div id="faq-answer-2" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
                     Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs.
-                    Just smart, subtle, personal and custom to your relationship.
+                    Just smart, subtle - always!
                   </p>
                 </div>
               )}
@@ -602,8 +602,8 @@ export default function Home() {
               {faqOpen[3] && (
                 <div id="faq-answer-3" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                  Cards are printed and shipped to you 2-3 weeks before the occasion date, giving you plenty of time to personalize and send them. 
-                  You'll receive email reminders so nothing slips through the cracks!
+                  Cards are shipped to you ~3 weeks before the occasion date. You'll recive them ~2 weeks before the occasion date, giving you plenty of time to personalize and send them. 
+                  We'll email you once your card ships so nothing slips through the cracks!
                   </p>
                 </div>
               )}
