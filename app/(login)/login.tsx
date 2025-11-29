@@ -182,7 +182,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      maxLength={50}
+                      maxLength={254}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                       placeholder="you@example.com"
                     />

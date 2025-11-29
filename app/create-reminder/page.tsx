@@ -37,21 +37,45 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const reminderFormSchema = z.object({
   firstPerson: z.object({
     salutation: z.string().optional(),
-    first: z.string().min(1, "First name is required"),
-    last: z.string().min(1, "Last name is required"),
+    first: z.string()
+      .min(1, "First name is required")
+      .max(50, "First name must be 50 characters or less")
+      .regex(/^[a-zA-Z\s'-]+$/, "First name can only contain letters, spaces, hyphens, and apostrophes"),
+    last: z.string()
+      .min(1, "Last name is required")
+      .max(50, "Last name must be 50 characters or less")
+      .regex(/^[a-zA-Z\s'-]+$/, "Last name can only contain letters, spaces, hyphens, and apostrophes"),
   }),
   secondPersonEnabled: z.boolean().optional(),
   secondPerson: z.object({
     salutation: z.string().optional(),
-    first: z.string().optional(),
-    last: z.string().optional(),
+    first: z.string()
+      .max(50, "First name must be 50 characters or less")
+      .regex(/^[a-zA-Z\s'-]*$/, "First name can only contain letters, spaces, hyphens, and apostrophes")
+      .optional(),
+    last: z.string()
+      .max(50, "Last name must be 50 characters or less")
+      .regex(/^[a-zA-Z\s'-]*$/, "Last name can only contain letters, spaces, hyphens, and apostrophes")
+      .optional(),
   }).optional(),
   address: z.object({
-    street: z.string().min(1, "Street is required"),
-    apartment: z.string().optional(),
-    city: z.string().min(1, "City is required"),
+    street: z.string()
+      .min(1, "Street is required")
+      .max(100, "Street address must be 100 characters or less")
+      .regex(/^[a-zA-Z0-9\s.,#'-]+$/, "Street address contains invalid characters"),
+    apartment: z.string()
+      .max(50, "Apartment/Unit must be 50 characters or less")
+      .regex(/^[a-zA-Z0-9\s.,#'-]*$/, "Apartment/Unit contains invalid characters")
+      .optional(),
+    city: z.string()
+      .min(1, "City is required")
+      .max(50, "City must be 50 characters or less")
+      .regex(/^[a-zA-Z\s'-]+$/, "City can only contain letters, spaces, hyphens, and apostrophes"),
     state: z.string().min(1, "State is required"),
-    zip: z.string().min(5, "Zip code is required"),
+    zip: z.string()
+      .min(5, "Zip code must be at least 5 digits")
+      .max(10, "Zip code must be 10 characters or less")
+      .regex(/^\d{5}(-\d{4})?$/, "Zip code must be 5 digits or 5+4 format (e.g., 12345 or 12345-6789)"),
   }),
   date: z.date().optional(),
   occasion: z.string().optional(),
@@ -884,6 +908,13 @@ export default function CreateReminderPage() {
                       aria-required="true"
                       aria-invalid={!!errors.firstPerson?.first}
                       aria-describedby={errors.firstPerson?.first ? "first-name-error" : undefined}
+                      maxLength={50}
+                      pattern="[a-zA-Z\s'-]+"
+                      onKeyPress={(e) => {
+                        if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     {errors.firstPerson?.first && (
                       <p id="first-name-error" role="alert" className="text-sm text-red-500 mt-1">
@@ -910,6 +941,13 @@ export default function CreateReminderPage() {
                       aria-required="true"
                       aria-invalid={!!errors.firstPerson?.last}
                       aria-describedby={errors.firstPerson?.last ? "last-name-error" : undefined}
+                      maxLength={50}
+                      pattern="[a-zA-Z\s'-]+"
+                      onKeyPress={(e) => {
+                        if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     {errors.firstPerson?.last && (
                       <p id="last-name-error" role="alert" className="text-sm text-red-500 mt-1">
@@ -942,6 +980,13 @@ export default function CreateReminderPage() {
                         placeholder="First Name"
                         {...register("secondPerson.first")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                        maxLength={50}
+                        pattern="[a-zA-Z\s'-]+"
+                        onKeyPress={(e) => {
+                          if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                     </div>
                     <div>
@@ -953,6 +998,13 @@ export default function CreateReminderPage() {
                         placeholder="Last Name"
                         {...register("secondPerson.last")}
                         className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                        maxLength={50}
+                        pattern="[a-zA-Z\s'-]+"
+                        onKeyPress={(e) => {
+                          if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -989,6 +1041,8 @@ export default function CreateReminderPage() {
                         }
                       }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
+                      maxLength={100}
+                      pattern="[a-zA-Z0-9\s.,#'-]+"
                         aria-required="true"
                         aria-invalid={!!errors.address?.street}
                         autoComplete="street-address"
@@ -1016,6 +1070,8 @@ export default function CreateReminderPage() {
                       }}
                       className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                         autoComplete="address-line2"
+                        maxLength={50}
+                        pattern="[a-zA-Z0-9\s.,#'-]+"
                     />
                     </div>
                     <div className="grid grid-cols-3 gap-4">
@@ -1038,6 +1094,13 @@ export default function CreateReminderPage() {
                           aria-required="true"
                           aria-invalid={!!errors.address?.city}
                           autoComplete="address-level2"
+                          maxLength={50}
+                          pattern="[a-zA-Z\s'-]+"
+                          onKeyPress={(e) => {
+                            if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                              e.preventDefault();
+                            }
+                          }}
                         />
                         {errors.address?.city && (
                           <p id="city-error" role="alert" className="text-sm text-red-500 mt-1">
@@ -1083,16 +1146,30 @@ export default function CreateReminderPage() {
                         </Label>
                         <Input
                           id="zip"
-                          placeholder="Zip Code"
+                          placeholder="Zip Code (12345 or 12345-6789)"
                           {...register("address.zip")}
-                          onChange={(e) => handleZipChange(e.target.value)}
-                          maxLength={5}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/[^\d-]/g, ''); // Only allow digits and hyphens
+                            // Format: allow 5 digits or 5+4 format
+                            if (value.length > 5 && !value.includes('-')) {
+                              value = value.slice(0, 5) + '-' + value.slice(5, 9);
+                            }
+                            if (value.length > 10) value = value.slice(0, 10);
+                            e.target.value = value;
+                            handleZipChange(value);
+                          }}
+                          maxLength={10}
                           className="w-full border-gray-200 focus:border-gray-400 focus:ring-0"
                           aria-required="true"
                           aria-invalid={!!errors.address?.zip}
                           autoComplete="postal-code"
                           inputMode="numeric"
-                          pattern="[0-9]*"
+                          pattern="\d{5}(-\d{4})?"
+                          onKeyPress={(e) => {
+                            if (!/^[\d-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                              e.preventDefault();
+                            }
+                          }}
                         />
                         {zipLookupLoading && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
