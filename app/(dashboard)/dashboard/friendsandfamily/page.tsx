@@ -255,15 +255,25 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
 
   // Only sync occasions when switching to a DIFFERENT recipient (not on refresh of same recipient)
   useEffect(() => {
+    console.log('[EditRecipientModal] useEffect for recipient sync:', {
+      recipientId: recipient.id,
+      lastRecipientId,
+      recipientOccasionsCount: recipient.occasions?.length || 0,
+      currentOccasionsCount: occasions.length
+    });
+    
     if (recipient.id !== lastRecipientId) {
       // Different recipient - reset occasions
-      setOccasions(
-        recipient.occasions?.map(occ => ({
-          ...occ,
-          occasionDate: new Date(occ.occasionDate),
-        })) || []
-      );
+      console.log('[EditRecipientModal] Different recipient ID, resetting occasions');
+      const newOccasions = recipient.occasions?.map(occ => ({
+        ...occ,
+        occasionDate: new Date(occ.occasionDate),
+      })) || [];
+      console.log('[EditRecipientModal] Setting occasions to:', newOccasions);
+      setOccasions(newOccasions);
       setLastRecipientId(recipient.id);
+    } else {
+      console.log('[EditRecipientModal] Same recipient ID, preserving occasions state');
     }
     // If same recipient ID, keep current occasions state (preserves user changes)
   }, [recipient.id, lastRecipientId]);
@@ -286,16 +296,38 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      console.log('[EditRecipientModal] Saving with occasions:', occasions);
-      console.log('[EditRecipientModal] Occasions count:', occasions.length);
-      console.log('[EditRecipientModal] Occasions details:', occasions.map(occ => ({
+      // If user has selected an occasion type but hasn't clicked "Add Occasion", add it automatically
+      let occasionsToSave = [...occasions];
+      if (newOccasion.type && !occasions.some(occ => occ.occasionType === newOccasion.type)) {
+        console.log('[EditRecipientModal] Auto-adding occasion that was selected but not added:', newOccasion);
+        const occasionDate = HOLIDAY_OCCASIONS.includes(newOccasion.type)
+          ? getHolidayDate(newOccasion.type)
+          : newOccasion.date;
+        
+        occasionsToSave.push({
+          id: -Date.now(),
+          recipientId: recipient.id,
+          occasionType: newOccasion.type,
+          occasionDate,
+          notes: newOccasion.notes,
+          createdAt: new Date(),
+          isJustBecause: false,
+          computedSendDate: null,
+          cardVariation: null,
+          lastSentYear: null,
+        });
+      }
+      
+      console.log('[EditRecipientModal] Saving with occasions:', occasionsToSave);
+      console.log('[EditRecipientModal] Occasions count:', occasionsToSave.length);
+      console.log('[EditRecipientModal] Occasions details:', occasionsToSave.map(occ => ({
         type: occ.occasionType,
         date: occ.occasionDate,
         dateString: occ.occasionDate?.toISOString(),
         notes: occ.notes
       })));
       
-      const occasionsPayload = occasions.map(occ => {
+      const occasionsPayload = occasionsToSave.map(occ => {
         const dateValue = occ.occasionDate;
         const dateObj = dateValue instanceof Date ? dateValue : new Date(dateValue);
         
@@ -370,7 +402,13 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
   };
 
   const addOccasion = () => {
-    if (!newOccasion.type) return;
+    console.log('[EditRecipientModal] addOccasion called, newOccasion:', newOccasion);
+    console.log('[EditRecipientModal] Current occasions before add:', occasions);
+    
+    if (!newOccasion.type) {
+      console.log('[EditRecipientModal] No occasion type selected, returning');
+      return;
+    }
 
     // Check for duplicates
     const isDuplicate = occasions.some(
@@ -378,6 +416,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
     );
 
     if (isDuplicate) {
+      console.log('[EditRecipientModal] Duplicate occasion detected');
       setDuplicateWarning(`You already have a ${newOccasion.type} occasion for this recipient. Are you sure you want to add another?`);
       return;
     }
@@ -400,13 +439,18 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
       lastSentYear: null,
     };
     
-    setOccasions([
+    console.log('[EditRecipientModal] Adding new occasion:', newOcc);
+    const updatedOccasions = [
       ...occasions,
       newOcc,
-    ]);
+    ];
+    console.log('[EditRecipientModal] Updated occasions array:', updatedOccasions);
+    
+    setOccasions(updatedOccasions);
     
     setNewOccasion({ type: '', date: new Date(), notes: '' });
     setDuplicateWarning(null);
+    console.log('[EditRecipientModal] Occasion added, state updated');
   };
 
   const confirmAddDuplicateOccasion = () => {
