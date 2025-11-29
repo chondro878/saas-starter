@@ -329,7 +329,8 @@ export default function Home() {
             Here's how it works
           </h2>
           <p className="text-xl md:text-2xl text-gray-800 font-light leading-relaxed max-w-3xl mx-auto">
-            Being thoughtful shouldn't be complicated. We've made staying connected with the people you care about effortless—just four simple steps and you're done.
+            We've made staying connected with the people you care about effortless.<br/>
+            Just four simple steps and you're done!
           </p>
         </div>
       </section>
@@ -337,14 +338,14 @@ export default function Home() {
       {/* Step 1: Add Your People - Video Left */}
       <section className="w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[525px] md:h-[600px] overflow-hidden bg-gray-900 flex items-center justify-center">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px]">
             <video
               src="/Step1.mp4"
               autoPlay
               loop
               muted
               playsInline
-              className="w-full h-full object-contain"
+              className="w-full h-auto"
             />
           </div>
           <div className="flex flex-col justify-center px-20 py-32">
@@ -353,7 +354,7 @@ export default function Home() {
               Add the people you want to stay close to
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Start by adding the people who matter most—family, friends, colleagues, anyone you want to remember. A simple list that ensures you never forget the important ones.
+              Start by adding the people who matter most - family, friends, colleagues, anyone you want to remember!
             </p>
           </div>
         </div>
@@ -368,41 +369,42 @@ export default function Home() {
               Add dates and occasions that matter
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Mark their birthdays, anniversaries, or any special date. We'll keep track of everything so you don't have to remember—we'll remind you when it's time.
+              Mark their birthdays, anniversaries, or any special date. We'll keep track of everything so you don't have to remember.
             </p>
           </div>
-          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2 overflow-hidden bg-gray-900 flex items-center justify-center">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-2">
             <video
-              src="/Step1.mp4"
+              src="/Step2.mp4"
               autoPlay
               loop
               muted
               playsInline
-              className="w-full h-full object-contain"
+              className="w-full h-auto"
             />
           </div>
         </div>
       </section>
 
-      {/* Step 3: Receive Card - Image Left */}
+      {/* Step 3: Receive Card - Video Left */}
       <section className="w-full bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="relative h-[525px] md:h-[600px]">
-            <Image
-              src="/howitworks/3cardrecived.jpg"
-              alt="Receive your luxury card and reminder"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 50vw"
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px]">
+            <video
+              src="/Step3.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto"
             />
           </div>
           <div className="flex flex-col justify-center px-20 py-24">
             <div className="meta text-gray-500 mb-6">Step 3</div>
             <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Get your card delivered to your door
+              Get their card delivered to your door
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              15 days before the occasion, receive a beautifully designed luxury card with your personal reminder note, pre-stamped and pre-addressed. All you need to do is sign it.
+              15 days before the occasion, receive a beautifully designed luxury card with your personal reminder note, pre-stamped and pre-addressed. All you need to do is sign it!
             </p>
           </div>
         </div>
@@ -417,16 +419,17 @@ export default function Home() {
               Sign, seal, and send—you're done
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Drop it in the mailbox and you're finished. No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time.
+              Drop it in the mailbox and you're finished. No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
             </p>
           </div>
-          <div className="relative h-[525px] md:h-[600px] order-1 md:order-2">
-            <Image
-              src="/howitworks/4mailbox.jpg"
-              alt="Mail your pre-stamped card"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 50vw"
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-2">
+            <video
+              src="/Step4.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto"
             />
           </div>
         </div>
@@ -442,7 +445,7 @@ export default function Home() {
             Never miss a moment
           </h2>
           <p className="text-xl text-gray-800 mb-12 font-light leading-relaxed">
-            Start with your first reminder. Free to try.
+            Try creating first reminder - free! 
           </p>
           <Link 
             href="/create-reminder" 
@@ -600,7 +603,7 @@ export default function Home() {
                 <div id="faq-answer-3" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
                     No problem, just sign the card and you're good-to-go.  
-                    We also offer a premium tier where we hand curate a thoughtful note based off your relationship - no AI slop nonsense - ever!
+                    We also offer a premium tier where we hand-curate thoughtful notes based on your relationship - no generic messages, just authentic, personalized touches!
                   </p>
                 </div>
               )}
@@ -659,7 +662,7 @@ export default function Home() {
             Ready to Get Started?
           </h2>
           <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            Join thousands who never miss a special moment. Subscribe today.
+            Join thousands who never miss a special moment. Subscribe today!
           </p>
           <Link 
             href="/sign-up" 

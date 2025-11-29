@@ -33,16 +33,6 @@ export const HOLIDAYS: Holiday[] = [
     }
   },
   {
-    name: "St. Patrick's Day",
-    month: 2,
-    day: 17,
-    color: {
-      primary: 'bg-green-500',
-      secondary: 'bg-green-100',
-      text: 'text-green-700'
-    }
-  },
-  {
     name: "Easter",
     month: 3,
     day: 15, // Approximate
@@ -141,7 +131,7 @@ export function getNextHolidays(count: number = 3): Array<Holiday & { date: Date
   
   // Filter to only future holidays and sort by days until
   return allHolidayDates
-    .filter(h => h.daysUntil >= 0)
+    .filter(h => h.daysUntil > 0)
     .sort((a, b) => a.daysUntil - b.daysUntil)
     .slice(0, count);
 }

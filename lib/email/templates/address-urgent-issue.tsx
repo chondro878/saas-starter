@@ -26,7 +26,7 @@ export const AddressUrgentIssueEmail: React.FC<Readonly<AddressUrgentIssueEmailP
   dashboardLink,
 }) => (
   <div style={{ fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-    <h1 style={{ color: '#dc2626' }}>⚠️ Action Required: Verify Address</h1>
+    <h1 style={{ color: '#dc2626' }}>Action Required: Verify Address ⚠️ </h1>
     
     <p>Hi {userName},</p>
     

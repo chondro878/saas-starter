@@ -161,16 +161,6 @@ export function AllCardsCarousel() {
             </div>
           </div>
         )}
-        
-        {/* Action Button */}
-        <div className="flex justify-center">
-          <Link
-            href="/sign-up"
-            className="px-10 py-4 border-2 border-gray-900 text-gray-900 rounded-lg text-lg font-medium hover:bg-gray-900 hover:text-white transition-colors"
-          >
-            Get Started
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -45,13 +45,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Contact
-                </a>
+                <Link href="/careers" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Careers
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Careers
+                <a href="mailto:hello@avoidtherain.com" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Contact
                 </a>
               </li>
             </ul>

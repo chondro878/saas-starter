@@ -10,7 +10,7 @@ export function occasionsForMonth(month?: string | number): { label: string; val
     const holidayMap: Record<number, { label: string; value: string }[]> = {
       0: [{ label: "New Year's Day", value: "new_years_day" }],
       1: [{ label: "Valentine's Day", value: "valentines_day" }, { label: "Presidents' Day", value: "presidents_day" }],
-      2: [{ label: "St. Patrick's Day", value: "st_patricks_day" }],
+      2: [],  // March
       3: [{ label: "Easter", value: "easter" }, { label: "April Fool's Day", value: "april_fools" }],
       4: [{ label: "Mother's Day", value: "mothers_day" }, { label: "Memorial Day", value: "memorial_day" }],
       5: [{ label: "Father's Day", value: "fathers_day" }, { label: "Juneteenth", value: "juneteenth" }],
@@ -57,7 +57,6 @@ export function getNextHoliday(): { label: string; value: string; date: Date } |
         new_years_day: 1,
         valentines_day: 14,
         presidents_day: 19,
-        st_patricks_day: 17,
         april_fools: 1,
         easter: 9, // Placeholder
         mothers_day: 12,

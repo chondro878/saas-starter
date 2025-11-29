@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { PasswordStrengthIndicator, validatePasswordStrength } from '@/components/ui/password-strength-indicator';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
 
   // Check if we have a valid session/token on mount
   useEffect(() => {
@@ -40,9 +42,10 @@ export default function ResetPasswordPage() {
     setError('');
     setIsLoading(true);
 
-    // Validation
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    // Validation using the same utility function
+    const validation = validatePasswordStrength(password);
+    if (!validation.isValid) {
+      setError(validation.errors.join('. '));
       setIsLoading(false);
       return;
     }
@@ -170,7 +173,10 @@ export default function ResetPasswordPage() {
               className="mt-2 bg-white/50 border-gray-300 focus:border-gray-900 focus:ring-gray-900"
               disabled={isLoading}
             />
-            <p className="text-sm text-gray-500 mt-1">Must be at least 8 characters</p>
+            <PasswordStrengthIndicator 
+              password={password} 
+              onValidityChange={setIsPasswordValid}
+            />
           </div>
 
           <div>
@@ -198,7 +204,7 @@ export default function ResetPasswordPage() {
 
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isPasswordValid || password !== confirmPassword}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-base font-medium"
           >
             {isLoading ? (

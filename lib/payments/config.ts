@@ -51,7 +51,7 @@ export const STRIPE_PLANS = {
       'Delivered to your door',
       'Email reminders',
       'Holiday packs included',
-      'AI-written messages',
+      'Hand-curated messages by real people',
       'Priority support',
       'Expedited shipping',
     ],

@@ -1,112 +1,174 @@
 import Link from 'next/link';
+import { Footer } from '@/components/ui/footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Refund Policy',
-  description: 'Our refund policy for Avoid the Rain greeting cards. Learn about cancellations, refunds for damaged or lost orders, and how to request help.',
-  openGraph: {
-    title: 'Refund Policy | Avoid the Rain',
-    description: 'Our refund policy for Avoid the Rain greeting cards. Learn about cancellations, refunds for damaged or lost orders.',
-    url: 'https://avoidtherain.com/refund-policy',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  title: 'Refund Policy - Avoid the Rain',
+  description: 'Learn about our refund and cancellation policy.',
 };
-
-const sections = [
-  {
-    title: '1. Overview',
-    content: [
-      'We stand behind every card we print and ship. This Refund Policy explains when we provide refunds or credits and how to request help if something goes wrong.'
-    ]
-  },
-  {
-    title: '2. Cancellations Before Shipment',
-    content: [
-      'You can cancel any order that has not yet entered production or been handed off for shipping. If no cards have been printed or shipped, we will issue a full refund to your original payment method.'
-    ]
-  },
-  {
-    title: '3. Refunds for Unshipped Orders',
-    content: [
-      'If you subscribed or prepaid for cards but have not scheduled or sent any cards and would like to cancel, we will refund any unused balance in full.',
-      'Refunds are generally processed within 5–7 business days, depending on your financial institution.'
-    ]
-  },
-  {
-    title: '4. Damaged or Lost in Transit',
-    content: [
-      'If cards arrive damaged or fail to arrive due to a shipping carrier issue, we will credit your Avoid the Rain account with the full value of the affected cards so you can resend them at no additional cost.',
-      'Please notify us within 14 days of the expected delivery date and include photos or documentation so we can file a claim with the carrier.'
-    ]
-  },
-  {
-    title: '5. Non-Refundable Situations',
-    content: [
-      'Because each order is custom printed, we cannot offer refunds for cards that have already shipped unless they were damaged or lost in transit.',
-      'We do not refund for spelling mistakes, incorrect addresses, or other user-provided errors once production has started. Please review all details carefully before confirming your order.',
-      'Subscriptions that have already delivered scheduled cards are not eligible for partial refunds, but you can cancel future deliveries at any time.'
-    ]
-  },
-  {
-    title: '6. How to Request a Refund or Credit',
-    content: [
-      'Email support@avoidtherain.com with your order number, the names of affected recipients, and a brief description of the issue.',
-      'We may ask for additional information to verify the problem. Once confirmed, we will process your refund or credit promptly and keep you updated along the way.'
-    ]
-  },
-  {
-    title: '7. Changes to This Policy',
-    content: [
-      'We may update this Refund Policy as our service evolves. We will post any changes here and update the “Last Updated” date below.'
-    ]
-  }
-];
 
 export default function RefundPolicyPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
-        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
-      </div>
+    <>
+      <div className="min-h-screen bg-gray-50">
+        {/* Back Link */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-6 py-4">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium"
+            >
+              ← Back
+            </Link>
+          </div>
+        </div>
 
-      <div className="relative min-h-screen flex flex-col py-16 px-6 sm:px-10 lg:px-16">
-        <header className="max-w-4xl mx-auto mb-12">
-          <Link href="/" className="text-sm uppercase tracking-[0.3em] text-gray-700 hover:text-gray-900 transition">
-            Avoid the Rain
-          </Link>
-          <h1 className="mt-4 text-4xl sm:text-5xl font-semibold text-gray-900">
-            Refund Policy
-          </h1>
-          <p className="mt-4 text-gray-700 text-base sm:text-lg leading-relaxed">
-            We make things right when cards do not go out as planned. Review our refund rules and how to request help below.
-          </p>
-          <p className="mt-6 text-sm uppercase tracking-wide text-gray-600">Last updated: November 2025</p>
-        </header>
+        <div className="max-w-4xl mx-auto px-6 py-12 sm:py-16">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12">
+            <h1 className="text-4xl font-light text-gray-900 mb-4">Refund Policy</h1>
+            <p className="text-sm text-gray-500 mb-12">Last updated: January 2025</p>
 
-        <main className="max-w-4xl mx-auto bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl p-8 sm:p-12 space-y-10">
-          {sections.map((section) => (
-            <section key={section.title} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{section.title}</h2>
-              {section.content.map((paragraph) => (
-                <p key={paragraph} className="text-gray-700 leading-relaxed">
-                  {paragraph}
+            <div className="prose prose-gray max-w-none space-y-8">
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Our Commitment</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  At Avoid the Rain, we want you to be completely satisfied with our service. This Refund Policy outlines our approach to refunds, cancellations, and service guarantees.
                 </p>
-              ))}
-            </section>
-          ))}
+              </section>
 
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">Need Help?</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Reach out anytime at <a href="mailto:support@avoidtherain.com" className="text-indigo-600 hover:text-indigo-500 underline">support@avoidtherain.com</a>. We’re happy to help you keep every card on track.
-            </p>
-          </section>
-        </main>
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Subscription Refunds</h2>
+                
+                <h3 className="text-xl font-medium text-gray-900 mb-3">30-Day Money-Back Guarantee</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  New subscribers can request a full refund within 30 days of their initial subscription purchase if:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>No cards have been printed or shipped</li>
+                  <li>The request is made within 30 days of the original purchase date</li>
+                  <li>You contact us at <a href="mailto:support@avoidtherain.com" className="text-purple-600 hover:text-purple-700">support@avoidtherain.com</a></li>
+                </ul>
+
+                <h3 className="text-xl font-medium text-gray-900 mb-3">After 30 Days</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  After the 30-day guarantee period:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Subscriptions are non-refundable</li>
+                  <li>You may cancel at any time to prevent future charges</li>
+                  <li>You will retain access through the end of your current billing period</li>
+                  <li>No partial refunds are provided for unused cards or time remaining</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Card Quality Guarantee</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We stand behind the quality of our cards. If you receive a card that is:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>Damaged during shipping</li>
+                  <li>Printed with errors or defects</li>
+                  <li>Missing components (envelope, stamp, etc.)</li>
+                </ul>
+                <p className="text-gray-700 leading-relaxed">
+                  We will replace it at no charge. Contact us within 7 days of receiving the card with photos of the issue.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Add-On Purchases</h2>
+                
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Extra Cards</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>Refundable before printing begins (typically 48 hours after purchase)</li>
+                  <li>Non-refundable once printing has started</li>
+                  <li>Eligible for replacement if damaged or defective</li>
+                </ul>
+
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Holiday Packs</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Refundable within 14 days if unopened and in original condition</li>
+                  <li>Non-refundable once opened or used</li>
+                  <li>Return shipping costs are the customer's responsibility</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Delivery Issues</h2>
+                
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Lost or Late Deliveries</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  If your cards don't arrive as scheduled:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>Contact us within 7 days of the expected delivery date</li>
+                  <li>We will investigate with USPS and provide a replacement if lost</li>
+                  <li>We are not responsible for delays caused by USPS or force majeure events</li>
+                </ul>
+
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Incorrect Address</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  We are not responsible for cards sent to incorrect addresses provided by you. Please ensure all addresses are accurate and up-to-date in your account.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Cancellation Process</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  To cancel your subscription:
+                </p>
+                <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+                  <li>Log into your account at avoidtherain.com</li>
+                  <li>Navigate to Settings → Subscriptions</li>
+                  <li>Click "Manage Billing" to access the Stripe portal</li>
+                  <li>Select "Cancel Subscription"</li>
+                </ol>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  Alternatively, email us at <a href="mailto:support@avoidtherain.com" className="text-purple-600 hover:text-purple-700">support@avoidtherain.com</a> and we'll process your cancellation within 24 hours.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Refund Processing</h2>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Approved refunds are processed within 5-7 business days</li>
+                  <li>Refunds are issued to the original payment method</li>
+                  <li>It may take additional time for your bank to process the refund</li>
+                  <li>You will receive an email confirmation once the refund is processed</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Exceptions and Special Cases</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We handle each situation with care. If you have extenuating circumstances not covered by this policy, please contact us. We'll do our best to find a fair solution.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Examples of situations we may accommodate:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Medical emergencies or hospitalization</li>
+                  <li>Service outages on our end</li>
+                  <li>Repeated quality issues with cards</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Contact Us</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  For refund requests or questions about this policy:
+                </p>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  <strong>Email:</strong> <a href="mailto:support@avoidtherain.com" className="text-purple-600 hover:text-purple-700">support@avoidtherain.com</a><br />
+                  <strong>Response Time:</strong> Within 24 hours on business days
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
-

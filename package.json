@@ -10,7 +10,8 @@
     "db:seed:fulfillment": "npx tsx lib/db/seed-fulfillment.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:check": "node scripts/db-health-check.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

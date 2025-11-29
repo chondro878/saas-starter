@@ -1,119 +1,139 @@
 import Link from 'next/link';
+import { Footer } from '@/components/ui/footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy',
-  description: 'Learn how Avoid the Rain collects, uses, and protects your personal information. We take your privacy seriously and are transparent about our data practices.',
-  openGraph: {
-    title: 'Privacy Policy | Avoid the Rain',
-    description: 'Learn how Avoid the Rain collects, uses, and protects your personal information.',
-    url: 'https://avoidtherain.com/privacy-policy',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  title: 'Privacy Policy - Avoid the Rain',
+  description: 'Learn how Avoid the Rain collects, uses, and protects your personal information.',
 };
-
-const sections = [
-  {
-    title: '1. Information We Collect',
-    content: [
-      'We collect the information you provide when you create an account, make a purchase, or contact support. This may include your name, email address, mailing address, payment details, and any preferences you share with us.',
-      'We also collect technical information automatically, such as IP address, browser type, device identifiers, and usage data to help us improve performance and reliability.'
-    ]
-  },
-  {
-    title: '2. How We Use Your Information',
-    content: [
-      'To provide, personalize, and improve our services, including printing and delivering your cards.',
-      'To communicate with you about orders, reminders, promotions, and important updates.',
-      'To monitor and analyze usage, prevent fraud, ensure security, and comply with legal obligations.'
-    ]
-  },
-  {
-    title: '3. Sharing Your Information',
-    content: [
-      'We share information with trusted service providers who support payment processing, printing, shipping, analytics, and customer service. These partners are required to protect your data and only use it for the services they perform for us.',
-      'We may disclose information if required by law, to protect our rights, or to respond to lawful requests from public authorities.'
-    ]
-  },
-  {
-    title: '4. Your Choices & Rights',
-    content: [
-      'You can update your account details, manage marketing preferences, or delete your account at any time from your dashboard or by contacting support.',
-      'You may opt out of marketing emails by using the unsubscribe link in any communication or adjusting your notification preferences.'
-    ]
-  },
-  {
-    title: '5. Data Retention & Security',
-    content: [
-      'We retain your information for as long as needed to provide our services, comply with legal obligations, resolve disputes, and enforce our agreements.',
-      'We maintain administrative, technical, and physical safeguards designed to protect your information. However, no system is completely secure, and we encourage you to use strong passwords and keep your credentials private.'
-    ]
-  },
-  {
-    title: '6. Children’s Privacy',
-    content: [
-      'Our services are not directed to children under 13, and we do not knowingly collect personal information from children. If we learn that we have collected information from a child without parental consent, we will delete it promptly.'
-    ]
-  },
-  {
-    title: '7. Changes to This Policy',
-    content: [
-      'We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the “Last Updated” date below.'
-    ]
-  },
-  {
-    title: '8. Contact Us',
-    content: [
-      'Have questions or requests? Email us at support@avoidtherain.com or write to Avoid the Rain, 123 Evergreen Terrace, Seattle, WA 98101.'
-    ]
-  }
-];
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
-        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
-      </div>
+    <>
+      <div className="min-h-screen bg-gray-50">
+        {/* Back Link */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-6 py-4">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium"
+            >
+              ← Back
+            </Link>
+          </div>
+        </div>
 
-      <div className="relative min-h-screen flex flex-col py-16 px-6 sm:px-10 lg:px-16">
-        <header className="max-w-4xl mx-auto mb-12">
-          <Link href="/" className="text-sm uppercase tracking-[0.3em] text-gray-700 hover:text-gray-900 transition">
-            Avoid the Rain
-          </Link>
-          <h1 className="mt-4 text-4xl sm:text-5xl font-semibold text-gray-900">
-            Privacy Policy
-          </h1>
-          <p className="mt-4 text-gray-700 text-base sm:text-lg leading-relaxed">
-            Your trust matters. This Privacy Policy explains what information we collect, how we use it, and the choices you have.
-          </p>
-          <p className="mt-6 text-sm uppercase tracking-wide text-gray-600">Last updated: November 2025</p>
-        </header>
+        <div className="max-w-4xl mx-auto px-6 py-12 sm:py-16">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12">
+            <h1 className="text-4xl font-light text-gray-900 mb-4">Privacy Policy</h1>
+            <p className="text-sm text-gray-500 mb-12">Last updated: January 2025</p>
 
-        <main className="max-w-4xl mx-auto bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl p-8 sm:p-12 space-y-10">
-          {sections.map((section) => (
-            <section key={section.title} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{section.title}</h2>
-              {section.content.map((paragraph) => (
-                <p key={paragraph} className="text-gray-700 leading-relaxed">
-                  {paragraph}
+            <div className="prose prose-gray max-w-none space-y-8">
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Introduction</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  At Avoid the Rain, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service.
                 </p>
-              ))}
-            </section>
-          ))}
+              </section>
 
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">9. Exercising Your Rights</h2>
-            <p className="text-gray-700 leading-relaxed">
-              To exercise any privacy rights available in your region, please submit a request through our support channel. We may verify your identity before completing the request to protect your account.
-            </p>
-          </section>
-        </main>
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Information We Collect</h2>
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Personal Information</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We collect information that you provide directly to us, including:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Name and contact information (email address, phone number)</li>
+                  <li>Shipping and billing addresses</li>
+                  <li>Payment information (processed securely through Stripe)</li>
+                  <li>Recipient information (names, addresses, and occasion dates)</li>
+                  <li>Communication preferences and account settings</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">How We Use Your Information</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We use the information we collect to:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Process and fulfill your card orders</li>
+                  <li>Send reminder emails for upcoming occasions</li>
+                  <li>Process payments and maintain your subscription</li>
+                  <li>Communicate with you about your account and our services</li>
+                  <li>Improve our products and services</li>
+                  <li>Comply with legal obligations</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Information Sharing</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We do not sell your personal information. We may share your information with:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li><strong>Service Providers:</strong> Including payment processors (Stripe), shipping partners (USPS), and email service providers</li>
+                  <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+                  <li><strong>Business Transfers:</strong> In connection with any merger, sale of company assets, or acquisition</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Data Security</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the internet or electronic storage is 100% secure.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Your Rights</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  You have the right to:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Access and receive a copy of your personal information</li>
+                  <li>Correct inaccurate or incomplete information</li>
+                  <li>Request deletion of your personal information</li>
+                  <li>Opt-out of marketing communications</li>
+                  <li>Cancel your subscription at any time</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Cookies and Tracking</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We use cookies and similar tracking technologies to improve your experience, analyze usage, and assist with our marketing efforts. You can control cookies through your browser settings.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Children's Privacy</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Changes to This Policy</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Contact Us</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  If you have questions about this Privacy Policy, please contact us at:
+                </p>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  <strong>Email:</strong> <a href="mailto:privacy@avoidtherain.com" className="text-purple-600 hover:text-purple-700">privacy@avoidtherain.com</a>
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
-

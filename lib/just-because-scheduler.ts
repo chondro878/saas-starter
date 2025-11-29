@@ -20,7 +20,6 @@ interface ExclusionWindow {
 const MAJOR_HOLIDAYS = [
   { month: 1, day: 1 },   // New Year's Day
   { month: 2, day: 14 },  // Valentine's Day
-  { month: 3, day: 17 },  // St. Patrick's Day
   { month: 7, day: 4 },   // Independence Day
   { month: 10, day: 31 }, // Halloween
   { month: 12, day: 25 }, // Christmas

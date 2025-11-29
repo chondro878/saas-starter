@@ -89,9 +89,6 @@ export function calculateHolidayForYear(holidayName: string, year: number): Date
         case "Valentine's Day":
             return new Date(year, 1, 14); // February 14
 
-        case "St. Patrick's Day":
-            return new Date(year, 2, 17); // March 17
-
         case "Easter":
             return calculateEaster(year);
 

@@ -25,6 +25,7 @@ import {
 import { AlertCircle, Check, X, HelpCircle, Info } from 'lucide-react';
 import { calculateHolidayDate } from '@/lib/holiday-calculator';
 import { getCardVariation, getJustBecauseLabel } from '@/lib/just-because-utils';
+import { checkOccasionDeliveryStatus } from '@/lib/delivery-window';
 import { UnauthenticatedSuccess } from './components/unauthenticated-success';
 
 // --- Schema definition for the reminder form using Zod ---
@@ -135,7 +136,6 @@ export default function CreateReminderPage() {
   const holidayOccasions = [
     { value: "New Year's", label: "New Year's", dateLabel: "Jan 1" },
     { value: "Valentine's Day", label: "Valentine's Day", dateLabel: "Feb 14" },
-    { value: "St. Patrick's Day", label: "St. Patrick's Day", dateLabel: "Mar 17" },
     { value: "Easter", label: "Easter", dateLabel: "Spring (varies)" },
     { value: "Mother's Day", label: "Mother's Day", dateLabel: "2nd Sunday of May" },
     { value: "Father's Day", label: "Father's Day", dateLabel: "3rd Sunday of June" },
@@ -379,7 +379,7 @@ export default function CreateReminderPage() {
       return {
         selected: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-500',
         default: 'bg-red-50 text-red-700 border-red-200 hover:border-red-300',
-        decoration: 'none' // No decoration, just gradient like St. Patrick's
+        decoration: 'none'
       };
     }
     if (occasionLower.includes('patrick')) {
@@ -1460,6 +1460,32 @@ export default function CreateReminderPage() {
                     })}
                   </div>
                 </fieldset>
+                
+                {/* Holiday Delivery Window Warnings */}
+                {selectedHolidayOccasions.length > 0 && (
+                  <div className="space-y-2">
+                    {selectedHolidayOccasions.map(holiday => {
+                      const status = checkOccasionDeliveryStatus(holiday);
+                      
+                      if (!status.isTooSoon) return null;
+                      
+                      return (
+                        <div key={holiday} className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-medium text-amber-900">{holiday}</span>
+                              <span className="text-amber-700"> is only {status.daysUntil} days away. </span>
+                              <span className="text-amber-700">
+                                We'll send the card for {format(status.fulfillmentDate, 'MMMM yyyy')}.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-between pt-4 flex-shrink-0 mt-auto">
@@ -1526,6 +1552,31 @@ export default function CreateReminderPage() {
                               }));
                             }}
                           />
+                          
+                          {/* Delivery Window Warning for Custom Occasions */}
+                          {customDates[oc] && (() => {
+                            const status = checkOccasionDeliveryStatus(oc, customDates[oc]);
+                            
+                            if (!status.isTooSoon) return null;
+                            
+                            return (
+                              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                  <div>
+                                    <p className="font-medium text-amber-900 mb-1">
+                                      We'll send this card next year
+                                    </p>
+                                    <p className="text-sm text-amber-700">
+                                      This {displayLabel.toLowerCase()} is only {status.daysUntil} days away, 
+                                      but we need 15 days to print and ship your card. We'll automatically 
+                                      send it for {format(status.fulfillmentDate, 'MMMM d, yyyy')}.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     );
@@ -1647,6 +1698,86 @@ export default function CreateReminderPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Delivery Timeline Warning - Consolidated Review */}
+              {(() => {
+                // Check all occasions for delivery window issues
+                const tooSoonOccasions: Array<{
+                  type: string;
+                  displayLabel: string;
+                  currentDate: Date;
+                  fulfillmentDate: Date;
+                  daysUntil: number;
+                }> = [];
+                
+                // Check custom occasions
+                selectedCustomOccasions
+                  .filter(oc => oc !== "JustBecause")
+                  .forEach(occasion => {
+                    const date = customDates[occasion];
+                    if (date) {
+                      const status = checkOccasionDeliveryStatus(occasion, date);
+                      if (status.isTooSoon) {
+                        tooSoonOccasions.push({
+                          type: occasion,
+                          displayLabel: getOccasionDisplayLabel(occasion),
+                          currentDate: date,
+                          fulfillmentDate: status.fulfillmentDate,
+                          daysUntil: status.daysUntil,
+                        });
+                      }
+                    }
+                  });
+                
+                // Check holiday occasions
+                selectedHolidayOccasions.forEach(holiday => {
+                  const status = checkOccasionDeliveryStatus(holiday);
+                  if (status.isTooSoon) {
+                    const holidayDate = calculateHolidayDate(holiday);
+                    tooSoonOccasions.push({
+                      type: holiday,
+                      displayLabel: holiday,
+                      currentDate: holidayDate,
+                      fulfillmentDate: status.fulfillmentDate,
+                      daysUntil: status.daysUntil,
+                    });
+                  }
+                });
+                
+                if (tooSoonOccasions.length === 0) return null;
+                
+                return (
+                  <div className="p-5 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                    <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                      <Info className="w-5 h-5" />
+                      Delivery Timeline
+                    </h3>
+                    <p className="text-blue-800 mb-3">
+                      {tooSoonOccasions.length === 1 
+                        ? "This occasion is within our 15-day fulfillment window." 
+                        : "These occasions are within our 15-day fulfillment window."
+                      }
+                      {" "}We'll send {tooSoonOccasions.length === 1 ? "this card" : "these cards"} next year:
+                    </p>
+                    <ul className="space-y-2">
+                      {tooSoonOccasions.map((occ, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <div className="text-blue-700">
+                            <span className="font-medium">{occ.displayLabel}</span>
+                            <span> ({format(occ.currentDate, 'MMM d')} - only {occ.daysUntil} days away)</span>
+                            <br />
+                            <span className="text-xs">→ Card will be sent: {format(occ.fulfillmentDate, 'MMMM d, yyyy')}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-blue-600 mt-3">
+                      💡 Don't worry - we'll automatically send these cards next year so you don't forget!
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* Address Validation Messages */}
               {addressValidation.isValidating && (

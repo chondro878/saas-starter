@@ -52,7 +52,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(recipientsWithOccasions);
   } catch (error) {
     console.error('Error fetching recipients:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 

@@ -19,7 +19,7 @@ export function CardReminderEmail({ user, order, occasionDate, daysUntilOccasion
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
-            <Heading style={h1}>⏰ Reminder: Card needs your message!</Heading>
+            <Heading style={h1}>Reminder: Card needs your message!</Heading>
             
             <Text style={paragraph}>
               Hi {firstName},
@@ -34,13 +34,13 @@ export function CardReminderEmail({ user, order, occasionDate, daysUntilOccasion
             </Text>
             
             <Text style={listItem}>
-              ✍️ Write your personal message inside
+              * Write your personal message inside
             </Text>
             <Text style={listItem}>
-              ✉️ Seal it up (it's already stamped!)
+              * Seal it up (it's already stamped!)
             </Text>
             <Text style={listItem}>
-              📮 Drop it in the mail
+              * Drop it in the mail 📮
             </Text>
             
             <Section style={recipientBox}>

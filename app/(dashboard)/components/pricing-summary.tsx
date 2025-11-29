@@ -46,7 +46,7 @@ export function PricingSummary() {
             $199
           </div>
           <p className="text-xl font-light leading-relaxed max-w-xs">
-            25 cards/year + AI-written messages. For managers or social pros.
+            25 cards/year + hand-curated messages by real people. For managers or social pros.
           </p>
         </div>
       </div>

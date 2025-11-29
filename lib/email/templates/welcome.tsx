@@ -19,14 +19,14 @@ export function WelcomeEmail({ user = { firstName: 'there', email: 'user@example
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
-            <Heading style={h1}>Welcome to Avoid the Rain! 🎉</Heading>
+            <Heading style={h1}>Welcome to Avoid the Rain! 💌</Heading>
             
             <Text style={paragraph}>
               Hi {firstName},
             </Text>
             
             <Text style={paragraph}>
-              We're thrilled to have you join us! You've taken the first step toward never missing another special occasion.
+              We're thrilled to have you join us! You've taken the first step toward never missing another special occasion, ever again!
             </Text>
             
             <Text style={paragraph}>
@@ -34,17 +34,17 @@ export function WelcomeEmail({ user = { firstName: 'there', email: 'user@example
             </Text>
             
             <Text style={listItem}>
-              📝 Add your first recipient and their special occasions
+              - If you havent already, add recipients and their special occasions via your dashboard.
             </Text>
             <Text style={listItem}>
-              Choose a subscription plan that fits your needs
+              - Choose a subscription plan that fits your needs.
             </Text>
             <Text style={listItem}>
               We'll handle the rest - beautiful cards delivered right to your door!
             </Text>
             
             <Button style={button} href={`${process.env.BASE_URL}/create-reminder`}>
-              Add Your First Recipient
+              My Dashboard
             </Button>
             
             <Text style={paragraph}>

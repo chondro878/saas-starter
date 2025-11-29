@@ -29,7 +29,7 @@ export function InteractivePricing() {
     {
       name: 'LET US HELP',
       price: '$199',
-      description: '25 cards/year + AI-written messages. For managers or social pros.',
+      description: '25 cards/year + hand-curated messages by real people. For managers or social pros.',
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CONCIERGE!,
     },
   ];

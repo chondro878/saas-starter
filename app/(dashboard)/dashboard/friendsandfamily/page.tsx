@@ -35,7 +35,6 @@ const CUSTOM_OCCASIONS = [
 const HOLIDAY_OCCASIONS = [
   "New Year's",
   "Valentine's Day",
-  "St. Patrick's Day",
   "Easter",
   "Mother's Day",
   "Father's Day",
@@ -55,8 +54,6 @@ const getHolidayDate = (holiday: string): Date => {
       return new Date(year, 0, 1);
     case "Valentine's Day":
       return new Date(year, 1, 14);
-    case "St. Patrick's Day":
-      return new Date(year, 2, 17);
     case "Independence Day":
       return new Date(year, 6, 4);
     case "Halloween":

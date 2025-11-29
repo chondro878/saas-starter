@@ -133,7 +133,6 @@ export function ReminderForm({
   const holidayOccasions = [
     { value: "New Year's", label: "New Year's", dateLabel: "Jan 1" },
     { value: "Valentine's Day", label: "Valentine's Day", dateLabel: "Feb 14" },
-    { value: "St. Patrick's Day", label: "St. Patrick's Day", dateLabel: "Mar 17" },
     { value: "Easter", label: "Easter", dateLabel: "Spring (varies)" },
     { value: "Mother's Day", label: "Mother's Day", dateLabel: "2nd Sunday of May" },
     { value: "Father's Day", label: "Father's Day", dateLabel: "3rd Sunday of June" },

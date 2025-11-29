@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { manageBillingAction } from '@/lib/payments/actions';
-import { TrendingUp } from 'lucide-react';
 
 interface UpgradeButtonProps {
   priceId: string;
@@ -29,7 +28,6 @@ export function UpgradeButton({ priceId, planName }: UpgradeButtonProps) {
       disabled={isLoading}
       className="flex items-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
     >
-      <TrendingUp className="w-5 h-5" />
       {isLoading ? 'Opening...' : `Upgrade to ${planName}`}
     </button>
   );

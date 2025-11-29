@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Footer } from '@/components/ui/footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -52,12 +53,25 @@ const inspirationSlides = [
 
 export default function AboutPage() {
   return (
+    <>
     <div className="min-h-screen relative overflow-hidden text-slate-900">
       <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
         <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
       </div>
 
-      <div className="relative mx-auto flex max-w-4xl flex-col gap-12 px-6 py-16 sm:py-20">
+      {/* Back Link */}
+      <div className="relative">
+        <div className="max-w-4xl mx-auto px-6 pt-8">
+          <Link 
+            href="/" 
+            className="inline-flex items-center text-slate-700 hover:text-slate-900 transition-colors font-medium"
+          >
+            ← Back
+          </Link>
+        </div>
+      </div>
+
+      <div className="relative mx-auto flex max-w-4xl flex-col gap-12 px-6 py-8 sm:py-12 pb-16">
         <div className="overflow-hidden rounded-3xl border border-white/60 bg-white/40 shadow-2xl backdrop-blur">
           <Image
             src="/US.jpg"
@@ -72,15 +86,15 @@ export default function AboutPage() {
         <div className="space-y-6 rounded-3xl border border-white/60 bg-white/70 p-8 shadow-2xl backdrop-blur">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">About Avoid the Rain</p>
           <h1 className="text-4xl font-semibold leading-tight">
-            We&apos;re Julian and Jess—Avoid the Rain is our love letter to staying close.
+            Avoid the Rain is our love letter to staying close.
           </h1>
           <p className="text-lg leading-relaxed text-slate-700">
-            We live in Seattle, run Avoid the Rain from our apartment, and split our time between writing code, licking stamps, and making
-            sure the people we adore never go too long without hearing from us. This is one of several small businesses we&apos;re building
-            together—all centered around relationships, rituals, and being the kindest versions of ourselves.
+            We&apos;re Julian and Jess, and run Avoid the Rain from our home in Seattle. We split our time between writing code, licking stamps, and making
+            sure the people we adore never go too long without hearing from us. This is one of several small projests we&apos;re building
+            together, all centered around relationships, rituals, and being the kindest versions of ourselves.
           </p>
           <p className="text-lg leading-relaxed text-slate-700">
-            We&apos;re not backed by a giant corporation or a pile of investor cash. It&apos;s just us (and a very opinionated dog) doing
+            We&apos;re not backed by a giant corporation or a pile of investor cash. It&apos;s just us (and a very opinionated cat) doing
             the work because we believe thoughtfulness should feel easy, beautiful, and personal. When you email support, you reach one of
             us. When you ship a card, we celebrate with you. When something goes wrong, we fix it ourselves.
           </p>
@@ -103,7 +117,7 @@ export default function AboutPage() {
         <div className="space-y-4 rounded-3xl border border-white/60 bg-white/70 p-8 shadow-2xl backdrop-blur">
           <h2 className="text-2xl font-semibold">What &amp; Who Inspires Us</h2>
           <p className="text-slate-700">
-            We take cues from people and projects that champion kindness, curiosity, and timeless care. Spin through a few of our go-tos.
+            We take cues from people and projects that champion kindness, curiosity, and timeless care. Spin through a few of our go-2's.
           </p>
 
           <div className="relative">
@@ -134,6 +148,8 @@ export default function AboutPage() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
 

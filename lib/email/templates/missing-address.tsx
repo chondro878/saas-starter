@@ -19,7 +19,7 @@ export function MissingAddressEmail({ user, recipientName, occasionType, occasio
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
-            <Heading style={h1}>⚠️ Action Required: Missing Address</Heading>
+            <Heading style={h1}>Action Required: Missing Address ⚠️</Heading>
             
             <Text style={paragraph}>
               Hi {firstName},
@@ -39,13 +39,13 @@ export function MissingAddressEmail({ user, recipientName, occasionType, occasio
             </Text>
             
             <Text style={listItem}>
-              📬 Cards are delivered to your address (pre-stamped and ready to send)
+              Cards are delivered to your address (pre-stamped and ready to send)
             </Text>
             <Text style={listItem}>
-              ✍️ You personalize them with your handwritten message
+              You personalize them with your handwritten message
             </Text>
             <Text style={listItem}>
-              💌 Then you mail them to your recipients
+              Then you mail them to your recipients 💌 
             </Text>
             
             <Button style={button} href={`${process.env.BASE_URL}/dashboard/security`}>

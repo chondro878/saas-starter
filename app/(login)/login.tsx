@@ -10,6 +10,7 @@ import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { signIn, signUp, resendVerificationEmail } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { supabase } from '@/lib/supabase/browserClient';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength-indicator';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
@@ -36,6 +37,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const [inviteCodeError, setInviteCodeError] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
 
   // Check if email exists
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -568,6 +570,10 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
+                    <PasswordStrengthIndicator 
+                      password={password} 
+                      onValidityChange={setIsPasswordValid}
+                    />
                   </div>
 
                   <div>
@@ -617,7 +623,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   <Button
                     type="submit"
                     className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-full transition-colors shadow-sm"
-                    disabled={pending || password !== confirmPassword}
+                    disabled={pending || password !== confirmPassword || !isPasswordValid}
                   >
                     {pending ? (
                       <>

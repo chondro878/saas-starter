@@ -37,18 +37,20 @@ export default async function SubscriptionsPage() {
                 </p>
               </div>
               <div className="p-4 sm:p-6 lg:p-8">
-                <p className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                  Additional Features
-                </p>
-                <ul className="space-y-2 mb-6">
-                  {STRIPE_PLANS[nextTier].features.slice(currentPlan?.features.length || 0).map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-end">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                      Additional Features
+                    </p>
+                    <ul className="space-y-2">
+                      {STRIPE_PLANS[nextTier].features.slice(currentPlan?.features.length || 0).map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                          <Check className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   <UpgradeButton priceId={STRIPE_PLANS[nextTier].priceId} planName={STRIPE_PLANS[nextTier].name} />
                 </div>
               </div>
@@ -56,45 +58,33 @@ export default async function SubscriptionsPage() {
           </div>
         )}
 
-        {/* Payment Methods Section */}
+        {/* Billing & Payment Methods Section */}
         {hasActiveSubscription && (
           <div className="mb-8 sm:mb-12">
             <h2 className="text-xs uppercase tracking-wider text-gray-600 font-semibold mb-4 sm:mb-6">
-              PAYMENT METHODS
+              BILLING & PAYMENT METHODS
             </h2>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <CreditCard className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700 font-medium">Managed through Stripe</span>
+                  {/* Payment Method */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CreditCard className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-700 font-medium">Payment Method</span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Managed through Stripe
+                    </p>
                   </div>
+
+                  {/* Description */}
                   <p className="text-sm text-gray-500">
-                    Click "Manage Billing" to update your payment method, view invoices, or cancel your subscription.
+                    Click "Manage Billing" to update your payment method, billing information, view invoices, or cancel your subscription.
                   </p>
                 </div>
                 <div className="flex-shrink-0">
                   <ManageBillingButton variant="link" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Billing Information Section */}
-        {hasActiveSubscription && (
-          <div className="mb-8 sm:mb-12">
-            <h2 className="text-xs uppercase tracking-wider text-gray-600 font-semibold mb-4 sm:mb-6">
-              BILLING INFORMATION
-            </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-500 mb-1">Name</p>
-                  <p className="text-gray-900 font-medium">{team.name || 'Not provided'}</p>
-                </div>
-                <div className="flex-shrink-0">
-                  <ManageBillingButton variant="link" text="Update information" />
                 </div>
               </div>
             </div>

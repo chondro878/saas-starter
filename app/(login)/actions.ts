@@ -47,7 +47,12 @@ async function logActivity(
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
-  password: z.string().min(8).max(100)
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100)
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
@@ -129,7 +134,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
 const signUpSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100)
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
   firstName: z.string().min(1).max(50).optional(),
   lastName: z.string().min(1).max(50).optional(),
   inviteId: z.string().optional(),
@@ -406,7 +416,12 @@ export const resendVerificationEmail = validatedAction(
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),
-  newPassword: z.string().min(8).max(100),
+  newPassword: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100)
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
   confirmPassword: z.string().min(8).max(100)
 });
 
@@ -465,7 +480,12 @@ export const updatePassword = validatedActionWithUser(
 );
 
 const deleteAccountSchema = z.object({
-  password: z.string().min(8).max(100)
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100)
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
 });
 
 export const deleteAccount = validatedActionWithUser(

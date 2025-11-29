@@ -1,133 +1,149 @@
 import Link from 'next/link';
+import { Footer } from '@/components/ui/footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Read the Terms of Service for Avoid the Rain. Understand your rights and responsibilities when using our greeting card reminder service.',
-  openGraph: {
-    title: 'Terms of Service | Avoid the Rain',
-    description: 'Read the Terms of Service for Avoid the Rain. Understand your rights and responsibilities when using our service.',
-    url: 'https://avoidtherain.com/terms-of-service',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  title: 'Terms of Service - Avoid the Rain',
+  description: 'Terms and conditions for using Avoid the Rain services.',
 };
-
-const sections = [
-  {
-    title: '1. Acceptance of Terms',
-    content: [
-      'By accessing Avoid the Rain, creating an account, or using any of our services, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please discontinue use of the platform.'
-    ]
-  },
-  {
-    title: '2. Eligibility',
-    content: [
-      'You must be at least 18 years old to create an account. By using the service, you represent that you have the legal capacity to enter into a binding agreement.'
-    ]
-  },
-  {
-    title: '3. Accounts & Security',
-    content: [
-      'You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account. Notify us immediately if you suspect unauthorized access.'
-    ]
-  },
-  {
-    title: '4. Orders, Billing & Subscriptions',
-    content: [
-      'By submitting an order or activating a subscription, you authorize us to charge the payment method on file for the applicable fees and taxes.',
-      'Subscription plans renew automatically unless cancelled prior to the renewal date. You can manage your subscription from your dashboard at any time.'
-    ]
-  },
-  {
-    title: '5. Cancellations & Refunds',
-    content: [
-      'You may cancel an order before it enters production. Once production begins, orders are final. For subscription cancellations, access remains active through the end of the billing cycle.',
-      'Contact support@avoidtherain.com for assistance with cancellations or questions about refunds.'
-    ]
-  },
-  {
-    title: '6. Intellectual Property',
-    content: [
-      'All creative assets, logos, designs, and software are owned by Avoid the Rain or our licensors. You may not copy, modify, or distribute any part of the service without written permission.',
-      'By uploading personalized content (such as card messages or images), you grant us a limited license to use that content solely to fulfill your orders.'
-    ]
-  },
-  {
-    title: '7. Acceptable Use',
-    content: [
-      'You agree not to misuse the service, including uploading offensive, unlawful, or infringing content, attempting to disrupt the platform, or using the service for unauthorized marketing or spam.'
-    ]
-  },
-  {
-    title: '8. Disclaimers',
-    content: [
-      'We strive for uninterrupted availability, but the service is provided on an “as-is” and “as-available” basis. We make no warranties regarding reliability, accuracy, or suitability for a particular purpose.'
-    ]
-  },
-  {
-    title: '9. Limitation of Liability',
-    content: [
-      'To the fullest extent permitted by law, Avoid the Rain is not liable for any indirect, incidental, special, or consequential damages arising from your use of the service.'
-    ]
-  },
-  {
-    title: '10. Governing Law',
-    content: [
-      'These terms are governed by the laws of the State of Washington, without regard to its conflict of law principles.'
-    ]
-  },
-  {
-    title: '11. Changes to the Terms',
-    content: [
-      'We may update these Terms of Service from time to time. Continued use of the platform after changes are posted constitutes acceptance of the revised terms.'
-    ]
-  },
-  {
-    title: '12. Contact Information',
-    content: [
-      'Questions? Reach out to us at support@avoidtherain.com or mail us at Avoid the Rain, 123 Evergreen Terrace, Seattle, WA 98101.'
-    ]
-  }
-];
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
-        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60" />
-      </div>
+    <>
+      <div className="min-h-screen bg-gray-50">
+        {/* Back Link */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-6 py-4">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium"
+            >
+              ← Back
+            </Link>
+          </div>
+        </div>
 
-      <div className="relative min-h-screen flex flex-col py-16 px-6 sm:px-10 lg:px-16">
-        <header className="max-w-4xl mx-auto mb-12">
-          <Link href="/" className="text-sm uppercase tracking-[0.3em] text-gray-700 hover:text-gray-900 transition">
-            Avoid the Rain
-          </Link>
-          <h1 className="mt-4 text-4xl sm:text-5xl font-semibold text-gray-900">
-            Terms of Service
-          </h1>
-          <p className="mt-4 text-gray-700 text-base sm:text-lg leading-relaxed">
-            These Terms govern your use of Avoid the Rain. Please review them carefully before creating an account or placing an order.
-          </p>
-          <p className="mt-6 text-sm uppercase tracking-wide text-gray-600">Last updated: November 2025</p>
-        </header>
+        <div className="max-w-4xl mx-auto px-6 py-12 sm:py-16">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12">
+            <h1 className="text-4xl font-light text-gray-900 mb-4">Terms of Service</h1>
+            <p className="text-sm text-gray-500 mb-12">Last updated: January 2025</p>
 
-        <main className="max-w-4xl mx-auto bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl p-8 sm:p-12 space-y-10">
-          {sections.map((section) => (
-            <section key={section.title} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{section.title}</h2>
-              {section.content.map((paragraph) => (
-                <p key={paragraph} className="text-gray-700 leading-relaxed">
-                  {paragraph}
+            <div className="prose prose-gray max-w-none space-y-8">
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Agreement to Terms</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  By accessing or using Avoid the Rain ("Service"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the Service.
                 </p>
-              ))}
-            </section>
-          ))}
-        </main>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Description of Service</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Avoid the Rain is a subscription-based service that sends premium greeting cards to you before important occasions. We provide reminder services, card printing, pre-stamping, and delivery to your specified address.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Subscription Terms</h2>
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Billing</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>Subscriptions are billed annually in advance</li>
+                  <li>Payment is processed through Stripe, our secure payment processor</li>
+                  <li>Prices are subject to change with 30 days notice</li>
+                  <li>You authorize us to charge your payment method for all subscription fees</li>
+                </ul>
+
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Card Allocation</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
+                  <li>Your plan includes a specific number of cards per year</li>
+                  <li>Unused cards do not roll over to the next subscription period</li>
+                  <li>Our "Just Because" feature may automatically use unused cards</li>
+                  <li>Additional cards can be purchased separately</li>
+                </ul>
+
+                <h3 className="text-xl font-medium text-gray-900 mb-3">Cancellation</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>You may cancel your subscription at any time</li>
+                  <li>Cancellations take effect at the end of your current billing period</li>
+                  <li>No refunds are provided for partial subscription periods</li>
+                  <li>You retain access to your account until the end of the paid period</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">User Responsibilities</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  You agree to:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Provide accurate and complete information</li>
+                  <li>Keep your account credentials secure</li>
+                  <li>Maintain accurate recipient addresses</li>
+                  <li>Notify us of any address changes at least 3 weeks before scheduled deliveries</li>
+                  <li>Use the Service only for lawful purposes</li>
+                  <li>Not violate any applicable laws or regulations</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Delivery and Timing</h2>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Cards are typically delivered 2-3 weeks before the occasion date</li>
+                  <li>We are not responsible for delays caused by USPS or other carriers</li>
+                  <li>You are responsible for mailing cards to recipients after receiving them</li>
+                  <li>Delivery addresses must be valid US addresses</li>
+                  <li>We cannot guarantee delivery dates for occasions less than 15 days away</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Intellectual Property</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  All card designs, website content, and branding are the property of Avoid the Rain. You may not reproduce, distribute, or create derivative works without our explicit permission.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Limitation of Liability</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  To the maximum extent permitted by law:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>We are not liable for any indirect, incidental, or consequential damages</li>
+                  <li>Our total liability is limited to the amount you paid in the past 12 months</li>
+                  <li>We are not responsible for missed occasions due to user error or postal delays</li>
+                  <li>We provide the Service "as is" without warranties of any kind</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Modifications to Service</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We reserve the right to modify or discontinue the Service at any time. We will provide reasonable notice of any material changes.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Dispute Resolution</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Any disputes arising from these Terms shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association. These Terms are governed by the laws of Washington State.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">Contact Information</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Questions about these Terms of Service? Contact us at:
+                </p>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  <strong>Email:</strong> <a href="mailto:support@avoidtherain.com" className="text-purple-600 hover:text-purple-700">support@avoidtherain.com</a>
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
-

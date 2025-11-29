@@ -43,20 +43,20 @@ export function SubscriptionStartedEmail({ user, planName, cardLimit }: Subscrip
             </Text>
             
             <Text style={listItem}>
-              📝 Add recipients and their special occasions
+            - If you havent already, add recipients and their special occasions via your dashboard.
             </Text>
             <Text style={listItem}>
-              🤖 We'll automatically create orders 15 days before each occasion
+              - Around 15 days before each occasion you'll receive the prestamped card. 📬
             </Text>
             <Text style={listItem}>
-              📬 Cards arrive at your door, pre-stamped and ready to personalize
+              - Write your message & sign the card. ✍️
             </Text>
             <Text style={listItem}>
-              💌 Write your message and drop them in the mail!
+              - Drop it in the mail! 📫
             </Text>
             
             <Button style={button} href={`${process.env.BASE_URL}/create-reminder`}>
-              Add Your First Recipient
+              My Dashboard
             </Button>
             
             <Text style={paragraph}>
