@@ -49,7 +49,7 @@ const HOLIDAY_OCCASIONS = [
 
 const OCCASION_TYPES = [...CUSTOM_OCCASIONS, ...HOLIDAY_OCCASIONS];
 
-// Get color scheme for occasion type - matches /create-reminder colors
+// Get color scheme for occasion type - matches /create-reminder gradients
 const getOccasionColors = (occasionType: string, relationship?: string) => {
   const type = occasionType.toLowerCase();
   
@@ -64,116 +64,116 @@ const getOccasionColors = (occasionType: string, relationship?: string) => {
     };
   }
   if (type.includes('anniversary')) {
-    // Romantic relationship - Pink
+    // Romantic relationship - Pink gradient
     if (relationship?.toLowerCase() === 'romantic' || type.includes('romantic')) {
       return {
-        bg: 'bg-pink-50',
-        border: 'border-pink-200',
-        text: 'text-pink-800',
-        badge: 'bg-pink-100 text-pink-700',
-        accent: 'bg-pink-300'
+        bg: 'bg-gradient-to-r from-pink-400 to-rose-500',
+        border: 'border-pink-400',
+        text: 'text-white',
+        badge: 'bg-white/20 text-white',
+        accent: 'bg-pink-500'
       };
     }
-    // All other relationships - Purple
+    // All other relationships - Purple gradient
     return {
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-800',
-      badge: 'bg-purple-100 text-purple-700',
-      accent: 'bg-purple-300'
+      bg: 'bg-gradient-to-r from-purple-400 to-purple-600',
+      border: 'border-purple-400',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
+      accent: 'bg-purple-500'
     };
   }
   
-  // Holidays - matching /create-reminder
+  // Holidays - using same gradients as /create-reminder
   if (type.includes("new year")) {
     return {
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      text: 'text-amber-700',
-      badge: 'bg-amber-100 text-amber-700',
-      accent: 'bg-amber-400'
+      bg: 'bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500',
+      border: 'border-amber-500',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
+      accent: 'bg-amber-500'
     };
   }
   if (type.includes("valentine")) {
     return {
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      text: 'text-red-700',
-      badge: 'bg-red-100 text-red-700',
+      bg: 'bg-gradient-to-r from-red-500 to-pink-500',
+      border: 'border-red-500',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-red-500'
     };
   }
   if (type.includes("easter")) {
     return {
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-700',
-      badge: 'bg-purple-100 text-purple-700',
+      bg: 'bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-300',
+      border: 'border-purple-400',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-purple-400'
     };
   }
   if (type.includes("mother")) {
     return {
-      bg: 'bg-pink-50',
-      border: 'border-pink-200',
-      text: 'text-pink-700',
-      badge: 'bg-pink-100 text-pink-700',
+      bg: 'bg-gradient-to-r from-pink-400 to-rose-500',
+      border: 'border-pink-400',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-pink-400'
     };
   }
   if (type.includes("father")) {
     return {
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      text: 'text-blue-700',
-      badge: 'bg-blue-100 text-blue-700',
+      bg: 'bg-gradient-to-r from-blue-500 to-indigo-600',
+      border: 'border-blue-500',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-blue-500'
     };
   }
   if (type.includes("independence")) {
     return {
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      text: 'text-red-700',
-      badge: 'bg-red-100 text-red-700',
+      bg: 'bg-gradient-to-r from-red-500 via-white to-blue-500',
+      border: 'border-red-500',
+      text: 'text-gray-900',
+      badge: 'bg-gray-900/20 text-gray-900',
       accent: 'bg-red-500'
     };
   }
   if (type.includes("halloween")) {
     return {
-      bg: 'bg-orange-50',
-      border: 'border-orange-200',
-      text: 'text-orange-700',
-      badge: 'bg-orange-100 text-orange-700',
+      bg: 'bg-gradient-to-r from-orange-500 to-purple-600',
+      border: 'border-orange-500',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-orange-500'
     };
   }
   if (type.includes("thanksgiving")) {
     return {
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      text: 'text-amber-700',
-      badge: 'bg-amber-100 text-amber-700',
+      bg: 'bg-gradient-to-r from-amber-600 to-orange-600',
+      border: 'border-amber-600',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-amber-600'
     };
   }
   if (type.includes("christmas")) {
     return {
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      text: 'text-red-700',
-      badge: 'bg-red-100 text-red-700',
+      bg: 'bg-gradient-to-r from-red-600 to-green-600',
+      border: 'border-red-600',
+      text: 'text-white',
+      badge: 'bg-white/20 text-white',
       accent: 'bg-red-600'
     };
   }
   
   // Default
   return {
-    bg: 'bg-gray-50',
-    border: 'border-gray-200',
-    text: 'text-gray-800',
-    badge: 'bg-gray-100 text-gray-700',
-    accent: 'bg-gray-300'
+    bg: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+    border: 'border-blue-500',
+    text: 'text-white',
+    badge: 'bg-white/20 text-white',
+    accent: 'bg-blue-500'
   };
 };
 
