@@ -50,14 +50,14 @@ export function MonthDayPicker({ value, onChange, className }: MonthDayPickerPro
       {/* Month Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-800 mb-3 relative z-10">Month</label>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {months.map((month, index) => (
             <button
               key={month}
               type="button"
               onClick={() => handleMonthChange(index)}
               className={cn(
-                "py-2.5 px-3 rounded-lg text-sm font-medium transition-all relative z-10 min-h-[44px]",
+                "py-2 px-2 sm:py-2.5 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all relative z-10 min-h-[40px] sm:min-h-[44px] flex items-center justify-center",
                 selectedMonth === index
                   ? "bg-gray-900 text-white shadow-md scale-105"
                   : "bg-white/90 text-gray-900 border border-gray-300 hover:bg-white hover:border-gray-400 hover:shadow-sm"
@@ -72,14 +72,14 @@ export function MonthDayPicker({ value, onChange, className }: MonthDayPickerPro
       {/* Day Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-800 mb-3 relative z-10">Day</label>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {days.map((day) => (
             <button
               key={day}
               type="button"
               onClick={() => handleDayChange(day)}
               className={cn(
-                "py-2.5 px-2 rounded-lg text-sm font-medium transition-all relative z-10 min-h-[44px] min-w-[44px]",
+                "py-1.5 px-1 sm:py-2.5 sm:px-2 rounded-lg text-xs sm:text-sm font-medium transition-all relative z-10 min-h-[36px] sm:min-h-[44px] min-w-0 flex items-center justify-center",
                 selectedDay === day
                   ? "bg-gray-900 text-white shadow-md scale-105"
                   : "bg-white/90 text-gray-900 border border-gray-300 hover:bg-white hover:border-gray-400 hover:shadow-sm"
