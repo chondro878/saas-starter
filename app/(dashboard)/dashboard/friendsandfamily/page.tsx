@@ -757,7 +757,44 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
               </div>
             </div>
 
-            {/* Move couple checkbox and relationship below name fields */}
+            {formData.isCouple && (
+              <div className="mt-4 grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="secondFirstName">Partner's First Name</Label>
+                  <Input
+                    id="secondFirstName"
+                    value={formData.secondFirstName}
+                    onChange={(e) => setFormData({ ...formData, secondFirstName: e.target.value })}
+                    className="mt-1"
+                    maxLength={50}
+                    pattern="[a-zA-Z\s'-]+"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="secondLastName">Partner's Last Name</Label>
+                  <Input
+                    id="secondLastName"
+                    value={formData.secondLastName}
+                    onChange={(e) => setFormData({ ...formData, secondLastName: e.target.value })}
+                    className="mt-1"
+                    maxLength={50}
+                    pattern="[a-zA-Z\s'-]+"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Couple checkbox and relationship below partner's last name */}
             <div className="mt-4">
               <div className="flex items-center gap-2">
                 <input
@@ -800,43 +837,6 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                 ))}
               </select>
             </div>
-
-            {formData.isCouple && (
-              <div className="mt-4 grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="secondFirstName">Partner's First Name</Label>
-                  <Input
-                    id="secondFirstName"
-                    value={formData.secondFirstName}
-                    onChange={(e) => setFormData({ ...formData, secondFirstName: e.target.value })}
-                    className="mt-1"
-                    maxLength={50}
-                    pattern="[a-zA-Z\s'-]+"
-                    onKeyPress={(e) => {
-                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="secondLastName">Partner's Last Name</Label>
-                  <Input
-                    id="secondLastName"
-                    value={formData.secondLastName}
-                    onChange={(e) => setFormData({ ...formData, secondLastName: e.target.value })}
-                    className="mt-1"
-                    maxLength={50}
-                    pattern="[a-zA-Z\s'-]+"
-                    onKeyPress={(e) => {
-                      if (!/^[a-zA-Z\s'-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Address */}
