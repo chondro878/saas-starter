@@ -774,15 +774,19 @@ export default function FriendsAndFamilyPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete recipient');
+        const errorData = await response.json();
+        console.error('Delete error:', errorData);
+        throw new Error(errorData.error || 'Failed to delete recipient');
       }
 
       // Refresh the list
       await mutate();
+      mutateAllocation(); // Refresh card allocation after deletion
       setRecipientToDelete(null);
     } catch (error) {
       console.error('Error deleting recipient:', error);
-      alert('Failed to delete recipient. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete recipient. Please try again.';
+      alert(errorMessage);
     } finally {
       setIsDeleting(false);
     }
