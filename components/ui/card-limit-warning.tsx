@@ -74,6 +74,7 @@ export function CardLimitWarning({ allocation, onDismiss, showDismiss = false }:
             <p className="text-sm font-medium text-gray-900">Options to ensure all cards are sent:</p>
             <div className="grid sm:grid-cols-2 gap-3">
               <button
+                type="button"
                 onClick={handleBuyCards}
                 className="flex flex-col items-start p-4 bg-white border-2 border-purple-300 hover:border-purple-500 rounded-lg transition-all text-left"
               >
@@ -81,6 +82,7 @@ export function CardLimitWarning({ allocation, onDismiss, showDismiss = false }:
                 <span className="text-sm text-gray-600">{formatCurrency(cardCost)} one-time purchase</span>
               </button>
               <button
+                type="button"
                 onClick={handleUpgrade}
                 className="flex flex-col items-start p-4 bg-white border-2 border-purple-300 hover:border-purple-500 rounded-lg transition-all text-left"
               >
@@ -93,6 +95,7 @@ export function CardLimitWarning({ allocation, onDismiss, showDismiss = false }:
           {showDismiss && onDismiss && (
             <div className="mt-4 pt-4 border-t border-amber-200">
               <button
+                type="button"
                 onClick={onDismiss}
                 className="text-sm text-gray-600 hover:text-gray-900 underline"
               >
