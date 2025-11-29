@@ -96,7 +96,7 @@ export function CardLimitWarning({ allocation, onDismiss, showDismiss = false }:
                 onClick={onDismiss}
                 className="text-sm text-gray-600 hover:text-gray-900 underline"
               >
-                I'll handle this later
+                Dismiss for now
               </button>
             </div>
           )}
