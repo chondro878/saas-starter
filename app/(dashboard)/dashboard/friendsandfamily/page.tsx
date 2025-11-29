@@ -371,13 +371,18 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
   const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessWithWarning, setShowSuccessWithWarning] = useState(false);
+  // Determine if this is a couple
+  const isRecipientCouple = recipient.isCouple || !!(recipient.secondFirstName && recipient.secondFirstName.trim());
+  
   const [formData, setFormData] = useState({
     firstName: recipient.firstName,
     lastName: recipient.lastName,
     secondFirstName: recipient.secondFirstName || '',
     secondLastName: recipient.secondLastName || '',
-    isCouple: recipient.isCouple || false,
-    relationship: recipient.relationship,
+    // Check both isCouple flag and presence of secondFirstName to determine couple status
+    isCouple: isRecipientCouple,
+    // If couple and relationship is Romantic, change to Friend
+    relationship: (isRecipientCouple && recipient.relationship === 'Romantic') ? 'Friend' : recipient.relationship,
     street: recipient.street,
     apartment: recipient.apartment || '',
     city: recipient.city,
@@ -497,6 +502,11 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
         formData.firstName.trim() && formData.lastName.trim() && 
         formData.secondFirstName.trim() && formData.secondLastName.trim();
 
+      // Prevent Romantic relationship for couples
+      const relationship = (isCoupleComplete && formData.relationship === 'Romantic') 
+        ? 'Friend' 
+        : formData.relationship;
+
       const response = await fetch(`/api/recipients/${recipient.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -507,7 +517,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
             secondFirstName: isCoupleComplete ? formData.secondFirstName : null,
             secondLastName: isCoupleComplete ? formData.secondLastName : null,
             isCouple: isCoupleComplete,
-            relationship: formData.relationship,
+            relationship: relationship,
             street: formData.street,
             apartment: formData.apartment,
             city: formData.city,
@@ -747,20 +757,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
               </div>
             </div>
 
-            <div className="mt-4">
-              <Label htmlFor="relationship">Relationship</Label>
-              <select
-                id="relationship"
-                value={formData.relationship}
-                onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
-                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none"
-              >
-                {RELATIONSHIP_OPTIONS.map((rel) => (
-                  <option key={rel} value={rel}>{rel}</option>
-                ))}
-              </select>
-            </div>
-
+            {/* Move couple checkbox and relationship below name fields */}
             <div className="mt-4">
               <div className="flex items-center gap-2">
                 <input
@@ -773,13 +770,35 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                       ...formData, 
                       isCouple,
                       // Clear second person fields if unchecking couple
-                      ...(isCouple ? {} : { secondFirstName: '', secondLastName: '' })
+                      ...(isCouple ? {} : { secondFirstName: '', secondLastName: '' }),
+                      // Clear Romantic relationship if checking couple
+                      ...(isCouple && formData.relationship === 'Romantic' ? { relationship: 'Friend' } : {})
                     });
                   }}
                   className="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500"
                 />
                 <Label htmlFor="isCouple" className="cursor-pointer">Is this a couple?</Label>
               </div>
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="relationship">Relationship</Label>
+              <select
+                id="relationship"
+                value={formData.relationship}
+                onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
+                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md focus:border-gray-400 focus:ring-0 focus:outline-none"
+              >
+                {RELATIONSHIP_OPTIONS.filter(rel => {
+                  // Exclude Romantic when couple is checked
+                  if (formData.isCouple && rel === 'Romantic') {
+                    return false;
+                  }
+                  return true;
+                }).map((rel) => (
+                  <option key={rel} value={rel}>{rel}</option>
+                ))}
+              </select>
             </div>
 
             {formData.isCouple && (
