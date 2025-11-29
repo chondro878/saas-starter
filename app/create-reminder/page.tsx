@@ -592,14 +592,14 @@ export default function CreateReminderPage() {
       // Check if this is a couple (both first and last names filled)
       const isCouple = data.secondPersonEnabled && 
         data.firstPerson.first.trim() && data.firstPerson.last.trim() && 
-        data.secondPerson.first?.trim() && data.secondPerson.last?.trim();
+        data.secondPerson?.first?.trim() && data.secondPerson?.last?.trim();
 
       // Prepare recipient data
       const recipientData = {
         firstName: data.firstPerson.first,
         lastName: data.firstPerson.last,
-        secondFirstName: isCouple ? data.secondPerson.first : null,
-        secondLastName: isCouple ? data.secondPerson.last : null,
+        secondFirstName: isCouple ? data.secondPerson?.first : null,
+        secondLastName: isCouple ? data.secondPerson?.last : null,
         isCouple: isCouple,
         relationship: data.relationship || 'Friend',
         street: data.address.street,

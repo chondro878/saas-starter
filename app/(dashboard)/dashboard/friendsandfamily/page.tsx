@@ -914,7 +914,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                     maxLength={10}
                     inputMode="numeric"
                     pattern="\d{5}(-\d{4})?"
-                    placeholder="12345 or 12345-6789"
+                    placeholder="123"
                     onKeyPress={(e) => {
                       if (!/^[\d-]$/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
                         e.preventDefault();
