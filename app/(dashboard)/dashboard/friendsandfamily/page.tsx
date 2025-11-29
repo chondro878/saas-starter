@@ -249,6 +249,16 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
     })) || []
   );
 
+  // Sync occasions state when recipient changes
+  useEffect(() => {
+    setOccasions(
+      recipient.occasions?.map(occ => ({
+        ...occ,
+        occasionDate: new Date(occ.occasionDate),
+      })) || []
+    );
+  }, [recipient]);
+
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
