@@ -131,30 +131,9 @@ export default function CreateReminderPage() {
   // Notes mode: 'all' for same note to all occasions, 'custom' for per-occasion notes
   const [notesMode, setNotesMode] = useState<'all' | 'custom' | null>('all');
 
-  // Tooltip visibility state (mobile-friendly)
+  // Tooltip visibility state (mobile-friendly full-screen modals)
   const [showJustBecauseTooltip, setShowJustBecauseTooltip] = useState(false);
   const [showNoteTooltip, setShowNoteTooltip] = useState(false);
-  const justBecauseTooltipRef = useRef<HTMLDivElement>(null);
-  const noteTooltipRef = useRef<HTMLDivElement>(null);
-
-  // Close tooltips when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (justBecauseTooltipRef.current && !justBecauseTooltipRef.current.contains(event.target as Node)) {
-        setShowJustBecauseTooltip(false);
-      }
-      if (noteTooltipRef.current && !noteTooltipRef.current.contains(event.target as Node)) {
-        setShowNoteTooltip(false);
-      }
-    };
-
-    if (showJustBecauseTooltip || showNoteTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [showJustBecauseTooltip, showNoteTooltip]);
 
   // --- Form setup with react-hook-form and Zod resolver ---
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
@@ -1524,41 +1503,17 @@ export default function CreateReminderPage() {
                     <span>
                       Just Because <span className="text-xs text-gray-500">(random date)</span>
                     </span>
-                    <span className="relative inline-block" ref={justBecauseTooltipRef}>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowJustBecauseTooltip(!showJustBecauseTooltip);
-                        }}
-                        className="focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-0.5"
-                        aria-label="More information about Just Because"
-                        aria-expanded={showJustBecauseTooltip}
-                      >
-                        <Info className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700 transition-colors" />
-                      </button>
-                      {showJustBecauseTooltip && (
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-50 shadow-lg max-w-xs">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="flex-1">
-                              We'll pick a random date to send a surprise card, avoiding holidays and other occasions
-                            </p>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowJustBecauseTooltip(false);
-                              }}
-                              className="flex-shrink-0 text-white hover:text-gray-300 focus:outline-none"
-                              aria-label="Close tooltip"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
-                        </div>
-                      )}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowJustBecauseTooltip(true);
+                      }}
+                      className="focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-0.5"
+                      aria-label="More information about Just Because"
+                    >
+                      <Info className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700 transition-colors" />
+                    </button>
                   </legend>
                   <div 
                     className="grid grid-cols-1 gap-3"
@@ -2195,41 +2150,17 @@ export default function CreateReminderPage() {
                     <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-2 mb-3">
                         <Label className="text-sm font-medium text-gray-700">Personal reminder for All Occasions *</Label>
-                        <div className="relative" ref={noteTooltipRef}>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowNoteTooltip(!showNoteTooltip);
-                            }}
-                            className="focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-0.5"
-                            aria-label="More information about personal reminder"
-                            aria-expanded={showNoteTooltip}
-                          >
-                            <HelpCircle className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
-                          </button>
-                          {showNoteTooltip && (
-                            <div className="absolute left-0 top-6 z-20 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="flex-1">
-                                  This reminder will accompany every card we send to you for this person, regardless of the occasion.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowNoteTooltip(false);
-                                  }}
-                                  className="flex-shrink-0 text-white hover:text-gray-300 focus:outline-none"
-                                  aria-label="Close tooltip"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                              <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                            </div>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowNoteTooltip(true);
+                          }}
+                          className="focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-0.5"
+                          aria-label="More information about personal reminder"
+                        >
+                          <HelpCircle className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
+                        </button>
                       </div>
                       <Textarea
                         placeholder="Write yourself a reminder that applies to all occasions (e.g., favorite color, preferences, hobbies)..."
@@ -2376,6 +2307,74 @@ export default function CreateReminderPage() {
       </div>
     </div>
       </>
+    )}
+
+    {/* Full-screen overlay modals for tooltips */}
+    {showJustBecauseTooltip && (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4"
+        onClick={() => setShowJustBecauseTooltip(false)}
+      >
+        <div 
+          className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                <Info className="w-5 h-5 text-gray-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Just Because</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowJustBecauseTooltip(false)}
+              className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-1"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <p className="text-gray-700 leading-relaxed">
+            We'll pick a random date to send a surprise card, avoiding holidays and other occasions. 
+            This way, your recipient gets an unexpected, thoughtful card when they least expect it!
+          </p>
+        </div>
+      </div>
+    )}
+
+    {showNoteTooltip && (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4"
+        onClick={() => setShowNoteTooltip(false)}
+      >
+        <div 
+          className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-gray-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Personal Reminder</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowNoteTooltip(false)}
+              className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-1"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <p className="text-gray-700 leading-relaxed">
+            This reminder will accompany every card we send to you for this person, regardless of the occasion. 
+            Use it to remember important details like their favorite color, preferences, hobbies, or anything else 
+            that will help you write a more personal and thoughtful message.
+          </p>
+        </div>
+      </div>
     )}
     </div>
   );
