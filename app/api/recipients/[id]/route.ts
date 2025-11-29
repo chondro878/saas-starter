@@ -65,6 +65,13 @@ export async function PUT(
     const body = await request.json();
     const { recipientData, occasionsData } = body;
 
+    console.log('[PUT /api/recipients] Received data:', {
+      recipientId,
+      recipientData,
+      occasionsCount: occasionsData?.length || 0,
+      occasions: occasionsData
+    });
+
     // Verify recipient belongs to user
     const { users } = await import('@/lib/db/schema');
     const dbUser = await db
@@ -104,6 +111,7 @@ export async function PUT(
 
     // Delete existing occasions and recreate them
     if (occasionsData) {
+      console.log('[PUT /api/recipients] Deleting existing occasions for recipient:', recipientId);
       await db.delete(occasions).where(eq(occasions.recipientId, recipientId));
 
       if (occasionsData.length > 0) {
@@ -127,7 +135,9 @@ export async function PUT(
           };
         });
 
-        await db.insert(occasions).values(formattedOccasions);
+        console.log('[PUT /api/recipients] Inserting occasions:', formattedOccasions);
+        const insertedOccasions = await db.insert(occasions).values(formattedOccasions).returning();
+        console.log('[PUT /api/recipients] Inserted occasions:', insertedOccasions);
       }
     }
 
