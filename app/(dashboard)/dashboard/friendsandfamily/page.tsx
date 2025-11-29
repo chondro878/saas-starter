@@ -49,108 +49,83 @@ const HOLIDAY_OCCASIONS = [
 
 const OCCASION_TYPES = [...CUSTOM_OCCASIONS, ...HOLIDAY_OCCASIONS];
 
-// Get color scheme for occasion type
-const getOccasionColors = (occasionType: string) => {
+// Get color scheme for occasion type - matches /create-reminder colors
+const getOccasionColors = (occasionType: string, relationship?: string) => {
   const type = occasionType.toLowerCase();
   
   // Custom occasions
   if (type.includes('birthday')) {
     return {
-      bg: 'bg-pink-50',
-      border: 'border-pink-200',
-      text: 'text-pink-900',
-      badge: 'bg-pink-100 text-pink-700',
-      accent: 'bg-pink-500'
+      bg: 'bg-gray-50',
+      border: 'border-gray-200',
+      text: 'text-gray-800',
+      badge: 'bg-gray-100 text-gray-700',
+      accent: 'bg-gray-300'
     };
   }
-  if (type.includes('anniversary') && type.includes('romantic')) {
+  if (type.includes('anniversary')) {
+    // Romantic relationship - Pink
+    if (relationship?.toLowerCase() === 'romantic' || type.includes('romantic')) {
+      return {
+        bg: 'bg-pink-50',
+        border: 'border-pink-200',
+        text: 'text-pink-800',
+        badge: 'bg-pink-100 text-pink-700',
+        accent: 'bg-pink-300'
+      };
+    }
+    // All other relationships - Purple
     return {
-      bg: 'bg-rose-50',
-      border: 'border-rose-200',
-      text: 'text-rose-900',
-      badge: 'bg-rose-100 text-rose-700',
-      accent: 'bg-rose-500'
-    };
-  }
-  if (type.includes('anniversary') && type.includes('work')) {
-    return {
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      text: 'text-blue-900',
-      badge: 'bg-blue-100 text-blue-700',
-      accent: 'bg-blue-500'
+      bg: 'bg-purple-50',
+      border: 'border-purple-200',
+      text: 'text-purple-800',
+      badge: 'bg-purple-100 text-purple-700',
+      accent: 'bg-purple-300'
     };
   }
   
-  // Holidays
-  if (type.includes("easter")) {
+  // Holidays - matching /create-reminder
+  if (type.includes("new year")) {
     return {
-      bg: 'bg-green-50',
-      border: 'border-green-200',
-      text: 'text-green-900',
-      badge: 'bg-green-100 text-green-700',
-      accent: 'bg-green-500'
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      text: 'text-amber-700',
+      badge: 'bg-amber-100 text-amber-700',
+      accent: 'bg-amber-400'
     };
   }
   if (type.includes("valentine")) {
     return {
-      bg: 'bg-pink-50',
-      border: 'border-pink-200',
-      text: 'text-pink-900',
-      badge: 'bg-pink-100 text-pink-700',
-      accent: 'bg-pink-500'
-    };
-  }
-  if (type.includes("christmas")) {
-    return {
       bg: 'bg-red-50',
       border: 'border-red-200',
-      text: 'text-red-900',
+      text: 'text-red-700',
       badge: 'bg-red-100 text-red-700',
       accent: 'bg-red-500'
     };
   }
-  if (type.includes("thanksgiving")) {
-    return {
-      bg: 'bg-orange-50',
-      border: 'border-orange-200',
-      text: 'text-orange-900',
-      badge: 'bg-orange-100 text-orange-700',
-      accent: 'bg-orange-500'
-    };
-  }
-  if (type.includes("halloween")) {
+  if (type.includes("easter")) {
     return {
       bg: 'bg-purple-50',
       border: 'border-purple-200',
-      text: 'text-purple-900',
+      text: 'text-purple-700',
       badge: 'bg-purple-100 text-purple-700',
-      accent: 'bg-purple-500'
-    };
-  }
-  if (type.includes("new year")) {
-    return {
-      bg: 'bg-indigo-50',
-      border: 'border-indigo-200',
-      text: 'text-indigo-900',
-      badge: 'bg-indigo-100 text-indigo-700',
-      accent: 'bg-indigo-500'
+      accent: 'bg-purple-400'
     };
   }
   if (type.includes("mother")) {
     return {
       bg: 'bg-pink-50',
       border: 'border-pink-200',
-      text: 'text-pink-900',
+      text: 'text-pink-700',
       badge: 'bg-pink-100 text-pink-700',
-      accent: 'bg-pink-500'
+      accent: 'bg-pink-400'
     };
   }
   if (type.includes("father")) {
     return {
       bg: 'bg-blue-50',
       border: 'border-blue-200',
-      text: 'text-blue-900',
+      text: 'text-blue-700',
       badge: 'bg-blue-100 text-blue-700',
       accent: 'bg-blue-500'
     };
@@ -159,9 +134,36 @@ const getOccasionColors = (occasionType: string) => {
     return {
       bg: 'bg-red-50',
       border: 'border-red-200',
-      text: 'text-red-900',
+      text: 'text-red-700',
       badge: 'bg-red-100 text-red-700',
       accent: 'bg-red-500'
+    };
+  }
+  if (type.includes("halloween")) {
+    return {
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      text: 'text-orange-700',
+      badge: 'bg-orange-100 text-orange-700',
+      accent: 'bg-orange-500'
+    };
+  }
+  if (type.includes("thanksgiving")) {
+    return {
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      text: 'text-amber-700',
+      badge: 'bg-amber-100 text-amber-700',
+      accent: 'bg-amber-600'
+    };
+  }
+  if (type.includes("christmas")) {
+    return {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-700',
+      badge: 'bg-red-100 text-red-700',
+      accent: 'bg-red-600'
     };
   }
   
@@ -169,9 +171,9 @@ const getOccasionColors = (occasionType: string) => {
   return {
     bg: 'bg-gray-50',
     border: 'border-gray-200',
-    text: 'text-gray-900',
+    text: 'text-gray-800',
     badge: 'bg-gray-100 text-gray-700',
-    accent: 'bg-gray-500'
+    accent: 'bg-gray-300'
   };
 };
 
@@ -790,7 +792,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
               {occasions.map((occ, index) => {
                 const isHoliday = HOLIDAY_OCCASIONS.includes(occ.occasionType);
                 const isExpanded = expandedOccasions[index];
-                const colors = getOccasionColors(occ.occasionType);
+                const colors = getOccasionColors(occ.occasionType, formData.relationship);
                 
                 return (
                   <div key={index} className={`border-2 ${colors.border} ${colors.bg} rounded-lg overflow-hidden transition-all`}>
@@ -891,7 +893,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                 </select>
 
                 {newOccasion.type && (() => {
-                  const previewColors = getOccasionColors(newOccasion.type);
+                  const previewColors = getOccasionColors(newOccasion.type, formData.relationship);
                   const isHoliday = HOLIDAY_OCCASIONS.includes(newOccasion.type);
                   
                   return (
