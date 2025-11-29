@@ -163,8 +163,8 @@ export default function CreateReminderPage() {
 
   // Check if couple is complete (both first and last names filled)
   const isCoupleComplete = secondPersonEnabled && 
-    firstPerson.first.trim() && firstPerson.last.trim() && 
-    secondPerson.first.trim() && secondPerson.last.trim();
+    firstPerson.first?.trim() && firstPerson.last?.trim() && 
+    secondPerson.first?.trim() && secondPerson.last?.trim();
 
   // --- Occasion lists ---
   const customOccasions = [
