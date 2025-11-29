@@ -256,9 +256,19 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
       <div>
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-lg font-medium text-gray-900">
-            {recipient.isCouple && recipient.secondFirstName
-              ? `${recipient.firstName} & ${recipient.secondFirstName}`
-              : `${recipient.firstName} ${recipient.lastName}`}
+            {(() => {
+              // Debug: log recipient data to help diagnose couple display issues
+              if (recipient.secondFirstName) {
+                console.log('[RecipientCard] Couple data:', {
+                  firstName: recipient.firstName,
+                  secondFirstName: recipient.secondFirstName,
+                  isCouple: recipient.isCouple,
+                });
+              }
+              return (recipient.isCouple || recipient.secondFirstName) && recipient.secondFirstName?.trim()
+                ? `${recipient.firstName} & ${recipient.secondFirstName}`
+                : `${recipient.firstName} ${recipient.lastName}`;
+            })()}
           </h3>
           <span className={`text-xs ${colors.text} ${colors.bg} px-2.5 py-1 rounded-full font-medium flex-shrink-0 ml-2`}>
             {recipient.relationship}
