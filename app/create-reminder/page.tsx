@@ -27,6 +27,11 @@ import { calculateHolidayDate } from '@/lib/holiday-calculator';
 import { getCardVariation, getJustBecauseLabel } from '@/lib/just-because-utils';
 import { checkOccasionDeliveryStatus } from '@/lib/delivery-window';
 import { UnauthenticatedSuccess } from './components/unauthenticated-success';
+import { CardLimitWarning } from '@/components/ui/card-limit-warning';
+import { CardAllocation } from '@/lib/card-allocation';
+import useSWR from 'swr';
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // --- Schema definition for the reminder form using Zod ---
 const reminderFormSchema = z.object({
@@ -62,6 +67,12 @@ export default function CreateReminderPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Fetch card allocation data
+  const { data: allocation, mutate: mutateAllocation } = useSWR<CardAllocation>(
+    '/api/card-allocation',
+    fetcher
+  );
   
   // Unauthenticated success screen state
   const [showUnauthSuccess, setShowUnauthSuccess] = useState(false);
@@ -656,6 +667,9 @@ export default function CreateReminderPage() {
 
       const result = await response.json();
       console.log('Recipient created successfully:', result);
+      
+      // Refresh card allocation after creating recipient
+      mutateAllocation();
       
       setCurrentStep(6);
     } catch (error) {
@@ -2105,6 +2119,20 @@ export default function CreateReminderPage() {
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 We'll send you beautiful cards before each occasion. You just need to sign and send them.
               </p>
+              
+              {/* Card Limit Warning */}
+              {allocation && allocation.isOverLimit && (
+                <div className="w-full max-w-2xl mx-auto mb-8">
+                  <CardLimitWarning 
+                    allocation={allocation}
+                    showDismiss={true}
+                    onDismiss={() => {
+                      // Just hide the warning, they can see it on dashboard
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className="flex gap-4 justify-center">
                 <Button 
                   type="button"

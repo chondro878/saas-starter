@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { US_STATES } from '@/lib/us-states';
 import { MonthDayPicker } from '@/components/ui/month-day-picker';
+import { CardAllocation } from '@/lib/card-allocation';
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -725,6 +726,7 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
 
 export default function FriendsAndFamilyPage() {
   const { data: recipients, error, isLoading, mutate } = useSWR<RecipientWithOccasions[]>('/api/recipients', fetcher);
+  const { mutate: mutateAllocation } = useSWR<CardAllocation>('/api/card-allocation', fetcher);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRelationship, setFilterRelationship] = useState('all');
   const [filterOccasion, setFilterOccasion] = useState('all');
@@ -967,6 +969,7 @@ export default function FriendsAndFamilyPage() {
           onClose={() => setRecipientToEdit(null)}
           onSave={async () => {
             await mutate();
+            mutateAllocation(); // Refresh card allocation
             setRecipientToEdit(null);
           }}
           onDelete={setRecipientToDelete}

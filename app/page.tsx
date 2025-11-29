@@ -194,7 +194,7 @@ export default function Home() {
         name: 'How does it work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Simply add your important people and their special occasions. We\'ll send you beautifully designed cards from independent artists 15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.'
+          text: 'Simply add your important people and their special occasions. We\'ll send you beautifully designed cards from independent artists 15 days before each event; pre-stamped, pre-addressed, and ready to sign and send.'
         }
       },
       {
@@ -275,7 +275,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-white text-xl md:text-2xl mb-12 max-w-2xl leading-relaxed font-light">
-            Premium cards delivered to your door, pre-stamped and ready to send.
+            Luxuary cards delivered to your door, pre-stamped and ready to send.
           </p>
           <Link 
             href="/create-reminder" 
@@ -591,7 +591,7 @@ export default function Home() {
                 aria-controls="faq-answer-3"
               >
                 <h3 className="text-2xl font-medium text-gray-900 pr-8">
-                  What if I'm bad at writing notes in my cards? 
+                When will my cards arrive?
                 </h3>
                 <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[3] ? 'rotate-180' : ''}`} aria-hidden="true">
                   <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -602,8 +602,8 @@ export default function Home() {
               {faqOpen[3] && (
                 <div id="faq-answer-3" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    No problem, just sign the card and you're good-to-go.  
-                    We also offer a premium tier where we hand-curate thoughtful notes based on your relationship - no generic messages, just authentic, personalized touches!
+                  Cards are printed and shipped to you 2-3 weeks before the occasion date, giving you plenty of time to personalize and send them. 
+                  You'll receive email reminders so nothing slips through the cracks!
                   </p>
                 </div>
               )}

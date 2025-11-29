@@ -63,11 +63,11 @@ export function CardCreditPurchase() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-            <span>Use at anytime and send to anyone</span>
+            <span>Perfect for last-minute occasions or spontaneous kindness</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-            <span>Cards never expire</span>
+            <span>Save on bulk card purchases vs buying individually</span>
           </div>
         </div>
       </div>

@@ -8,12 +8,15 @@ import { IOSDownload } from '../components/ios-download';
 import { SubscriptionAlert } from '../components/subscription-alert';
 import { CardCreditPurchase } from '../components/card-credit-purchase';
 import { JustBecauseCreditApply } from '../components/just-because-credit-apply';
+import { DashboardCardLimitBanner } from '@/components/ui/dashboard-card-limit-banner';
+import { CardAllocation } from '@/lib/card-allocation';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DashboardHomePage() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const { data: recipients, error, isLoading } = useSWR<RecipientWithOccasions[]>('/api/recipients', fetcher);
+  const { data: allocation } = useSWR<CardAllocation>('/api/card-allocation', fetcher);
   
   // Extract first name from profile, name, or email
   const firstName = user?.firstName || user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
@@ -27,6 +30,15 @@ export default function DashboardHomePage() {
 
       {/* Subscription Alert */}
       <SubscriptionAlert />
+
+      {/* Card Limit Warning Banner */}
+      {allocation && allocation.isOverLimit && (
+        <DashboardCardLimitBanner 
+          scheduledCards={allocation.scheduledCards}
+          availableCards={allocation.totalAvailable}
+          shortfall={allocation.shortfall}
+        />
+      )}
 
       {/* Ready to add a reminder? - Only show if no recipients */}
       {!isLoading && !error && (!recipients || recipients.length === 0) && (
