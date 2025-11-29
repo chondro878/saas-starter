@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { occasions, recipients, users, teamMembers, teams } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray, count } from 'drizzle-orm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { calculateCardAllocation } from '@/lib/card-allocation';
 
@@ -54,22 +54,15 @@ export async function GET(request: NextRequest) {
 
     const recipientIds = userRecipients.map(r => r.id);
 
-    // Count total occasions
+    // Count total occasions efficiently in a single query
     let totalOccasions = 0;
     if (recipientIds.length > 0) {
-      const allOccasions = await db
-        .select()
+      const result = await db
+        .select({ count: count() })
         .from(occasions)
-        .where(eq(occasions.recipientId, recipientIds[0]));
+        .where(inArray(occasions.recipientId, recipientIds));
       
-      // Get occasions for all recipients
-      for (const recipientId of recipientIds) {
-        const recipientOccasions = await db
-          .select()
-          .from(occasions)
-          .where(eq(occasions.recipientId, recipientId));
-        totalOccasions += recipientOccasions.length;
-      }
+      totalOccasions = result[0]?.count || 0;
     }
 
     // Calculate allocation
