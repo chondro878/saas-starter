@@ -47,12 +47,7 @@ async function logActivity(
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
-  password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .max(100)
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
+  password: z.string().min(1).max(100)
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
