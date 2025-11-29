@@ -2127,7 +2127,7 @@ export default function CreateReminderPage() {
                     allocation={allocation}
                     showDismiss={true}
                     onDismiss={() => {
-                      // Just hide the warning, they can see it on dashboard
+                      router.push('/dashboard');
                     }}
                   />
                 </div>
