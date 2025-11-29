@@ -267,6 +267,8 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      console.log('[EditRecipientModal] Saving with occasions:', occasions);
+      
       const response = await fetch(`/api/recipients/${recipient.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -330,21 +332,28 @@ function EditRecipientModal({ recipient, onClose, onSave, onDelete }: EditRecipi
       ? getHolidayDate(newOccasion.type)
       : newOccasion.date;
 
+    const newOcc = {
+      id: -Date.now(), // Temporary ID
+      recipientId: recipient.id,
+      occasionType: newOccasion.type,
+      occasionDate,
+      notes: newOccasion.notes,
+      createdAt: new Date(),
+      isJustBecause: false,
+      computedSendDate: null,
+      cardVariation: null,
+      lastSentYear: null,
+    };
+
+    console.log('[EditRecipientModal] Adding occasion to state:', newOcc);
+    console.log('[EditRecipientModal] Current occasions before add:', occasions);
+    
     setOccasions([
       ...occasions,
-      {
-        id: -Date.now(), // Temporary ID
-        recipientId: recipient.id,
-        occasionType: newOccasion.type,
-        occasionDate,
-        notes: newOccasion.notes,
-        createdAt: new Date(),
-        isJustBecause: false,
-        computedSendDate: null,
-        cardVariation: null,
-        lastSentYear: null,
-      },
+      newOcc,
     ]);
+    
+    console.log('[EditRecipientModal] Occasions after add:', [...occasions, newOcc]);
     setNewOccasion({ type: '', date: new Date(), notes: '' });
     setDuplicateWarning(null);
   };
