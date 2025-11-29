@@ -394,7 +394,7 @@ export default function Home() {
               Get their card delivered to your door
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              15 days before the occasion, receive a beautifully designed luxury card, your reminder note, pre-stamped and pre-addressed.
+              15 days before the occasion, receive a beautifully designed luxury card, your reminder note, and pre-stamped, pre-addressed envelope.
             </p>
           </div>
           <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2">
@@ -416,7 +416,7 @@ export default function Home() {
           <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1 md:order-1">
             <div className="meta text-gray-500 mb-6">Step 4</div>
             <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Sign, seal, and send—you're done!
+              Sign, seal, and send — you're done!
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
               Use your reminder note to curate a message, seal, and drop it in the mailbox and you're done! No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
@@ -473,7 +473,7 @@ export default function Home() {
               Need bulk cards?
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Send holiday cards to everyone at once. We'll send you a kit of cards, reminder notes, and evelopes. Holidays - Stress Free!
+              Send holiday cards to everyone at once. We'll send you a kit of cards, reminder notes, and envelopes. Holidays - Stress Free!
             </p>
           </div>
         </div>
@@ -522,7 +522,7 @@ export default function Home() {
                 <div id="faq-answer-0" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
                     Simply add your important people and their special occasions. We'll send you beautifully designed cards from independent artists
-                    15 days before each event—pre-stamped, pre-addressed, and ready to sign and send.
+                    well before each event or holiday; pre-stamped, pre-addressed, and ready to sign and send.
                   </p>
                 </div>
               )}
@@ -575,8 +575,8 @@ export default function Home() {
               {faqOpen[2] && (
                 <div id="faq-answer-2" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no lazy designs.
-                    Just smart, subtle - always!
+                    Always! We design cards for real relationships, no cringey jokes, no corporate vibes, no AI slop.
+                    Just smart, subtle designs - always!
                   </p>
                 </div>
               )}
@@ -602,7 +602,7 @@ export default function Home() {
               {faqOpen[3] && (
                 <div id="faq-answer-3" className="pb-6 animate-fadeIn">
                   <p className="text-lg text-gray-600 leading-relaxed">
-                  Cards are shipped to you ~3 weeks before the occasion date. You'll recive them ~2 weeks before the occasion date, giving you plenty of time to personalize and send them. 
+                  Cards are shipped to you ~3 weeks before the occasion date. You'll receive them ~2 weeks before the occasion date, giving you plenty of time to personalize and send them. 
                   We'll email you once your card ships so nothing slips through the cracks!
                   </p>
                 </div>

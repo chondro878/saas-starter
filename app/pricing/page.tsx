@@ -1,65 +1,19 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Footer } from '@/components/ui/footer';
 import { InteractivePricing } from './interactive-pricing';
-import { getNextHoliday } from '@/lib/occasions';
 
 export default function PricingPage() {
-  // Navbar scroll behavior
-  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY < 100) {
-        setIsNavbarVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 200) {
-        setIsNavbarVisible(false);
-      } else {
-        setIsNavbarVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const nextHoliday = useMemo(() => {
-    const holiday = getNextHoliday();
-    if (!holiday) return null;
-    const today = new Date();
-    const timeDiff = holiday.date.getTime() - today.getTime();
-    const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-    return {
-      ...holiday,
-      name: holiday.label,
-      daysUntil,
-    };
-  }, []);
+  // FAQ individual question states
+  const [faqOpen, setFaqOpen] = useState<{ [key: number]: boolean }>({});
+  
+  const toggleFaq = (index: number) => {
+    setFaqOpen(prev => ({ ...prev, [index]: !prev[index] }));
+  };
 
   return (
     <>
-      {/* Sticky Header */}
-      <div className={`fixed top-0 z-50 w-full transition-all duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {nextHoliday && (
-          <div className="text-white text-center py-2 text-sm font-medium bg-gray-900">
-            Only {nextHoliday.daysUntil} days until {nextHoliday.name}
-          </div>
-        )}
-        <div className="bg-transparent flex justify-between items-center px-8 py-4">
-          <h1 className="text-2xl font-light text-white">Avoid the Rain</h1>
-          <div className="flex gap-6 items-center">
-            <Link href="/sign-in" className="text-white text-sm hover:text-white/80 transition-colors">Sign In</Link>
-            <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Get Started</Link>
-          </div>
-        </div>
-      </div>
-
       {/* Interactive Pricing Component */}
       <InteractivePricing />
 
@@ -82,37 +36,154 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* FAQ Section - Full Bleed White */}
+      {/* FAQ Section - Individual Collapsible Questions */}
       <section className="w-full bg-white py-20">
         <div className="max-w-4xl mx-auto px-8">
-          <h2 className="text-4xl font-light text-center mb-12 text-gray-900">Frequently Asked Questions</h2>
-          <div className="space-y-8">
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">Can I change plans?</h3>
-              <p className="text-gray-600 leading-relaxed">Yes! You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle.</p>
+          <h2 className="text-4xl md:text-5xl font-light text-center mb-12 md:mb-16 text-gray-900">
+            Frequently Asked Questions
+          </h2>
+          
+          <div className="space-y-4">
+            {/* Question 1 */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => toggleFaq(0)}
+                className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[0]}
+                aria-controls="faq-answer-0"
+              >
+                <h3 className="text-xl md:text-2xl font-medium text-gray-900 pr-8">
+                  Can I change plans?
+                </h3>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[0] ? 'rotate-180' : ''}`} aria-hidden="true">
+                  <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {faqOpen[0] && (
+                <div id="faq-answer-0" className="pb-6 animate-fadeIn">
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    Yes! You can change your plan at any time. Changes take effect at your next billing cycle.
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">What if I don't use all my cards?</h3>
-              <p className="text-gray-600 leading-relaxed">Unused cards don't roll over, but we've got you covered! Our "Just Because" feature automatically sends your remaining cards to loved ones throughout the year, so you never waste what you paid for.</p>
+
+            {/* Question 2 */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => toggleFaq(1)}
+                className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[1]}
+                aria-controls="faq-answer-1"
+              >
+                <h3 className="text-xl md:text-2xl font-medium text-gray-900 pr-8">
+                  What if I don't use all my cards?
+                </h3>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[1] ? 'rotate-180' : ''}`} aria-hidden="true">
+                  <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {faqOpen[1] && (
+                <div id="faq-answer-1" className="pb-6 animate-fadeIn">
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    Unused cards don't roll over, but we've got you covered! You can choose our "Just Because" feature and remind someone you're thinking of them.
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">How does the "Just Because" feature work?</h3>
-              <p className="text-gray-600 leading-relaxed">We automatically schedule your unused cards to be sent as surprise "Just Because" moments to your recipients. It's a thoughtful way to stay connected without the pressure of finding the perfect occasion.</p>
+
+            {/* Question 3 */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => toggleFaq(2)}
+                className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[2]}
+                aria-controls="faq-answer-2"
+              >
+                <h3 className="text-xl md:text-2xl font-medium text-gray-900 pr-8">
+                  How does the "Just Because" feature work?
+                </h3>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[2] ? 'rotate-180' : ''}`} aria-hidden="true">
+                  <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {faqOpen[2] && (
+                <div id="faq-answer-2" className="pb-6 animate-fadeIn">
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    When applied, we send a card out to you, avoiding holidays and the recipiants scheduled occasions. It's a thoughtful way to stay connected!
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">When will my cards arrive?</h3>
-              <p className="text-gray-600 leading-relaxed">Cards are printed and shipped to you 2-3 weeks before the occasion date, giving you plenty of time to personalize and send them. You'll receive email reminders so nothing slips through the cracks.</p>
+
+            {/* Question 4 */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => toggleFaq(4)}
+                className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[4]}
+                aria-controls="faq-answer-4"
+              >
+                <h3 className="text-xl md:text-2xl font-medium text-gray-900 pr-8">
+                  Can I cancel anytime?
+                </h3>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[4] ? 'rotate-180' : ''}`} aria-hidden="true">
+                  <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {faqOpen[4] && (
+                <div id="faq-answer-4" className="pb-6 animate-fadeIn">
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    Absolutely. Cancel anytime with no penalties. You'll retain access through the end of your billing period.
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">Can I cancel anytime?</h3>
-              <p className="text-gray-600 leading-relaxed">Absolutely. Cancel anytime with no penalties. You'll retain access through the end of your billing period.</p>
-            </div>
-            <div className="pb-8">
-              <h3 className="text-xl font-medium mb-3 text-gray-900">What card designs do you offer?</h3>
-              <p className="text-gray-600 leading-relaxed">We offer premium designs for every occasion - birthdays, anniversaries, holidays, and more. All cards are high-quality, beautifully designed, and ready to make someone's day special.</p>
+
+            {/* Question 5 */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => toggleFaq(5)}
+                className="w-full flex items-center justify-between py-6 text-left group"
+                aria-expanded={faqOpen[5]}
+                aria-controls="faq-answer-5"
+              >
+                <h3 className="text-xl md:text-2xl font-medium text-gray-900 pr-8">
+                  What card designs do you offer?
+                </h3>
+                <div className={`transform transition-transform duration-300 flex-shrink-0 ${faqOpen[5] ? 'rotate-180' : ''}`} aria-hidden="true">
+                  <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {faqOpen[5] && (
+                <div id="faq-answer-5" className="pb-6 animate-fadeIn">
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    We offer premium designs for every occasion - birthdays, anniversaries, holidays, and more. All cards are high-quality, beautifully designed, and ready to make someone's day special.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
+        <style jsx global>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+          }
+        `}</style>
       </section>
 
       {/* CTA Section - Full Bleed with Gradient */}
