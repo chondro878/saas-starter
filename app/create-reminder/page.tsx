@@ -153,6 +153,7 @@ export default function CreateReminderPage() {
   const address = watch("address") || { street: '', city: '', state: '', zip: '' };
   const relationship = watch("relationship");
   const note = watch("note") || '';
+  const occasionNotes = watch("occasionNotes") || {};
 
   // Helper function to get the display label for an occasion
   const getOccasionDisplayLabel = (occasion: string) => {
@@ -740,15 +741,13 @@ export default function CreateReminderPage() {
     
     if (notesMode === 'all') {
       // For "Same reminder for all", check if the 'note' field has content
-      const noteValue = watch('note');
-      return noteValue && noteValue.trim().length > 0;
+      return note && note.trim().length > 0;
     } else if (notesMode === 'custom') {
       // For "Personal reminder per occasion", check all occasion notes
       const allOccasions = [...selectedCustomOccasions, ...selectedHolidayOccasions];
-      const occasionNotes = watch('occasionNotes') || {};
       
       // Every occasion must have a note with content
-      return allOccasions.every(occasion => {
+      return allOccasions.length > 0 && allOccasions.every(occasion => {
         const noteValue = occasionNotes[occasion];
         return noteValue && noteValue.trim().length > 0;
       });
@@ -1690,9 +1689,8 @@ export default function CreateReminderPage() {
                                       We'll send this card next year
                                     </p>
                                     <p className="text-sm text-amber-700">
-                                      This {displayLabel.toLowerCase()} is only {status.daysUntil} days away, 
-                                      but we need 15 days to print and ship your card. We'll automatically 
-                                      send it for {format(status.fulfillmentDate, 'MMMM d, yyyy')}.
+                                      This {displayLabel.toLowerCase().replace(/^(their|your) /, '')} is only {status.daysUntil} days away, 
+                                      but we need 15 days to ship your card. We'll make sure it gets sent out next year!
                                     </p>
                                   </div>
                                 </div>
@@ -1888,8 +1886,6 @@ export default function CreateReminderPage() {
                           <div className="text-blue-700">
                             <span className="font-medium">{occ.displayLabel}</span>
                             <span> ({format(occ.currentDate, 'MMM d')} - only {occ.daysUntil} days away)</span>
-                            <br />
-                            <span className="text-xs">→ Card will be sent: {format(occ.fulfillmentDate, 'MMMM d, yyyy')}</span>
                           </div>
                         </li>
                       ))}
