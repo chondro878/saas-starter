@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/app/(dashboard)/components/ui/button';
 import { Input } from '@/app/(dashboard)/components/ui/input';
@@ -21,6 +21,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     mode === 'signin' ? signIn : signUp,
     { error: '' }
   );
+  const [isPending, startTransition] = useTransition();
 
   // Authentication flow state
   const [authStep, setAuthStep] = useState<'email' | 'inviteCode' | 'signin' | 'signup' | 'emailConfirmation'>('email');
@@ -106,12 +107,23 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     formAction(formData);
   };
 
-  const handleSignUpSubmit = (formData: FormData) => {
+  const handleSignUpSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    // Ensure all required fields are set from state (form inputs should have these, but ensure they're set)
     formData.set('email', email);
     formData.set('firstName', firstName);
     formData.set('lastName', lastName);
+    // Password should be in formData from the input, but ensure it's set from state
+    if (password) {
+      formData.set('password', password);
+    }
     formData.set('inviteCode', inviteCode);
-    formAction(formData);
+    
+    // Wrap formAction in startTransition to fix React warning
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   // Check if email confirmation is required after sign up
@@ -486,7 +498,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   Create an account
                 </h2>
 
-                <form className="space-y-6" action={handleSignUpSubmit}>
+                <form className="space-y-6" onSubmit={handleSignUpSubmit}>
                   <input type="hidden" name="redirect" value={redirect || ''} />
                   <input type="hidden" name="priceId" value={priceId || ''} />
                   <input type="hidden" name="inviteId" value={inviteId || ''} />

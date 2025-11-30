@@ -19,9 +19,12 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
   action: ValidatedActionFunction<S, T>
 ) {
   return async (prevState: ActionState, formData: FormData) => {
-    const result = schema.safeParse(Object.fromEntries(formData));
+    const formDataObj = Object.fromEntries(formData);
+    const result = schema.safeParse(formDataObj);
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      // Return the first validation error message
+      const firstError = result.error.errors[0];
+      return { error: firstError.message || 'Validation failed' };
     }
 
     return action(result.data, formData);
