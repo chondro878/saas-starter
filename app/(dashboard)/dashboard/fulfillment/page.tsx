@@ -14,14 +14,12 @@ import type { Order } from '@/lib/db/schema';
 
 export default async function FulfillmentPage() {
   // ===== SECURITY CHECK =====
-  // Only allow access to owners or whitelisted admin emails
+  // Only allow access to whitelisted admin emails (not all owners)
   const user = await getUser();
   
   // Whitelist of admin emails who can access fulfillment
   const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-  const isAuthorized = 
-    user?.role === 'owner' || 
-    adminEmails.includes(user?.email || '');
+  const isAuthorized = adminEmails.includes(user?.email || '');
   
   if (!isAuthorized) {
     redirect('/dashboard');

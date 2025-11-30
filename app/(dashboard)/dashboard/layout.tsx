@@ -89,7 +89,7 @@ export default function DashboardLayout({
               <ul className="space-y-2">
                 {navItems.map((item) => {
                   // Hide admin-only items for non-admin users
-                  if (item.adminOnly && user?.role !== 'owner') {
+                  if (item.adminOnly && !(user as any)?.isAdmin) {
                     return null;
                   }
                   
@@ -167,7 +167,7 @@ export default function DashboardLayout({
           <ul className="space-y-2">
             {navItems.map((item) => {
               // Hide admin-only items for non-admin users
-              if (item.adminOnly && user?.role !== 'owner') {
+              if (item.adminOnly && !(user as any)?.isAdmin) {
                 return null;
               }
               

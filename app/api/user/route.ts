@@ -6,7 +6,16 @@ import { eq } from 'drizzle-orm';
 
 export async function GET() {
   const user = await getUser();
-  return Response.json(user);
+  
+  // Check if user is an admin based on ADMIN_EMAILS environment variable
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
+  const isAdmin = user?.email ? adminEmails.includes(user.email) : false;
+  
+  // Return user with isAdmin flag
+  return Response.json({
+    ...user,
+    isAdmin
+  });
 }
 
 export async function PUT(request: Request) {
