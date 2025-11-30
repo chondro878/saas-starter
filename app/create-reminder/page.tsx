@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { format } from 'date-fns';
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from 'next/navigation';
@@ -136,10 +136,13 @@ export default function CreateReminderPage() {
   const [showNoteTooltip, setShowNoteTooltip] = useState(false);
 
   // --- Form setup with react-hook-form and Zod resolver ---
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ReminderFormData>({
+  const { register, handleSubmit, watch, setValue, getValues, control, formState } = useForm<ReminderFormData>({
     resolver: zodResolver(reminderFormSchema),
     defaultValues: {},
+    mode: 'onChange', // Validate on change for better reactivity
   });
+  
+  const { errors, isDirty, touchedFields } = formState;
 
   // --- State tracking for selected occasions and their dates ---
   const [selectedCustomOccasions, setSelectedCustomOccasions] = useState<string[]>([]);
@@ -153,7 +156,9 @@ export default function CreateReminderPage() {
   const address = watch("address") || { street: '', city: '', state: '', zip: '' };
   const relationship = watch("relationship");
   const note = watch("note") || '';
-  const occasionNotes = watch("occasionNotes") || {};
+  // Watch all form values to ensure reactivity - this will trigger re-renders on any change
+  const allFormValues = watch();
+  const occasionNotes = allFormValues.occasionNotes || {};
 
   // Helper function to get the display label for an occasion
   const getOccasionDisplayLabel = (occasion: string) => {
@@ -735,26 +740,49 @@ export default function CreateReminderPage() {
     }
   };
 
-  // Check if all required notes fields are filled
-  const areNotesComplete = () => {
-    if (!notesMode) return false; // Notes mode not selected
+  // Check if all required notes fields are filled (reactive validation)
+  const areNotesComplete = useMemo(() => {
+    if (!notesMode) {
+      console.log('areNotesComplete: notesMode is null/undefined');
+      return false; // Notes mode not selected
+    }
     
     if (notesMode === 'all') {
       // For "Same reminder for all", check if the 'note' field has content
-      return note && note.trim().length > 0;
+      const result = note && note.trim().length > 0;
+      console.log('areNotesComplete (all mode):', result, { note });
+      return result;
     } else if (notesMode === 'custom') {
       // For "Personal reminder per occasion", check all occasion notes
       const allOccasions = [...selectedCustomOccasions, ...selectedHolidayOccasions];
       
-      // Every occasion must have a note with content
-      return allOccasions.length > 0 && allOccasions.every(occasion => {
-        const noteValue = occasionNotes[occasion];
-        return noteValue && noteValue.trim().length > 0;
+      if (allOccasions.length === 0) {
+        return false;
+      }
+      
+      // Filter out "JustBecause" as it doesn't require a note
+      const occasionsNeedingNotes = allOccasions.filter(oc => oc !== 'JustBecause');
+      
+      if (occasionsNeedingNotes.length === 0) {
+        return true; // No occasions need notes
+      }
+      
+      // Use the watched occasionNotes from allFormValues which is reactive
+      // Also check getValues as a fallback to ensure we have the latest data
+      const currentOccasionNotes = getValues('occasionNotes') || {};
+      const allOccasionNotes = { ...occasionNotes, ...currentOccasionNotes };
+      
+      // Check if all occasions have notes
+      const allComplete = occasionsNeedingNotes.every(occasion => {
+        const noteValue = allOccasionNotes[occasion];
+        return noteValue && typeof noteValue === 'string' && noteValue.trim().length > 0;
       });
+      
+      return allComplete;
     }
     
     return false;
-  };
+  }, [notesMode, note, occasionNotes, selectedCustomOccasions, selectedHolidayOccasions, isDirty, touchedFields, allFormValues]);
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
 
@@ -2205,7 +2233,7 @@ export default function CreateReminderPage() {
                     isLoading || 
                     addressValidation.isValidating || 
                     (addressValidation.result?.verdict === 'UNDELIVERABLE') ||
-                    !areNotesComplete()
+                    !areNotesComplete
                   }
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800 border-0 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
