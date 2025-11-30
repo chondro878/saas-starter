@@ -158,7 +158,14 @@ export default function CreateReminderPage() {
   const note = watch("note") || '';
   // Watch all form values to ensure reactivity - this will trigger re-renders on any change
   const allFormValues = watch();
-  const occasionNotes = allFormValues.occasionNotes || {};
+  // Use useWatch for better reactivity with nested objects
+  const watchedOccasionNotes = useWatch({
+    control,
+    name: "occasionNotes",
+    defaultValue: {}
+  }) || {};
+  // Merge both sources - prefer watched values as they're more reactive
+  const occasionNotes = { ...watchedOccasionNotes, ...(allFormValues.occasionNotes || {}) };
 
   // Helper function to get the display label for an occasion
   const getOccasionDisplayLabel = (occasion: string) => {
@@ -687,7 +694,6 @@ export default function CreateReminderPage() {
 
       if (!user) {
         // User is NOT authenticated - save to localStorage and show success screen
-        console.log('[UNAUTH] User not authenticated, saving to localStorage');
         
         // Store in localStorage with expiration (24 hours)
         const storageData = {
@@ -705,7 +711,6 @@ export default function CreateReminderPage() {
       }
 
       // User IS authenticated - proceed with normal save
-      console.log('Sending recipient data:', { recipientData, occasionsData });
       
       const response = await fetch('/api/recipients', {
         method: 'POST',
@@ -725,7 +730,6 @@ export default function CreateReminderPage() {
       }
 
       const result = await response.json();
-      console.log('Recipient created successfully:', result);
       
       // Refresh card allocation after creating recipient
       mutateAllocation();
@@ -741,17 +745,15 @@ export default function CreateReminderPage() {
   };
 
   // Check if all required notes fields are filled (reactive validation)
-  const areNotesComplete = useMemo(() => {
+  // Compute directly on each render to ensure we get the latest form values
+  const areNotesComplete = (() => {
     if (!notesMode) {
-      console.log('areNotesComplete: notesMode is null/undefined');
       return false; // Notes mode not selected
     }
     
     if (notesMode === 'all') {
       // For "Same reminder for all", check if the 'note' field has content
-      const result = note && note.trim().length > 0;
-      console.log('areNotesComplete (all mode):', result, { note });
-      return result;
+      return note && note.trim().length > 0;
     } else if (notesMode === 'custom') {
       // For "Personal reminder per occasion", check all occasion notes
       const allOccasions = [...selectedCustomOccasions, ...selectedHolidayOccasions];
@@ -767,22 +769,43 @@ export default function CreateReminderPage() {
         return true; // No occasions need notes
       }
       
-      // Use the watched occasionNotes from allFormValues which is reactive
-      // Also check getValues as a fallback to ensure we have the latest data
+      // Get the current form values directly - this ensures we have the latest data
       const currentOccasionNotes = getValues('occasionNotes') || {};
-      const allOccasionNotes = { ...occasionNotes, ...currentOccasionNotes };
+      // Also watch each individual field to ensure we catch all values
+      const individualNotes: Record<string, string> = {};
+      occasionsNeedingNotes.forEach(occasion => {
+        const fieldName = `occasionNotes.${occasion}` as any;
+        const value = watch(fieldName);
+        if (value) {
+          individualNotes[occasion] = value;
+        }
+      });
+      
+      // Merge all sources - individual watched fields are most reliable
+      const allOccasionNotes = { 
+        ...currentOccasionNotes, 
+        ...watchedOccasionNotes, 
+        ...occasionNotes, 
+        ...individualNotes 
+      };
       
       // Check if all occasions have notes
       const allComplete = occasionsNeedingNotes.every(occasion => {
-        const noteValue = allOccasionNotes[occasion];
+        // Try multiple ways to access the value, prioritizing individual watched fields
+        const noteValue = individualNotes[occasion] ||
+                         allOccasionNotes[occasion] || 
+                         currentOccasionNotes[occasion] || 
+                         watchedOccasionNotes[occasion] || 
+                         occasionNotes[occasion] ||
+                         (allFormValues.occasionNotes && allFormValues.occasionNotes[occasion]);
+        
         return noteValue && typeof noteValue === 'string' && noteValue.trim().length > 0;
       });
-      
       return allComplete;
     }
     
     return false;
-  }, [notesMode, note, occasionNotes, selectedCustomOccasions, selectedHolidayOccasions, isDirty, touchedFields, allFormValues]);
+  })();
 
   const totalSteps = selectedCustomOccasions.length > 0 ? 5 : 4;
 

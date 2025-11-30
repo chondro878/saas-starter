@@ -117,6 +117,7 @@ export default function Home() {
     };
   }, [showAccountMenu]);
 
+
   // Navbar scroll behavior
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -250,7 +251,7 @@ export default function Home() {
           </Link>
           <div className="flex gap-6 items-center">
             <Link href="/sign-in" className="text-white text-sm hover:text-white/80 transition-colors">Sign In</Link>
-            <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Get Started</Link>
+            <Link href="/sign-up" className="border-2 border-white text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">Sign Up</Link>
           </div>
         </nav>
       </header>

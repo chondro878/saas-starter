@@ -478,7 +478,7 @@ export default function SplitTeaser({
                 
                 <div>
                   <Label className="block text-sm font-medium text-gray-700 mb-3">
-                    Holidays <span className="text-xs text-gray-500">(date is fixed)</span>
+                    Holidays <span className="text-xs text-gray-500">()</span>
                   </Label>
                   <div className="grid grid-cols-2 gap-3">
                     {holidayOccasions.map((item) => (
