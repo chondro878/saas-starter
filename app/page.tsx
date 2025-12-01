@@ -11,6 +11,7 @@ import { AllCardsCarousel } from "@/app/(dashboard)/components/all-cards-carouse
 import { InteractivePricing } from "@/app/pricing/interactive-pricing";
 import { IOSDownload } from "@/app/(dashboard)/components/ios-download";
 import { Footer } from "@/components/ui/footer";
+import { MeetOurArtists } from "@/app/(dashboard)/components/meet-our-artists";
 
 export default function Home() {
   // Authentication state
@@ -276,51 +277,95 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-white text-xl md:text-2xl mb-12 max-w-2xl leading-relaxed font-light">
-            Luxuary cards delivered to your door, pre-stamped and ready to send.
+           You pick who matters and when. We send you a designer card ahead of time, plus the note you wrote to your future self.
           </p>
-          <Link 
-            href="/create-reminder" 
-            className="border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-medium whitespace-nowrap hover:bg-white hover:text-gray-900 transition-colors"
+          
+          {/* Scroll Down Indicator */}
+          <button
+            onClick={() => {
+              const nextSection = document.querySelector('#how-it-works-section');
+              nextSection?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="flex items-center gap-2 px-7 py-3 border-2 border-white rounded-lg text-white hover:bg-white hover:text-gray-900 transition-all group"
+            aria-label="Scroll to start"
           >
-            Get Started
-          </Link>
+            <svg 
+              className="w-4 h-4 animate-bounce" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+            <span className="text-base font-light">Start Now</span>
+          </button>
         </div>
       </main>
 
-      {/* Social Proof (Quotes) */}
-      <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32" aria-label="Customer testimonials">
-        <div className="max-w-4xl mx-auto px-8 text-center">
-          <div className="overflow-hidden relative min-h-[200px] md:min-h-[128px] transition-all duration-500 ease-in-out">
-            <div className="animate-fade-slide" key={quoteIndex}>
-              <blockquote className="text-2xl sm:text-3xl md:text-4xl italic font-light text-gray-900 leading-relaxed px-2">
-                "{quotes[quoteIndex].text}"
-              </blockquote>
-              <p className="mt-6 text-base sm:text-lg text-gray-600 break-words px-2">— {quotes[quoteIndex].source}</p>
-            </div>
-          </div>
+      {/* How It Works - Header Section */}
+      <section id="how-it-works-section" className="w-full relative py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
+          <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
         </div>
-        <style jsx global>{`
-          @keyframes fadeSlide {
-            0%, 100% { opacity: 0; transform: translateY(10px); }
-            10%, 90% { opacity: 1; transform: translateY(0); }
-          }
-          .animate-fade-slide {
-            animation: fadeSlide 10s ease-in-out infinite;
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out forwards;
-          }
-        `}</style>
+        <div className="relative max-w-5xl mx-auto px-8 text-center">
+          <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-800 leading-tight">
+            Keeping you thoughtful! 
+          </h2>
+          <p className="text-xl md:text-2xl text-gray-800 font-light leading-relaxed max-w-3xl mx-auto">
+          Set it up once. From then on, the right card and the reminder you wrote about them shows up early so you always know what to say and when to say it.<br/>
+          </p>
+        </div>
       </section>
 
-      {/* Browse All Cards Carousel - Full Bleed */}
-      <AllCardsCarousel />
+      {/* Step 3: Receive Card - Video Right (moved, title removed) */}
+      <section className="w-full bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-2">
+            <video
+              src="/Step3.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-2 md:order-1">
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Your Card Arrives Before You Need It
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              15 days before the occasion, receive a beautifully designed luxury card, your reminder note, and pre-stamped, pre-addressed envelope.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {/* How It Works - Header Section */}
+      {/* Step 4: Mail It - Video Left (moved, title removed) */}
+      <section className="w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-pink-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
+          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-1 md:order-1">
+            <video
+              src="/Step4.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto"
+            />
+          </div>
+          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-2 md:order-2">
+            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
+              Sign, seal, and send — you're done!
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+              Use your reminder note to curate a message, seal, and drop it in the mailbox and you're done! No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Header Section (duplicated) */}
       <section className="w-full relative py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-300">
           <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100 via-transparent to-transparent opacity-60"></div>
@@ -330,8 +375,7 @@ export default function Home() {
             Here's how it works
           </h2>
           <p className="text-xl md:text-2xl text-gray-800 font-light leading-relaxed max-w-3xl mx-auto">
-            We've made staying connected with the people you care about effortless.<br/>
-            Just four simple steps and you're done!
+            Set things up once. From then on, the right card and your own reminder message about the person land in your hands exactly when they should.<br/>
           </p>
         </div>
       </section>
@@ -370,7 +414,7 @@ export default function Home() {
               Add dates and occasions that matter
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Mark their birthdays, anniversaries, or holidays you would like to celebrate. We'll keep track of everything so you don't have to remember.
+              Mark their birthdays, anniversaries, or holidays you would like to celebrate - and you're done! We'll keep track of everything so you don't have to remember.
             </p>
           </div>
           <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2 md:order-2">
@@ -386,55 +430,62 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Step 3: Receive Card - Video Right */}
-      <section className="w-full bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1">
-            <div className="meta text-gray-500 mb-6">Step 3</div>
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Get their card delivered to your door
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              15 days before the occasion, receive a beautifully designed luxury card, your reminder note, and pre-stamped, pre-addressed envelope.
-            </p>
-          </div>
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2">
-            <video
-              src="/Step3.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto"
-            />
-          </div>
+      {/* CTA Section (duplicated) */}
+      <section className="w-full relative py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-300">
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 via-transparent to-transparent opacity-60"></div>
+        </div>
+        <div className="relative max-w-4xl mx-auto px-8 text-center">
+          <h2 className="text-5xl md:text-6xl font-light mb-8 text-gray-800 leading-tight">
+            Never miss a moment
+          </h2>
+          <p className="text-xl text-gray-800 mb-12 font-light leading-relaxed">
+            See how it works for yourself - no obligation! 
+          </p>
+          <Link 
+            href="/create-reminder" 
+            className="inline-block border-2 border-gray-800 text-gray-800 px-12 py-5 rounded-lg text-xl font-medium hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            Try it now! 
+          </Link>
         </div>
       </section>
 
-      {/* Step 4: Mail It - Image Right */}
-      <section className="w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-pink-100">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-0">
-          <div className="flex flex-col justify-center px-8 md:px-20 py-12 md:py-24 order-1 md:order-1">
-            <div className="meta text-gray-500 mb-6">Step 4</div>
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-8 leading-tight">
-              Sign, seal, and send — you're done!
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
-              Use your reminder note to curate a message, seal, and drop it in the mailbox and you're done! No stress, no last-minute panic, no forgetting. Just a meaningful gesture that shows you care, delivered on time!
-            </p>
-          </div>
-          <div className="relative flex items-center justify-center min-h-[525px] md:min-h-[600px] order-2 md:order-2">
-            <video
-              src="/Step4.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto"
-            />
+      {/* Meet Our Artists */}
+      <MeetOurArtists />
+
+      {/* Social Proof (Quotes) */}
+      <section className="w-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-32" aria-label="Customer testimonials">
+        <div className="max-w-4xl mx-auto px-8 text-center">
+          <div className="overflow-hidden relative min-h-[200px] md:min-h-[128px] transition-all duration-500 ease-in-out">
+            <div className="animate-fade-slide" key={quoteIndex}>
+              <blockquote className="text-2xl sm:text-3xl md:text-4xl italic font-light text-gray-900 leading-relaxed px-2">
+                "{quotes[quoteIndex].text}"
+              </blockquote>
+              <p className="mt-6 text-base sm:text-lg text-gray-600 break-words px-2">— {quotes[quoteIndex].source}</p>
+            </div>
           </div>
         </div>
+        <style jsx global>{`
+          @keyframes fadeSlide {
+            0%, 100% { opacity: 0; transform: translateY(10px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-slide {
+            animation: fadeSlide 10s ease-in-out infinite;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+          }
+        `}</style>
       </section>
+
+      {/* Browse All Cards Carousel - Full Bleed */}
+      <AllCardsCarousel />
 
       {/* CTA Section */}
       <section className="w-full relative py-32">

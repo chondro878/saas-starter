@@ -80,10 +80,10 @@ export function AllCardsCarousel() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h2 className="text-5xl font-light text-gray-900 mb-4">
-            Browse All Cards
+            Sample Cards
           </h2>
           <p className="text-xl text-gray-600 font-light">
-            Beautiful designs for every occasion
+            A preview of the beautifully designed cards you'll receive
           </p>
         </div>
         
