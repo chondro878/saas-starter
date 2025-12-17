@@ -37,9 +37,23 @@ export async function GET(
       .from(occasions)
       .where(eq(occasions.recipientId, recipientId));
 
+    // Check if recipient has any orders in fulfillment (pending or printed)
+    const { orders } = await import('@/lib/db/schema');
+    const inProcessOrders = await db
+      .select()
+      .from(orders)
+      .where(
+        and(
+          eq(orders.recipientId, recipientId),
+          inArray(orders.status, ['pending', 'printed'])
+        )
+      );
+
     return NextResponse.json({
       ...recipient[0],
       occasions: recipientOccasions,
+      isLocked: inProcessOrders.length > 0,
+      inProcessOrderCount: inProcessOrders.length,
     });
   } catch (error) {
     console.error('Error fetching recipient:', error);
@@ -97,6 +111,26 @@ export async function PUT(
 
     if (existingRecipient.length === 0) {
       return NextResponse.json({ error: 'Recipient not found or unauthorized' }, { status: 404 });
+    }
+
+    // Check if recipient has any orders that are being processed (pending or printed)
+    const { orders } = await import('@/lib/db/schema');
+    const inProcessOrders = await db
+      .select()
+      .from(orders)
+      .where(
+        and(
+          eq(orders.recipientId, recipientId),
+          inArray(orders.status, ['pending', 'printed'])
+        )
+      );
+
+    if (inProcessOrders.length > 0) {
+      return NextResponse.json({
+        error: 'Cannot edit recipient',
+        message: 'This recipient has orders currently in fulfillment. You can make changes after the cards have been mailed.',
+        locked: true
+      }, { status: 423 }); // 423 = Locked
     }
 
     // Update recipient
@@ -190,6 +224,25 @@ export async function DELETE(
 
     if (existingRecipient.length === 0) {
       return NextResponse.json({ error: 'Recipient not found or unauthorized' }, { status: 404 });
+    }
+
+    // Check if recipient has any orders that are being processed (pending or printed)
+    const inProcessOrders = await db
+      .select()
+      .from(orders)
+      .where(
+        and(
+          eq(orders.recipientId, recipientId),
+          inArray(orders.status, ['pending', 'printed'])
+        )
+      );
+
+    if (inProcessOrders.length > 0) {
+      return NextResponse.json({
+        error: 'Cannot delete recipient',
+        message: 'This recipient has orders currently in fulfillment. You can delete after the cards have been mailed.',
+        locked: true
+      }, { status: 423 }); // 423 = Locked
     }
 
     // Get all occasions for this recipient

@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
       .where(eq(recipients.userId, dbUser[0].id))
       .orderBy(desc(recipients.createdAt));
 
-    // Get occasions for each recipient
+    // Get occasions and lock status for each recipient
+    const { orders } = await import('@/lib/db/schema');
     const recipientsWithOccasions = await Promise.all(
       userRecipients.map(async (recipient) => {
         const recipientOccasions = await db
@@ -42,9 +43,22 @@ export async function GET(request: NextRequest) {
           .where(eq(occasions.recipientId, recipient.id))
           .orderBy(asc(occasions.occasionDate));
         
+        // Check if recipient has any orders in fulfillment (pending or printed)
+        const inProcessOrders = await db
+          .select()
+          .from(orders)
+          .where(
+            and(
+              eq(orders.recipientId, recipient.id),
+              inArray(orders.status, ['pending', 'printed'])
+            )
+          );
+        
         return {
           ...recipient,
           occasions: recipientOccasions,
+          isLocked: inProcessOrders.length > 0,
+          inProcessOrderCount: inProcessOrders.length,
         };
       })
     );

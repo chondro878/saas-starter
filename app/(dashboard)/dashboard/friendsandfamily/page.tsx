@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Search, Plus, Calendar, MapPin, Trash2, X, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Calendar, MapPin, Trash2, X, AlertCircle, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { RecipientWithOccasions } from '@/lib/db/schema';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
@@ -251,14 +251,24 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
   // Get next upcoming occasion
   const nextOccasion = recipient.occasions?.[0];
   
+  // Check if recipient is locked (has orders in fulfillment)
+  const isLocked = (recipient as any).isLocked || false;
+  const inProcessOrderCount = (recipient as any).inProcessOrderCount || 0;
+  
   return (
     <div 
-      onClick={() => onEdit(recipient)}
-      className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => !isLocked && onEdit(recipient)}
+      className={`bg-white rounded-lg border border-gray-200 p-6 transition-shadow ${
+        isLocked 
+          ? 'opacity-75 cursor-not-allowed' 
+          : 'hover:shadow-md cursor-pointer'
+      }`}
+      title={isLocked ? 'This recipient has orders in fulfillment. You can edit after cards are mailed.' : ''}
     >
       <div>
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-lg font-medium text-gray-900">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-medium text-gray-900">
             {(() => {
               // Debug: log recipient data to help diagnose couple display issues
               if (recipient.secondFirstName) {
@@ -273,6 +283,12 @@ function RecipientCard({ recipient, onEdit }: RecipientCardProps) {
                 : `${recipient.firstName} ${recipient.lastName}`;
             })()}
           </h3>
+            {isLocked && (
+              <div className="flex items-center gap-1 ml-2 text-orange-600" title={`${inProcessOrderCount} order${inProcessOrderCount !== 1 ? 's' : ''} in fulfillment`}>
+                <Lock className="w-4 h-4" />
+              </div>
+            )}
+          </div>
           <span className={`text-xs ${colors.text} ${colors.bg} px-2.5 py-1 rounded-full font-medium flex-shrink-0 ml-2`}>
             {recipient.relationship}
           </span>
@@ -508,6 +524,14 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('[EditRecipientModal] API error response:', errorData);
+        
+        // Show user-friendly message for locked recipients
+        if (response.status === 423 && errorData.locked) {
+          alert(errorData.message || 'This recipient has orders currently in fulfillment. You can make changes after the cards have been mailed.');
+          onClose();
+          return;
+        }
+        
         throw new Error(errorData.error || 'Failed to update recipient');
       }
 
@@ -613,6 +637,24 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
             </button>
           </div>
 
+          {/* Locked warning banner */}
+          {(recipient as any).isLocked && (
+            <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+              <div className="flex items-start">
+                <Lock className="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-medium text-orange-800">
+                    Recipient Locked
+                  </h3>
+                  <p className="text-sm text-orange-700 mt-1">
+                    This recipient has {(recipient as any).inProcessOrderCount || 0} order{(recipient as any).inProcessOrderCount !== 1 ? 's' : ''} currently in fulfillment. 
+                    You can make changes after the cards have been mailed.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
         <div className="space-y-6 pb-24">
           {/* Personal Information Section */}
           <PersonalInformationSection 
@@ -657,8 +699,9 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
                 onDelete(recipient);
                 onClose();
               }}
-              disabled={isSaving}
-              className="px-6 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full sm:w-auto"
+              disabled={isSaving || (recipient as any).isLocked}
+              className="px-6 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              title={(recipient as any).isLocked ? 'Cannot delete while orders are in fulfillment' : ''}
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete Recipient
@@ -674,10 +717,19 @@ function EditRecipientModal({ recipient, onClose, onSave, onRefresh, onDelete }:
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={isSaving || !formData.firstName || !formData.lastName || !formData.street || !formData.city || !formData.state || !formData.zip}
+                disabled={
+                  isSaving || 
+                  !formData.firstName || 
+                  !formData.lastName || 
+                  !formData.street || 
+                  !formData.city || 
+                  !formData.state || 
+                  !formData.zip ||
+                  (recipient as any).isLocked
+                }
                 className="px-6 bg-gray-900 hover:bg-gray-800 text-white flex-1 sm:flex-initial"
               >
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving...' : (recipient as any).isLocked ? 'Locked' : 'Save Changes'}
               </Button>
             </div>
           </div>
@@ -742,6 +794,14 @@ export default function FriendsAndFamilyPage() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Delete error:', errorData);
+        
+        // Show user-friendly message for locked recipients
+        if (response.status === 423 && errorData.locked) {
+          alert(errorData.message || 'This recipient has orders currently in fulfillment. You can delete after the cards have been mailed.');
+          setRecipientToDelete(null);
+          return;
+        }
+        
         throw new Error(errorData.error || 'Failed to delete recipient');
       }
 

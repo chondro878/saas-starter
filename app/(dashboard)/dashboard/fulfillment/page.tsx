@@ -169,16 +169,16 @@ function OrderCard({ order }: { order: Order }) {
                 : order.recipientFirstName}
             </h3>
             <span className={`px-2 py-1 ${cardTypeBadge.bg} ${cardTypeBadge.text} text-xs font-medium rounded`}>
-              {order.occasionType}
-            </span>
-            <span className={`px-2 py-1 ${cardTypeBadge.bg} ${cardTypeBadge.text} text-xs font-medium rounded`}>
               {cardTypeBadge.label}
             </span>
           </div>
           
           <div className="text-sm text-gray-600 space-y-1">
             <p>
-              <span className="font-medium">Occasion:</span> {new Date(order.occasionDate).toLocaleDateString('en-US', { 
+              <span className="font-medium">Card Type:</span> {order.occasionType}
+            </p>
+            <p>
+              <span className="font-medium">Date:</span> {new Date(order.occasionDate).toLocaleDateString('en-US', { 
                 month: 'long', 
                 day: 'numeric',
                 year: 'numeric'
