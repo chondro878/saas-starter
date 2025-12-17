@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { recipients, occasions } from '@/lib/db/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, inArray } from 'drizzle-orm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { calculateJustBecauseDate } from '@/lib/just-because-scheduler';
 
