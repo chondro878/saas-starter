@@ -2340,12 +2340,7 @@ export default function CreateReminderPage() {
 
         {currentStep <= totalSteps && (
           <div className="absolute top-6 right-8 z-10" role="group" aria-label="Form progress">
-            <span
-              className={cn(
-                "text-sm font-semibold text-white",
-                getProgressBarColor(currentStep, totalSteps, true)
-              )}
-            >
+            <span className="text-sm font-semibold text-purple-600">
               Step {currentStep} of {totalSteps}
             </span>
           </div>
