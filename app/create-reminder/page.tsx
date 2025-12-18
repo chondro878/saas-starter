@@ -22,7 +22,6 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertCircle, Check, X, HelpCircle, Info } from 'lucide-react';
 import { calculateHolidayDate } from '@/lib/holiday-calculator';
 import { getCardVariation, getJustBecauseLabel } from '@/lib/just-because-utils';
@@ -1037,26 +1036,17 @@ export default function CreateReminderPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium text-gray-700">Is this a couple?</Label>
-                  <RadioGroup
-                    value={secondPersonEnabled ? "couple" : "individual"}
-                    onValueChange={(value) => setValue("secondPersonEnabled", value === "couple")}
-                    className="flex gap-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="individual" id="individual" />
-                      <Label htmlFor="individual" className="font-normal cursor-pointer">
-                        Individual
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="couple" id="couple" />
-                      <Label htmlFor="couple" className="font-normal cursor-pointer">
-                        Couple
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="is-couple"
+                    checked={secondPersonEnabled}
+                    onChange={(e) => setValue("secondPersonEnabled", e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500 cursor-pointer"
+                  />
+                  <Label htmlFor="is-couple" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Is this a couple?
+                  </Label>
                 </div>
 
                 {secondPersonEnabled && (
