@@ -349,6 +349,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?from=create-reminder`
     : `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:346',message:'signUp - redirect params',data:{redirectParam,shouldAttachReminder,emailRedirectUrl,baseUrl:process.env.NEXT_PUBLIC_APP_URL},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H2-H3'})}).catch(()=>{});
+  // #endregion
+
   const supabaseSignUpRes = await supabase.auth.signUp({
     email,
     password,
@@ -370,6 +374,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     createdUserId: createdUser.id,
     createdTeamId: teamId
   });
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:365',message:'Supabase signUp complete',data:{hasError:!!supabaseSignUpRes.error,errorMsg:supabaseSignUpRes.error?.message,requiresConfirm:!supabaseSignUpRes.data?.session,email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
   // #endregion
 
   if (supabaseSignUpRes.error) {
@@ -460,17 +465,28 @@ const resendVerificationSchema = z.object({
 
 export const resendVerificationEmail = validatedAction(
   resendVerificationSchema,
-  async (data) => {
+  async (data, formData) => {
     const supabase = await createSupabaseServerClient();
     const { email } = data;
 
     console.log('[RESEND] Attempting to resend verification email to:', email);
 
+    // Get redirect parameter to preserve create-reminder context
+    const redirectParam = formData?.get('redirect') as string | null;
+    const shouldAttachReminder = redirectParam && redirectParam.includes('create-reminder');
+    const emailRedirectUrl = shouldAttachReminder 
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?from=create-reminder`
+      : `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:470',message:'resendVerification params',data:{email,redirectParam,shouldAttachReminder,emailRedirectUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H4'})}).catch(()=>{});
+    // #endregion
+
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email: email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+        emailRedirectTo: emailRedirectUrl
       }
     });
 

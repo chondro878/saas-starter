@@ -146,6 +146,10 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     try {
       const formData = new FormData();
       formData.set('email', email);
+      // Preserve redirect context for create-reminder flow
+      if (redirect) {
+        formData.set('redirect', redirect);
+      }
       
       const result = await resendVerificationEmail({ error: '' } as ActionState, formData);
       
