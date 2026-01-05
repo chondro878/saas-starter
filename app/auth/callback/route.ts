@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     type,
     has_token_hash: !!token_hash,
     has_token: !!token,
-    has_code: !!code
+    has_code: !!code,
+    full_url: requestUrl.toString()
   });
   // #endregion
 
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 
   const supabase = await createSupabaseServerClient();
 
-  // Handle PKCE flow (newer Supabase auth)
+  // Handle PKCE flow with 'code' parameter (newer Supabase auth)
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
@@ -57,6 +58,37 @@ export async function GET(request: Request) {
     console.error('[AUTH CALLBACK] PKCE verification failed:', error?.message);
   }
   
+  // Handle PKCE flow with 'token' parameter (email verification link format)
+  else if (token && type === 'signup') {
+    // Extract actual code from PKCE token format
+    const pkceCode = token.replace('pkce_', '');
+    
+    const { data, error } = await supabase.auth.exchangeCodeForSession(pkceCode);
+    
+    // #region agent log
+    console.log('[DEBUG H3,H5] PKCE token exchange result:', {
+      hasError: !!error,
+      errorMsg: error?.message,
+      hasSession: !!data?.session,
+      userEmail: data?.user?.email
+    });
+    // #endregion
+    
+    if (!error && data.session) {
+      console.log('[AUTH CALLBACK] PKCE token verification successful for:', data.user?.email);
+      
+      const pendingReminder = requestUrl.searchParams.get('from');
+      if (pendingReminder === 'create-reminder') {
+        console.log('[AUTH CALLBACK] Redirecting to attach-reminder flow');
+        return NextResponse.redirect(`${requestUrl.origin}/onboarding/attach-reminder`);
+      }
+
+      return NextResponse.redirect(`${requestUrl.origin}${next}`);
+    }
+    
+    console.error('[AUTH CALLBACK] PKCE token verification failed:', error?.message);
+  }
+  
   // Handle legacy token_hash flow
   else if (token_hash && type) {
     const { data, error } = await supabase.auth.verifyOtp({
@@ -84,6 +116,7 @@ export async function GET(request: Request) {
   // #region agent log
   console.log('[DEBUG H3] Verification failed - redirecting to error:', {
     had_code: !!code,
+    had_token: !!token,
     had_token_hash: !!token_hash
   });
   // #endregion
