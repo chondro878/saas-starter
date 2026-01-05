@@ -10,7 +10,12 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code');
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'callback/route.ts:10',message:'Auth callback entry',data:{type,has_token_hash:!!token_hash,has_token:!!token,has_code:!!code},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+  console.log('[DEBUG H3] Auth callback entry:', {
+    type,
+    has_token_hash: !!token_hash,
+    has_token: !!token,
+    has_code: !!code
+  });
   // #endregion
 
   console.log('[AUTH CALLBACK] Processing verification:', { 
@@ -27,7 +32,13 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'callback/route.ts:27',message:'PKCE exchange result',data:{hasError:!!error,errorMsg:error?.message,hasSession:!!data?.session,userEmail:data?.user?.email,emailVerified:data?.user?.email_confirmed_at},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3,H5'})}).catch(()=>{});
+    console.log('[DEBUG H3,H5] PKCE exchange result:', {
+      hasError: !!error,
+      errorMsg: error?.message,
+      hasSession: !!data?.session,
+      userEmail: data?.user?.email,
+      emailVerified: data?.user?.email_confirmed_at
+    });
     // #endregion
     
     if (!error && data.session) {
@@ -71,7 +82,10 @@ export async function GET(request: Request) {
   }
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'callback/route.ts:70',message:'Verification failed - redirecting to error',data:{had_code:!!code,had_token_hash:!!token_hash},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+  console.log('[DEBUG H3] Verification failed - redirecting to error:', {
+    had_code: !!code,
+    had_token_hash: !!token_hash
+  });
   // #endregion
 
   // Redirect to error page if verification failed

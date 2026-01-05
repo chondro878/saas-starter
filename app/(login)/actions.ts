@@ -55,7 +55,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:57',message:'SignIn attempt',data:{email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+  console.log('[DEBUG H1] SignIn attempt:', { email });
   // #endregion
 
   // First, try Supabase authentication
@@ -65,7 +65,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   });
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:62',message:'Supabase signIn response',data:{hasError:!!supabaseSignInRes.error,errorMsg:supabaseSignInRes.error?.message,hasSession:!!supabaseSignInRes.data?.session,emailVerified:supabaseSignInRes.data?.user?.email_confirmed_at},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+  console.log('[DEBUG H1] Supabase signIn response:', {
+    hasError: !!supabaseSignInRes.error,
+    errorMsg: supabaseSignInRes.error?.message,
+    hasSession: !!supabaseSignInRes.data?.session,
+    emailVerified: supabaseSignInRes.data?.user?.email_confirmed_at
+  });
   // #endregion
 
   if (supabaseSignInRes.error) {
@@ -110,7 +115,11 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .limit(1);
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:103',message:'Database user lookup',data:{foundCount:userWithTeam.length,hasTeam:!!userWithTeam[0]?.team,userId:userWithTeam[0]?.user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H4,H5'})}).catch(()=>{});
+  console.log('[DEBUG H4,H5] Database user lookup:', {
+    foundCount: userWithTeam.length,
+    hasTeam: !!userWithTeam[0]?.team,
+    userId: userWithTeam[0]?.user?.id
+  });
   // #endregion
 
   if (userWithTeam.length === 0) {
@@ -333,11 +342,18 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     role: userRole
   };
 
+  // Prepare email redirect URL - include 'from' parameter if user came from create-reminder
+  const redirectParam = formData.get('redirect') as string | null;
+  const shouldAttachReminder = redirectParam && redirectParam.includes('create-reminder');
+  const emailRedirectUrl = shouldAttachReminder 
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?from=create-reminder`
+    : `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+
   const supabaseSignUpRes = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: emailRedirectUrl,
       data: {
         first_name: firstName,
         last_name: lastName,
@@ -346,7 +362,14 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   });
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:347',message:'Supabase signUp response',data:{hasError:!!supabaseSignUpRes.error,hasSession:!!supabaseSignUpRes.data?.session,hasUser:!!supabaseSignUpRes.data?.user,emailConfirmed:supabaseSignUpRes.data?.user?.email_confirmed_at,createdUserId:createdUser.id,createdTeamId:teamId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2,H3,H4'})}).catch(()=>{});
+  console.log('[DEBUG H2,H3,H4] Supabase signUp response:', {
+    hasError: !!supabaseSignUpRes.error,
+    hasSession: !!supabaseSignUpRes.data?.session,
+    hasUser: !!supabaseSignUpRes.data?.user,
+    emailConfirmed: supabaseSignUpRes.data?.user?.email_confirmed_at,
+    createdUserId: createdUser.id,
+    createdTeamId: teamId
+  });
   // #endregion
 
   if (supabaseSignUpRes.error) {
@@ -367,7 +390,11 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     console.log('[SIGN UP] Email confirmation required for:', email);
 
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:365',message:'Email confirmation required - returning success',data:{email,dbUserId:createdUser.id,dbTeamId:teamId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2,H3'})}).catch(()=>{});
+    console.log('[DEBUG H2,H3] Email confirmation required - returning success:', {
+      email,
+      dbUserId: createdUser.id,
+      dbTeamId: teamId
+    });
     // #endregion
 
     return {
