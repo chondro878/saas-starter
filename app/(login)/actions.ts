@@ -173,16 +173,50 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         // Account exists but is unverified - allow reclaim
         console.log(`[SIGN UP] Reclaiming unverified account: ${email}`);
         
-        // Delete old Supabase auth account
-        const { error: deleteAuthError } = await supabase.auth.admin.deleteUser(supabaseUser.id);
-        if (deleteAuthError) {
-          console.error('[SIGN UP] Error deleting old Supabase account:', deleteAuthError);
+        try {
+          // First, delete database records in proper order to respect foreign keys
+          const userId = existingUser[0].id;
+          
+          // Delete team members first (references users)
+          await db.delete(teamMembers).where(eq(teamMembers.userId, userId));
+          
+          // Get user's teams to check if they're the only member
+          const userTeams = await db
+            .select({ teamId: teamMembers.teamId })
+            .from(teamMembers)
+            .where(eq(teamMembers.teamId, userId));
+          
+          // Delete the user (this will cascade to activity logs via DB constraints)
+          await db.delete(users).where(eq(users.id, userId));
+          
+          // Delete orphaned teams if this was the only member
+          for (const { teamId } of userTeams) {
+            const remainingMembers = await db
+              .select()
+              .from(teamMembers)
+              .where(eq(teamMembers.teamId, teamId))
+              .limit(1);
+            
+            if (remainingMembers.length === 0) {
+              await db.delete(teams).where(eq(teams.id, teamId));
+            }
+          }
+          
+          // Finally, delete Supabase auth account
+          const { error: deleteAuthError } = await supabase.auth.admin.deleteUser(supabaseUser.id);
+          if (deleteAuthError) {
+            console.error('[SIGN UP] Error deleting old Supabase account:', deleteAuthError);
+          }
+          
+          console.log(`[SIGN UP] ✅ Deleted unverified account, allowing new sign-up for: ${email}`);
+        } catch (deleteError) {
+          console.error('[SIGN UP] Error cleaning up unverified account:', deleteError);
+          return {
+            error: 'Failed to clean up previous account. Please contact support.',
+            email,
+            password
+          };
         }
-        
-        // Delete old database records (cascade will handle related data)
-        await db.delete(users).where(eq(users.email, email));
-        
-        console.log(`[SIGN UP] ✅ Deleted unverified account, allowing new sign-up for: ${email}`);
         // Continue with new sign-up below
       } else {
         // Account is verified or error occurred - don't allow sign-up

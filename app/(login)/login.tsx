@@ -131,6 +131,11 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     setAuthStep('emailConfirmation');
   }
 
+  // Check if user tried to sign in but email is not confirmed
+  if (state && (state as any)?.emailNotConfirmed && authStep !== 'emailConfirmation') {
+    setAuthStep('emailConfirmation');
+  }
+
   // Handle resend verification email
   const handleResendVerification = async () => {
     if (!email || resendingEmail) return;
