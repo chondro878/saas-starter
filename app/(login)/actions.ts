@@ -54,11 +54,19 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const supabase = await createSupabaseServerClient();
   const { email, password } = data;
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:57',message:'SignIn attempt',data:{email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
+
   // First, try Supabase authentication
   const supabaseSignInRes = await supabase.auth.signInWithPassword({
     email,
     password
   });
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:62',message:'Supabase signIn response',data:{hasError:!!supabaseSignInRes.error,errorMsg:supabaseSignInRes.error?.message,hasSession:!!supabaseSignInRes.data?.session,emailVerified:supabaseSignInRes.data?.user?.email_confirmed_at},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
 
   if (supabaseSignInRes.error) {
     // Check if it's an email confirmation error
@@ -100,6 +108,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .leftJoin(teams, eq(teamMembers.teamId, teams.id))
     .where(eq(users.email, email))
     .limit(1);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:103',message:'Database user lookup',data:{foundCount:userWithTeam.length,hasTeam:!!userWithTeam[0]?.team,userId:userWithTeam[0]?.user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H4,H5'})}).catch(()=>{});
+  // #endregion
 
   if (userWithTeam.length === 0) {
     return {
@@ -333,6 +345,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     }
   });
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:347',message:'Supabase signUp response',data:{hasError:!!supabaseSignUpRes.error,hasSession:!!supabaseSignUpRes.data?.session,hasUser:!!supabaseSignUpRes.data?.user,emailConfirmed:supabaseSignUpRes.data?.user?.email_confirmed_at,createdUserId:createdUser.id,createdTeamId:teamId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2,H3,H4'})}).catch(()=>{});
+  // #endregion
+
   if (supabaseSignUpRes.error) {
     console.error('Supabase Auth error:', supabaseSignUpRes.error?.message);
     return {
@@ -349,6 +365,11 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     // Email confirmation is enabled and user needs to verify
     // Don't create the session yet, show them a "check your email" message
     console.log('[SIGN UP] Email confirmation required for:', email);
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/f35922fa-18f6-4b9a-9ca1-2201e36a1ceb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'actions.ts:365',message:'Email confirmation required - returning success',data:{email,dbUserId:createdUser.id,dbTeamId:teamId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2,H3'})}).catch(()=>{});
+    // #endregion
+
     return {
       success: true,
       message: 'Please check your email to confirm your account.',
