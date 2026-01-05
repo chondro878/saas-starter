@@ -483,12 +483,18 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   <p className="text-xs text-gray-500 mb-4">
                     Didn't receive the email? Check your spam folder or{' '}
                     <button 
-                      onClick={() => setAuthStep('email')}
-                      className="text-indigo-600 hover:text-indigo-500 underline font-medium"
+                      onClick={handleResendVerification}
+                      disabled={resendingEmail}
+                      className="text-indigo-600 hover:text-indigo-500 underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      try again
+                      {resendingEmail ? 'Sending...' : 'resend email'}
                     </button>
                   </p>
+                  {resendSuccess && (
+                    <p className="text-sm text-green-600 mb-4">
+                      ✓ Verification email sent! Check your inbox.
+                    </p>
+                  )}
                 </div>
               </>
             ) : (
